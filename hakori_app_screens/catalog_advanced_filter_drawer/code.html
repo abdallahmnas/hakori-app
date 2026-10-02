@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "secondary-fixed": "#e4e1e6", "on-error": "#ffffff", "surface-container": "#f0edee", "tertiary-fixed": "#ffe08b", "on-tertiary-container": "#554300", "on-secondary-container": "#656467", "on-tertiary-fixed": "#241a00", "surface-variant": "#e5e2e3", "secondary": "#5f5e61", "on-background": "#1c1b1c", "surface-dim": "#dcd9da", "primary-container": "#d4af37", "on-surface": "#1c1b1c", "error": "#ba1a1a", "inverse-primary": "#e9c349", "on-primary": "#ffffff", "tertiary-container": "#d2af48", "surface-container-high": "#ebe7e8", "secondary-fixed-dim": "#c8c5ca", "on-tertiary": "#ffffff", "surface-bright": "#fcf8f9", "on-secondary-fixed-variant": "#47464a", "error-container": "#ffdad6", "background": "#fcf8f9", "on-secondary": "#ffffff", "inverse-on-surface": "#f3f0f1", "on-tertiary-fixed-variant": "#584400", "surface": "#fcf8f9", "surface-container-highest": "#e5e2e3", "primary": "#735c00", "tertiary-fixed-dim": "#e7c35a", "on-primary-fixed-variant": "#574500", "outline-variant": "#d0c5af", "on-primary-container": "#554300", "on-secondary-fixed": "#1b1b1e", "secondary-container": "#e4e1e6", "outline": "#7f7663", "primary-fixed": "#ffe088", "inverse-surface": "#313031", "on-error-container": "#93000a", "surface-container-lowest": "#ffffff", "on-surface-variant": "#4d4635", "tertiary": "#745b00", "primary-fixed-dim": "#e9c349", "on-primary-fixed": "#241a00", "surface-tint": "#735c00", "surface-container-low": "#f6f3f4" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xs": "0.25rem", "space-lg": "1.5rem", "space-xl": "2rem", "margin": "1.25rem", "gutter": "1rem", "space-md": "1rem", "space-sm": "0.5rem" }, "fontFamily": { "body-lg": ["Inter"], "headline-md": ["Playfair Display"], "label-lg": ["Inter"], "headline-xl": ["Playfair Display"], "headline-xl-mobile": ["Playfair Display"], "body-md": ["Inter"], "body-sm": ["Inter"], "headline-lg": ["Playfair Display"], "label-md": ["Inter"], "headline-2xl": ["Playfair Display"], "price-display": ["Inter"], "label-sm": ["Inter"] }, "fontSize": { "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "500" }], "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }], "headline-xl": ["36px", { "lineHeight": "44px", "fontWeight": "600" }], "headline-xl-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }], "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }], "headline-2xl": ["48px", { "lineHeight": "56px", "fontWeight": "600" }], "price-display": ["20px", { "lineHeight": "24px", "fontWeight": "700" }], "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "600" }] } } } };</script><style>@layer base{html,body{width:100%;margin:0;padding:0;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface flex flex-col min-h-full antialiased selection:bg-primary-container selection:text-on-primary-container"><header class="fixed top-0 inset-x-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.03)] pt-safe"><div class="h-28 px-margin flex flex-col justify-between pb-space-xs"><div class="h-6 flex items-center justify-between font-label-sm text-label-sm text-on-surface tracking-tight"><span class="font-semibold">9:41</span><div class="flex items-center gap-1.5 text-on-surface"><span class="material-symbols-outlined text-[15px]">signal_cellular_4_bar</span><span class="material-symbols-outlined text-[15px]">wifi</span><span class="material-symbols-outlined text-[18px]">battery_full</span></div></div><div class="h-16 flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="GoldSmile Luxury Brand Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1VSAb8S4qk-13FlEJkDylADihsbc71JGnozTx0ipRJwnTq9XHxSKzprrBDRFIIjDiiL3tnX1vn0hmOyfHe9k9EPgI0zVrTJkvC5L7Dr6wHSP-PbrSwtp7yomoMMrK_oJIL8AKU9EKm5HaYI15PvNOWBm6RhBvG0HuzWjJf-nrw6iiMEWXLb6TVxXv2aaSZEVXiSN6obanCrlQ0zhmQWfLk8IQGtk42Eo6iA2lu9oP2oSBRLIgZ47vKDVqI"/><div class="flex flex-col"><span class="font-headline-md text-headline-md tracking-wider text-on-surface font-serif uppercase leading-none">GoldSmile</span><span class="font-label-sm text-label-sm tracking-[0.2em] text-primary uppercase leading-tight font-medium">Catalog</span></div></div><div class="flex items-center gap-1"><button aria-label="Search catalog" class="w-11 h-11 flex items-center justify-center text-on-surface hover:text-primary transition-colors"><span class="material-symbols-outlined text-[22px]">search</span></button><a aria-label="Wishlist" class="relative w-11 h-11 flex items-center justify-center text-on-surface hover:text-primary transition-colors" data-path="wishlist" href="#"><span class="material-symbols-outlined text-[22px]">favorite</span><span class="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-primary ring-2 ring-surface"></span></a><a aria-label="Shopping bag" class="relative w-11 h-11 flex items-center justify-center text-on-surface hover:text-primary transition-colors" data-path="bag" href="#"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="absolute top-2 right-1.5 px-1 min-w-[15px] h-[15px] flex items-center justify-center rounded-full bg-primary-container text-on-primary-container font-label-sm text-[9px] font-bold leading-none ring-1 ring-surface">2</span></a><div class="ml-1 flex items-center justify-center"><a aria-label="VIP Member Profile" class="inline-flex items-center justify-center" data-path="profile" href="#"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-primary-container/40" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCH4aueU-6bvYtgxmTEG7ksrjGSpycVq-ZRVOV8KERJyPcIUh4vml4UI9OSS8we7_4CDBU-8WKBPsM7iBL091kgj1HPVaxc5uW8ThDju9zhvdDW-mboKFwJL9GV91CARcQf-VTDboXLpMDUiT0WQx8_rmvrTR58J8VxUETbuEn2wMH2ANsr11w0w1cX4QT7aVWLlR9TJ8TtBQ8QSN_UvuJUEwHVx9bcSz4PexQ60K0Wpeu8zc59MAmZ"/></a></div></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-28 pb-20 bg-surface min-h-screen"><div class="flex flex-col w-full relative">
+<!-- Merchandising Title & Sub-header Bar -->
+<div class="px-margin pt-space-xs pb-space-sm flex items-end justify-between">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs text-primary font-label-sm text-label-sm uppercase tracking-widest font-semibold">
+<span class="material-symbols-outlined text-[14px]">diamond</span>
+<span>Atelier Heritage</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight leading-tight mt-0.5">
+        Precious Metals &amp; Pavé
+      </h1>
+</div>
+<div class="px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold tracking-wider">
+      48 Pieces
+    </div>
+</div>
+<!-- Horizontal Quick Category Filters -->
+<div class="w-full overflow-x-auto no-scrollbar py-space-xs px-margin flex items-center gap-2">
+<button class="shrink-0 px-4 py-2 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm font-bold tracking-wider uppercase shadow-[0_4px_14px_rgba(212,175,55,0.28)] flex items-center gap-1.5 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-[15px]" style="font-variation-settings: 'FILL' 1;">stars</span>
+<span>All Pieces</span>
+</button>
+<button class="shrink-0 px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold tracking-wider uppercase active:scale-95 transition-colors">
+      Full Set Grills
+    </button>
+<button class="shrink-0 px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold tracking-wider uppercase active:scale-95 transition-colors">
+      Top Only
+    </button>
+<button class="shrink-0 px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold tracking-wider uppercase active:scale-95 transition-colors">
+      Bottom Only
+    </button>
+<button class="shrink-0 px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold tracking-wider uppercase active:scale-95 transition-colors">
+      Single Canine &amp; Caps
+    </button>
+<button class="shrink-0 px-4 py-2 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold tracking-wider uppercase active:scale-95 transition-colors">
+      Bespoke Custom
+    </button>
+</div>
+<!-- Ambient Curation Bar & Trigger Filter Count -->
+<div class="px-margin pt-space-md pb-space-xs flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Displaying 2-Column Vault</span>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm font-bold shadow-sm active:scale-95 transition-transform" id="filterToggleBtn">
+<span class="material-symbols-outlined text-[16px] text-primary">tune</span>
+<span>Refine Search</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+</button>
+</div>
+<!-- Product Catalog Grid (Background & Preview Canvas) -->
+<div class="px-margin py-space-sm grid grid-cols-2 gap-gutter mb-6">
+<!-- Card 1 -->
+<div class="flex flex-col bg-surface-container-lowest rounded-xl p-space-sm shadow-sm relative group overflow-hidden">
+<div class="relative w-full aspect-[1/1.15] bg-surface-container-low rounded-lg overflow-hidden mb-2.5">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Bespoke solid 18K Yellow Gold full eight-tooth upper grill mouthpiece, hand polished mirror finish reflecting studio champagne warm light, Place Vendome jewelry quality, luxury minimalist pedestal on pristine ivory backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXrSnOZdaf3WjU2MBZWZg98ALLQxVNmZhcEzD4HlXfD8aTQYG3MPtxhci2Mp4UtDKySKRFlUr09_rh_WtJSlZRxTiRHWJeUONOjM7KYMl0yEOU3cKUZqV-5hXtI4Mx7M_9EoQ0DG8suhZw2rUJqg0VI-yK4uVyRamHGT6Zn7sx8CL9kr79XH-zO8ejAos_G441MBfnhpzCm1awE8udNf-bq1elaIsagQ0G5XMjWiNC2NFnEH7yj4c4"/>
+<button aria-label="Add to favorites" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-bright/80 backdrop-blur-md flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+</button>
+<div class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-primary-container/20 backdrop-blur-md text-on-primary-container font-label-sm text-[10px] font-bold tracking-wider uppercase">
+          18K Gold
+        </div>
+</div>
+<div class="flex items-center gap-1 mb-1">
+<span class="material-symbols-outlined text-[14px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm font-bold text-on-surface">4.9</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">(38)</span>
+</div>
+<h3 class="font-headline-md text-[15px] font-medium text-on-surface leading-snug line-clamp-1">
+        Sovereign Imperial Top 8
+      </h3>
+<div class="mt-1 flex flex-col">
+<span class="font-price-display text-[17px] font-bold text-on-surface leading-tight">$1,299 USD</span>
+<span class="font-label-sm text-[11px] text-on-surface-variant tracking-tight font-medium">₦1,998,950 NGN</span>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="flex flex-col bg-surface-container-lowest rounded-xl p-space-sm shadow-sm relative group overflow-hidden">
+<div class="relative w-full aspect-[1/1.15] bg-surface-container-low rounded-lg overflow-hidden mb-2.5">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Micro-pavé VVS diamond encrusted six-piece lower teeth grill set crafted in 18K white gold, shimmering architectural stones, bright high fashion editorial lighting on clean minimalist surface with subtle champagne rim light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2r9z1P0wZAt3EhZCNJUU32fGAw4yNw4YkYxR5sP6whmW3ALzandp3XFK6-4eZDWrkWcO5H-L-cIvcgww6PovZNjG6xhaENrgknoyDKWxswoRKVC4Su3Bjaepw_XBigVnOo1MsYiAAFKBhyKf4WHQkHD0qCw2OLSo8FvO2w9WLlPBmCs_yLAE7u8Ck57ocff8s39QCZP7A0_2m29gnw8HhANIrohW8m9aR0xwowID3P-_Wqr0bmHJP"/>
+<button aria-label="Add to favorites" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-bright/80 backdrop-blur-md flex items-center justify-center text-primary transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+<div class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-primary-container/20 backdrop-blur-md text-on-primary-container font-label-sm text-[10px] font-bold tracking-wider uppercase">
+          VVS1 Pavé
+        </div>
+</div>
+<div class="flex items-center gap-1 mb-1">
+<span class="material-symbols-outlined text-[14px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm font-bold text-on-surface">5.0</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">(64)</span>
+</div>
+<h3 class="font-headline-md text-[15px] font-medium text-on-surface leading-snug line-clamp-1">
+        Astral Diamond Lower 6
+      </h3>
+<div class="mt-1 flex flex-col">
+<span class="font-price-display text-[17px] font-bold text-on-surface leading-tight">$2,450 USD</span>
+<span class="font-label-sm text-[11px] text-on-surface-variant tracking-tight font-medium">₦3,773,000 NGN</span>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="flex flex-col bg-surface-container-lowest rounded-xl p-space-sm shadow-sm relative group overflow-hidden">
+<div class="relative w-full aspect-[1/1.15] bg-surface-container-low rounded-lg overflow-hidden mb-2.5">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Sculptural 18K Rose Gold single canine dental cap with bezel-set flawless teardrop diamond accent, haute couture jewelry photography with surgical reflections and pure ivory tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBo5JQ689LL_oApzlylmOiSobvEkfftUVRsRub_NQvMLN7Cp1KrjysSZKtF2gcA800Zx5KSCUegpZEbtZaI-GnlzYI8GaqK-7QJaTn1QGzt7Pz_lF3AIaKcVv8ZUJSMiqGJxnQ4OmxhXYPnV5_6XauhYSJUcbIQLJwUncP8v7ybho5LHgfAz9TSboskvMpHslCmnR4n_61kdYg8z7ldCIlbzMjzIypztK8kAblGo0EZHMuARBfm8a6E"/>
+<button aria-label="Add to favorites" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-bright/80 backdrop-blur-md flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+</button>
+<div class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-surface-container-highest/80 backdrop-blur-md text-on-surface font-label-sm text-[10px] font-bold tracking-wider uppercase">
+          Single Fang
+        </div>
+</div>
+<div class="flex items-center gap-1 mb-1">
+<span class="material-symbols-outlined text-[14px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm font-bold text-on-surface">4.8</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">(19)</span>
+</div>
+<h3 class="font-headline-md text-[15px] font-medium text-on-surface leading-snug line-clamp-1">
+        Solitaire Canine Bezel
+      </h3>
+<div class="mt-1 flex flex-col">
+<span class="font-price-display text-[17px] font-bold text-on-surface leading-tight">$420 USD</span>
+<span class="font-label-sm text-[11px] text-on-surface-variant tracking-tight font-medium">₦646,800 NGN</span>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="flex flex-col bg-surface-container-lowest rounded-xl p-space-sm shadow-sm relative group overflow-hidden">
+<div class="relative w-full aspect-[1/1.15] bg-surface-container-low rounded-lg overflow-hidden mb-2.5">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Full 16 arch teeth grill set in mirror-polished pure 24K yellow bullion gold with baguette cut diamonds across front incisors, high luxury prestige dental art, hyper-realistic macro shot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwEpG5bbL2HtnvDivcUYJf70g84Mo2RoNfS1Y2i8hQSCHq6R-chOq9aD-NVjzXXaN08SFii3x56jr8KXHdypr78mXO0Ods7ca1lGf6h0Gq7pJdWGxuqkGZex5LXBnj8Mh6lkRf-eOZBOYdnDMLNbOnarBQqZKOlGzGhhmx9JlmK-4wajF7TpA4c16yXedMY2yfOFZ5HbAkCuFqrH4nGBYJ60o-elZh19wXcs3VMA2MPer8UQgVwSm_"/>
+<button aria-label="Add to favorites" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-surface-bright/80 backdrop-blur-md flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">favorite</span>
+</button>
+<div class="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-primary-container/20 backdrop-blur-md text-on-primary-container font-label-sm text-[10px] font-bold tracking-wider uppercase">
+          Full Arch
+        </div>
+</div>
+<div class="flex items-center gap-1 mb-1">
+<span class="material-symbols-outlined text-[14px] text-primary-container" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-sm text-label-sm font-bold text-on-surface">5.0</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">(42)</span>
+</div>
+<h3 class="font-headline-md text-[15px] font-medium text-on-surface leading-snug line-clamp-1">
+        Vendôme 16 Arch Monarch
+      </h3>
+<div class="mt-1 flex flex-col">
+<span class="font-price-display text-[17px] font-bold text-on-surface leading-tight">$4,850 USD</span>
+<span class="font-label-sm text-[11px] text-on-surface-variant tracking-tight font-medium">₦7,469,000 NGN</span>
+</div>
+</div>
+</div>
+<!-- Advanced Filter Drawer & Backdrop Overlay -->
+<div class="fixed inset-0 z-40 bg-on-surface/40 backdrop-blur-sm transition-opacity duration-300" id="filterBackdrop"></div>
+<div class="fixed inset-x-0 bottom-0 z-50 max-h-[760px] flex flex-col bg-surface-bright rounded-t-3xl shadow-[0_-10px_35px_rgba(0,0,0,0.12)] transition-transform duration-300 transform translate-y-0" id="filterDrawer">
+<!-- Drag Handle & Drawer Header -->
+<div class="w-full flex flex-col items-center pt-3 pb-space-sm px-margin">
+<div class="w-12 h-1 rounded-full bg-surface-container-highest mb-3"></div>
+<div class="w-full flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]">tune</span>
+<h2 class="font-headline-md text-headline-md text-on-surface font-semibold tracking-tight">Atelier Filters</h2>
+</div>
+<button aria-label="Close Filter Drawer" class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface active:scale-95 transition-transform" id="closeDrawerBtn">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+</div>
+<!-- Scrollable Filter Options Body -->
+<div class="flex-1 overflow-y-auto px-margin space-y-space-lg pb-space-xl pt-space-xs">
+<!-- Section 1: Price Range -->
+<div class="flex flex-col">
+<div class="flex items-center justify-between mb-1.5">
+<span class="font-label-lg text-label-lg text-on-surface">Price Valuation</span>
+<span class="font-label-sm text-label-sm text-primary font-bold tracking-wider uppercase">USD &amp; NGN Equivalence</span>
+</div>
+<!-- Live Slider Display Badges -->
+<div class="flex items-center justify-between my-2 p-2.5 rounded-xl bg-surface-container-low">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Min Valuation</span>
+<span class="font-price-display text-[15px] text-on-surface font-bold">$0 <span class="font-body-sm text-[11px] text-on-surface-variant font-normal">(₦0)</span></span>
+</div>
+<span class="material-symbols-outlined text-outline-variant text-[16px]">arrow_forward</span>
+<div class="flex flex-col items-end">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Max Cap</span>
+<span class="font-price-display text-[15px] text-primary font-bold">$2,500+ <span class="font-body-sm text-[11px] text-on-surface-variant font-normal">(₦3.85M)</span></span>
+</div>
+</div>
+<!-- Gold Range Visualizer -->
+<div class="relative py-4 flex items-center">
+<div class="w-full h-2 rounded-full bg-surface-container-high relative overflow-hidden">
+<div class="absolute left-[15%] right-[20%] h-full bg-primary-container rounded-full shadow-[0_0_12px_rgba(212,175,55,0.6)]"></div>
+</div>
+<!-- Slider Thumb Left -->
+<div class="absolute left-[15%] w-6 h-6 rounded-full bg-surface-container-lowest shadow-[0_2px_8px_rgba(0,0,0,0.18)] flex items-center justify-center -translate-x-1/2 cursor-grab">
+<div class="w-2.5 h-2.5 rounded-full bg-primary-container"></div>
+</div>
+<!-- Slider Thumb Right -->
+<div class="absolute left-[80%] w-6 h-6 rounded-full bg-surface-container-lowest shadow-[0_2px_8px_rgba(0,0,0,0.18)] flex items-center justify-center -translate-x-1/2 cursor-grab">
+<div class="w-2.5 h-2.5 rounded-full bg-primary-container"></div>
+</div>
+</div>
+</div>
+<!-- Section 2: Precious Metal Alloy -->
+<div class="flex flex-col">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg text-label-lg text-on-surface">Precious Metal Alloy</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Solid Foundry</span>
+</div>
+<div class="grid grid-cols-2 gap-2.5">
+<!-- Swatch 1: 18K Yellow Gold (Active) -->
+<button class="flex items-center gap-2.5 p-2.5 rounded-xl bg-primary-container text-on-primary-container font-label-sm text-label-sm font-bold shadow-[0_4px_14px_rgba(212,175,55,0.25)] transition-all">
+<div class="w-4 h-4 rounded-full bg-[#E5C158] shadow-inner"></div>
+<span class="line-clamp-1">18K Yellow Gold</span>
+<span class="material-symbols-outlined text-[16px] ml-auto">check_circle</span>
+</button>
+<!-- Swatch 2: 18K White Gold -->
+<button class="flex items-center gap-2.5 p-2.5 rounded-xl bg-surface-container text-on-surface font-label-sm text-label-sm font-medium hover:bg-surface-container-high transition-colors">
+<div class="w-4 h-4 rounded-full bg-[#E8E8EE] shadow-inner"></div>
+<span class="line-clamp-1">18K White Gold</span>
+</button>
+<!-- Swatch 3: 18K Rose Gold -->
+<button class="flex items-center gap-2.5 p-2.5 rounded-xl bg-surface-container text-on-surface font-label-sm text-label-sm font-medium hover:bg-surface-container-high transition-colors">
+<div class="w-4 h-4 rounded-full bg-[#E4A08D] shadow-inner"></div>
+<span class="line-clamp-1">18K Rose Gold</span>
+</button>
+<!-- Swatch 4: 24K Pure Bullion -->
+<button class="flex items-center gap-2.5 p-2.5 rounded-xl bg-surface-container text-on-surface font-label-sm text-label-sm font-medium hover:bg-surface-container-high transition-colors">
+<div class="w-4 h-4 rounded-full bg-[#F4B41A] shadow-inner"></div>
+<span class="line-clamp-1">24K Bullion</span>
+</button>
+<!-- Swatch 5: Platinum -->
+<button class="flex items-center gap-2.5 p-2.5 rounded-xl bg-surface-container text-on-surface font-label-sm text-label-sm font-medium hover:bg-surface-container-high col-span-2 transition-colors">
+<div class="w-4 h-4 rounded-full bg-[#C7C9CE] shadow-inner"></div>
+<span>950 Fine Platinum</span>
+</button>
+</div>
+</div>
+<!-- Section 3: Gemstone Clarity -->
+<div class="flex flex-col">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg text-label-lg text-on-surface">Gemstone Precision</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">GIA Standards</span>
+</div>
+<div class="flex flex-col gap-2">
+<!-- Checkbox 1 -->
+<label class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low cursor-pointer active:scale-[0.99] transition-transform">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[20px]">diamond</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">VVS1 Flawless Pavé</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">D-F Colorless micro-set diamonds</span>
+</div>
+</div>
+<div class="w-5 h-5 rounded-md bg-primary-container text-on-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</label>
+<!-- Checkbox 2 -->
+<label class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low cursor-pointer active:scale-[0.99] transition-transform">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">arrow_back_ios_new</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">VS1 Round Brilliant</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Optimal fiery dispersion cut</span>
+</div>
+</div>
+<div class="w-5 h-5 rounded-md bg-surface-container-high flex items-center justify-center"></div>
+</label>
+<!-- Checkbox 3 -->
+<label class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low cursor-pointer active:scale-[0.99] transition-transform">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">grid_goldenratio</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">Baguette &amp; Princess Cut</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Surgical channel flush setting</span>
+</div>
+</div>
+<div class="w-5 h-5 rounded-md bg-surface-container-high flex items-center justify-center"></div>
+</label>
+<!-- Checkbox 4 -->
+<label class="flex items-center justify-between p-3 rounded-xl bg-surface-container-low cursor-pointer active:scale-[0.99] transition-transform">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">view_in_ar</span>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">Plain Solid (No Stones)</span>
+<span class="font-body-sm text-[11px] text-on-surface-variant">Pure mirror or satin high-buff finish</span>
+</div>
+</div>
+<div class="w-5 h-5 rounded-md bg-surface-container-high flex items-center justify-center"></div>
+</label>
+</div>
+</div>
+<!-- Section 4: Tooth Count & Placement -->
+<div class="flex flex-col">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-lg text-label-lg text-on-surface">Tooth Count &amp; Placement</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Dental Mapping</span>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="px-3.5 py-2 rounded-xl bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold active:scale-95 transition-transform">
+            Top 6
+          </button>
+<button class="px-3.5 py-2 rounded-xl bg-primary-container text-on-primary-container font-label-sm text-label-sm font-bold shadow-[0_2px_8px_rgba(212,175,55,0.3)] active:scale-95 transition-transform">
+            Top 8
+          </button>
+<button class="px-3.5 py-2 rounded-xl bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold active:scale-95 transition-transform">
+            Full 16 Arch
+          </button>
+<button class="px-3.5 py-2 rounded-xl bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold active:scale-95 transition-transform">
+            Single Fang
+          </button>
+<button class="px-3.5 py-2 rounded-xl bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold active:scale-95 transition-transform">
+            Deep Cut Bridge
+          </button>
+</div>
+</div>
+</div>
+<!-- Sticky Drawer Bottom Action Panel -->
+<div class="p-margin bg-surface-bright/95 backdrop-blur-md shadow-[0_-4px_20px_rgba(0,0,0,0.04)] flex items-center gap-3">
+<button class="flex-1 h-12 rounded-xl bg-surface-container text-on-surface font-label-md text-label-md font-bold tracking-wider uppercase flex items-center justify-center gap-1.5 active:scale-95 transition-transform" id="resetFiltersBtn">
+<span class="material-symbols-outlined text-[17px]">restart_alt</span>
+<span>Reset</span>
+</button>
+<button class="flex-[2] h-12 rounded-xl bg-primary-container text-on-primary-container font-label-md text-label-md font-bold tracking-wider uppercase shadow-[0_8px_24px_rgba(212,175,55,0.28)] flex items-center justify-center gap-2 active:scale-95 transition-transform" id="applyFiltersBtn">
+<span class="material-symbols-outlined text-[18px]">done_all</span>
+<span>Apply (24 Pieces)</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+  (function initAdvancedFilters() {
+    const drawer = document.getElementById('filterDrawer');
+    const backdrop = document.getElementById('filterBackdrop');
+    const toggleBtn = document.getElementById('filterToggleBtn');
+    const closeBtn = document.getElementById('closeDrawerBtn');
+    const applyBtn = document.getElementById('applyFiltersBtn');
+    const resetBtn = document.getElementById('resetFiltersBtn');
+
+    let isOpen = true;
+
+    function setDrawerState(open) {
+      isOpen = open;
+      if (open) {
+        drawer.classList.remove('translate-y-full');
+        drawer.classList.add('translate-y-0');
+        backdrop.classList.remove('opacity-0', 'pointer-events-none');
+        backdrop.classList.add('opacity-100');
+      } else {
+        drawer.classList.remove('translate-y-0');
+        drawer.classList.add('translate-y-full');
+        backdrop.classList.remove('opacity-100');
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    if (toggleBtn) toggleBtn.addEventListener('click', () => setDrawerState(true));
+    if (closeBtn) closeBtn.addEventListener('click', () => setDrawerState(false));
+    if (backdrop) backdrop.addEventListener('click', () => setDrawerState(false));
+    if (applyBtn) {
+      applyBtn.addEventListener('click', () => {
+        setDrawerState(false);
+      });
+    }
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        // Soft tactile feedback
+        resetBtn.classList.add('scale-95');
+        setTimeout(() => resetBtn.classList.remove('scale-95'), 150);
+      });
+    }
+  })();
+</script></main><nav class="fixed bottom-0 inset-x-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_-4px_20px_rgba(0,0,0,0.03)] pb-safe" data-active-classes="text-primary font-semibold"><div class="h-16 px-gutter flex items-center justify-around"><a class="group flex flex-col items-center justify-center min-w-[44px] min-h-[44px] px-2 py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="home" href="#"><span class="material-symbols-outlined text-[22px] group-hover:scale-105 transition-transform">auto_awesome</span><span class="font-label-sm text-label-sm tracking-wider uppercase mt-0.5">Home</span></a><a aria-current="page" class="group flex flex-col items-center justify-center min-w-[44px] min-h-[44px] px-2 py-1 transition-all text-primary font-semibold" data-path="catalog" href="#"><span class="material-symbols-outlined text-[22px] group-hover:scale-105 transition-transform">grid_view</span><span class="font-label-sm text-label-sm tracking-wider uppercase mt-0.5">Catalog</span></a><a class="group relative flex flex-col items-center justify-center min-w-[44px] min-h-[44px] px-2 py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="bag" href="#"><div class="relative"><span class="material-symbols-outlined text-[22px] group-hover:scale-105 transition-transform">shopping_bag</span><span class="absolute -top-1 -right-2 px-1 min-w-[14px] h-[14px] flex items-center justify-center rounded-full bg-primary-container text-on-primary-container font-label-sm text-[9px] font-bold leading-none shadow-[0_2px_8px_rgba(212,175,55,0.35)]">2</span></div><span class="font-label-sm text-label-sm tracking-wider uppercase mt-0.5">Bag</span></a><a class="group flex flex-col items-center justify-center min-w-[44px] min-h-[44px] px-2 py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="orders" href="#"><span class="material-symbols-outlined text-[22px] group-hover:scale-105 transition-transform">receipt_long</span><span class="font-label-sm text-label-sm tracking-wider uppercase mt-0.5">Orders</span></a><a class="group flex flex-col items-center justify-center min-w-[44px] min-h-[44px] px-2 py-1 text-on-surface-variant hover:text-on-surface transition-all" data-path="profile" href="#"><span class="material-symbols-outlined text-[22px] group-hover:scale-105 transition-transform">person_outline</span><span class="font-label-sm text-label-sm tracking-wider uppercase mt-0.5">Profile</span></a></div></nav></body></html>

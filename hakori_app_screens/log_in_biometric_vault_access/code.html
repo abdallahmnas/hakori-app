@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "secondary-fixed": "#e4e1e6", "on-error": "#ffffff", "surface-container": "#f0edee", "tertiary-fixed": "#ffe08b", "on-tertiary-container": "#554300", "on-secondary-container": "#656467", "on-tertiary-fixed": "#241a00", "surface-variant": "#e5e2e3", "secondary": "#5f5e61", "on-background": "#1c1b1c", "surface-dim": "#dcd9da", "primary-container": "#d4af37", "on-surface": "#1c1b1c", "error": "#ba1a1a", "inverse-primary": "#e9c349", "on-primary": "#ffffff", "tertiary-container": "#d2af48", "surface-container-high": "#ebe7e8", "secondary-fixed-dim": "#c8c5ca", "on-tertiary": "#ffffff", "surface-bright": "#fcf8f9", "on-secondary-fixed-variant": "#47464a", "error-container": "#ffdad6", "background": "#fcf8f9", "on-secondary": "#ffffff", "inverse-on-surface": "#f3f0f1", "on-tertiary-fixed-variant": "#584400", "surface": "#fcf8f9", "surface-container-highest": "#e5e2e3", "primary": "#735c00", "tertiary-fixed-dim": "#e7c35a", "on-primary-fixed-variant": "#574500", "outline-variant": "#d0c5af", "on-primary-container": "#554300", "on-secondary-fixed": "#1b1b1e", "secondary-container": "#e4e1e6", "outline": "#7f7663", "primary-fixed": "#ffe088", "inverse-surface": "#313031", "on-error-container": "#93000a", "surface-container-lowest": "#ffffff", "on-surface-variant": "#4d4635", "tertiary": "#745b00", "primary-fixed-dim": "#e9c349", "on-primary-fixed": "#241a00", "surface-tint": "#735c00", "surface-container-low": "#f6f3f4" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "gutter": "1rem", "space-md": "1rem", "margin": "1.25rem", "space-sm": "0.5rem", "space-lg": "1.5rem", "space-xs": "0.25rem", "space-xl": "2rem" }, "fontFamily": { "body-lg": ["Inter"], "headline-md": ["Playfair Display"], "label-lg": ["Inter"], "headline-xl": ["Playfair Display"], "headline-xl-mobile": ["Playfair Display"], "body-md": ["Inter"], "body-sm": ["Inter"], "headline-lg": ["Playfair Display"], "label-md": ["Inter"], "headline-2xl": ["Playfair Display"], "price-display": ["Inter"], "label-sm": ["Inter"] }, "fontSize": { "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "500" }], "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }], "headline-xl": ["36px", { "lineHeight": "44px", "fontWeight": "600" }], "headline-xl-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }], "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }], "headline-2xl": ["48px", { "lineHeight": "56px", "fontWeight": "600" }], "price-display": ["20px", { "lineHeight": "24px", "fontWeight": "700" }], "label-sm": ["10px", { "lineHeight": "14px", "fontWeight": "600" }] } } } };</script><style>@layer base{html,body{width:100%;margin:0;padding:0;}body{overscroll-behavior-y:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface flex flex-col min-h-full antialiased selection:bg-primary-container selection:text-on-primary-container"><main class="flex-1 flex flex-col relative w-full pt-safe pb-safe min-h-screen"><div class="flex flex-col w-full">
+<!-- Subtle Ambient Glow & Grain Container -->
+<div class="px-margin pt-space-md pb-space-xl flex flex-col gap-space-lg relative overflow-hidden">
+<!-- Top Terminal Micro-Banner -->
+<div class="flex items-center justify-between py-space-xs px-space-md rounded-full bg-surface-container text-on-surface-variant shadow-sm">
+<div class="flex items-center gap-space-xs">
+<span class="inline-block w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-sm text-label-sm tracking-widest uppercase">Place Vendôme Encrypted Terminal</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">lock</span>
+<span class="font-label-sm text-label-sm tracking-wider uppercase opacity-80">TLS 1.3</span>
+</div>
+</div>
+<!-- Atelier Editorial Header -->
+<div class="flex flex-col gap-space-xs mt-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-sm text-label-sm tracking-widest text-primary uppercase">Maison Fondée 1984</span>
+<span class="w-8 h-[1px] bg-primary-container opacity-60"></span>
+</div>
+<h1 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface tracking-tight">
+        Welcome Back to Your Atelier
+      </h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+        Enter your credentials or authenticate via biometric vault key to access saved dental scans and live bullion commissions.
+      </p>
+</div>
+<!-- Fast Biometric Access Card (Delightful High-Prestige Shortcut) -->
+<div class="relative overflow-hidden rounded-xl bg-surface-container-lowest p-space-md shadow-md">
+<div class="absolute -right-6 -bottom-6 w-28 h-28 bg-primary-container/10 rounded-full blur-xl pointer-events-none"></div>
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[22px]">fingerprint</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Quick Biometric Access</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Encrypted Secure Enclave</span>
+</div>
+</div>
+<span class="py-0.5 px-space-xs rounded-full bg-primary/10 text-primary font-label-sm text-label-sm uppercase tracking-wider">
+          Saved Vault
+        </span>
+</div>
+<button class="mt-space-md w-full py-space-sm px-space-md rounded-lg bg-surface-container-high hover:bg-surface-variant transition-all duration-300 flex items-center justify-between group active:scale-[0.99]" id="biometricBtn" type="button">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px] transition-transform group-hover:scale-110">face</span>
+<span class="font-label-md text-label-md text-on-surface">Scan with Face ID (Adam Sulaiman)</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+</button>
+<!-- Micro-interaction feedback badge -->
+<div class="hidden mt-space-xs text-center font-label-sm text-label-sm text-primary animate-pulse" id="bioFeedback">
+        Contacting Secure Enclave &amp; verifying 18K token...
+      </div>
+</div>
+<!-- Divider Line with Diamond Monogram -->
+<div class="relative flex items-center justify-center py-space-xs">
+<div class="w-full h-[1px] bg-surface-variant"></div>
+<div class="absolute px-space-sm bg-surface flex items-center gap-1.5 text-on-surface-variant">
+<span class="font-label-sm text-label-sm uppercase tracking-widest text-secondary">or credentials</span>
+</div>
+</div>
+<!-- Standard Login Form -->
+<form class="flex flex-col gap-space-md" id="vaultLoginForm" onsubmit="event.preventDefault();">
+<!-- Patron Identifier Field -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface flex items-center justify-between" for="patronId">
+<span>Patron Identifier or Email</span>
+<span class="font-label-sm text-label-sm text-primary uppercase tracking-wider">Vendôme ID</span>
+</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3.5 text-primary text-[20px] pointer-events-none">vpn_key</span>
+<input class="w-full h-12 pl-11 pr-4 rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md outline-none focus:bg-surface-bright transition-colors shadow-sm placeholder:text-secondary" id="patronId" placeholder="patron@gold-smile.com" required="" type="email" value="adam.sulaiman@vip.com"/>
+</div>
+</div>
+<!-- Master Vault Passphrase Field -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface" for="masterPass">
+            Master Vault Passphrase
+          </label>
+<button class="font-label-sm text-label-sm text-primary hover:underline" type="button">
+            Forgot Passphrase?
+          </button>
+</div>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[20px] pointer-events-none">shield_lock</span>
+<input class="w-full h-12 pl-11 pr-11 rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md outline-none focus:bg-surface-bright transition-colors shadow-sm" id="masterPass" placeholder="Enter passphrase" required="" type="password" value="••••••••••••••••"/>
+<button aria-label="Toggle password visibility" class="absolute right-3 text-on-surface-variant hover:text-on-surface p-1 flex items-center justify-center transition-colors" id="togglePassword" type="button">
+<span class="material-symbols-outlined text-[20px]" id="eyeIcon">visibility_off</span>
+</button>
+</div>
+</div>
+<!-- Remember Device Security Toggle -->
+<div class="flex items-center justify-between py-1">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface">Remember This Device</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">30-day hardware-isolated vault session</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="rememberDevice" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-container-lowest after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<!-- Primary CTA Button -->
+<button class="w-full mt-space-xs h-12 rounded-lg bg-gradient-to-r from-primary-container via-tertiary-container to-primary-container text-on-primary-container font-label-lg text-label-lg tracking-wide flex items-center justify-center gap-2 shadow-md hover:brightness-105 active:scale-[0.99] transition-all" id="submitBtn" type="submit">
+<span>Authenticate &amp; Enter Atelier</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</form>
+<!-- Alternative VIP Authentication Providers -->
+<div class="flex flex-col gap-space-xs mt-space-xs">
+<div class="grid grid-cols-2 gap-space-sm">
+<button class="h-11 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md flex items-center justify-center gap-2 shadow-sm hover:bg-surface-container transition-colors active:scale-[0.99]" type="button">
+<span class="material-symbols-outlined text-[18px]">wallet</span>
+<span>Apple Pass</span>
+</button>
+<button class="h-11 rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md flex items-center justify-center gap-2 shadow-sm hover:bg-surface-container transition-colors active:scale-[0.99]" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary">diamond</span>
+<span>Google VIP</span>
+</button>
+</div>
+</div>
+<!-- Atelier Registration Route -->
+<div class="text-center pt-space-xs">
+<p class="font-body-md text-body-md text-on-surface-variant">
+        New to GoldSmile? 
+        <a class="font-label-lg text-label-lg text-primary hover:underline underline-offset-4 ml-1" href="#register">
+          Create Your Atelier Vault
+        </a>
+</p>
+</div>
+<!-- Certified Security Architecture Guarantee -->
+<div class="mt-space-xs rounded-xl bg-surface-container-low p-space-md flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs text-primary">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider font-semibold">Bespoke Vault Standards</span>
+</div>
+<div class="grid grid-cols-3 gap-2 text-center pt-1">
+<div class="flex flex-col items-center justify-center p-1.5 rounded bg-surface-container-lowest">
+<span class="font-label-sm text-label-sm text-on-surface font-bold">256-Bit</span>
+<span class="text-[9px] text-on-surface-variant uppercase tracking-tighter">Swiss Vault AES</span>
+</div>
+<div class="flex flex-col items-center justify-center p-1.5 rounded bg-surface-container-lowest">
+<span class="font-label-sm text-label-sm text-on-surface font-bold">ISO-27001</span>
+<span class="text-[9px] text-on-surface-variant uppercase tracking-tighter">Certified Lab</span>
+</div>
+<div class="flex flex-col items-center justify-center p-1.5 rounded bg-surface-container-lowest">
+<span class="font-label-sm text-label-sm text-on-surface font-bold">Zero-Proof</span>
+<span class="text-[9px] text-on-surface-variant uppercase tracking-tighter">Biometrics</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Password Visibility Toggle Interaction
+  const togglePassword = document.getElementById('togglePassword');
+  const passwordInput = document.getElementById('masterPass');
+  const eyeIcon = document.getElementById('eyeIcon');
+
+  if (togglePassword && passwordInput && eyeIcon) {
+    togglePassword.addEventListener('click', () => {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      eyeIcon.textContent = isPassword ? 'visibility' : 'visibility_off';
+    });
+  }
+
+  // Biometric Tap Simulation Micro-delight
+  const bioBtn = document.getElementById('biometricBtn');
+  const bioFeedback = document.getElementById('bioFeedback');
+
+  if (bioBtn && bioFeedback) {
+    bioBtn.addEventListener('click', () => {
+      bioFeedback.classList.remove('hidden');
+      setTimeout(() => {
+        bioFeedback.textContent = 'Hardware Token Accepted. Unlocking Vault 04...';
+        bioFeedback.classList.remove('animate-pulse');
+        bioFeedback.classList.add('text-primary');
+      }, 900);
+    });
+  }
+</script></main></body></html>
