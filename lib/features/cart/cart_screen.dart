@@ -10,6 +10,9 @@ import '../../core/widgets/app_button.dart';
 import '../../core/widgets/dual_price_text.dart';
 import 'empty_bag_screen.dart';
 
+import '../../core/services/auth_provider.dart';
+import '../../core/services/order_provider.dart';
+
 /// Screen 13: cart_multi_currency_checkout
 /// Simplified Cart & Checkout screen with clean items, currency indicator, and direct checkout trigger
 class CartScreen extends StatefulWidget {
@@ -21,6 +24,7 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   final TextEditingController _promoController = TextEditingController();
+  bool _isCheckingOut = false;
 
   @override
   void dispose() {
@@ -37,6 +41,55 @@ class _CartScreenState extends State<CartScreen> {
             success ? 'VIP Code Applied: 10% Privilege' : 'Invalid Code. Try "HAKORI2026"',
           ),
           backgroundColor: success ? AppColors.darkBase : AppColors.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleCheckout() async {
+    final cart = Provider.of<CartProvider>(context, listen: false);
+    if (cart.items.isEmpty) return;
+
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+
+    final clientUser = auth.currentUser;
+    final client = {
+      'name': clientUser?.fullName.isNotEmpty == true ? clientUser!.fullName : 'Lord Alexander Wright',
+      'email': clientUser?.email.isNotEmpty == true ? clientUser!.email : 'patron@aurumatelier.com',
+      'phone': clientUser?.phone?.isNotEmpty == true ? clientUser!.phone : '+234 801 234 5678',
+    };
+
+    final firstItem = cart.items.first;
+    final specimen = {
+      'title': firstItem.product.name,
+      'specDetails': '${firstItem.selectedMetal} • ${firstItem.selectedStone}',
+      'caratOrPurity': firstItem.selectedMetal,
+      'subType': firstItem.selectedArch,
+      'qty': cart.itemCount,
+    };
+
+    setState(() => _isCheckingOut = true);
+
+    final order = await orderProvider.placeOrder(
+      client: client,
+      specimen: specimen,
+      total: cart.totalUsd,
+      currency: 'USD',
+      shippingAddress: clientUser?.location ?? 'Victoria Island Penthouse 4B, Lagos, Nigeria',
+    );
+
+    if (!mounted) return;
+    setState(() => _isCheckingOut = false);
+
+    if (order != null) {
+      cart.clearCart();
+      context.push('/order-confirmation', extra: order);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(orderProvider.errorMessage ?? 'Checkout failed. Please try again.'),
+          backgroundColor: AppColors.error,
         ),
       );
     }
@@ -389,9 +442,9 @@ class _CartScreenState extends State<CartScreen> {
         ),
         child: SafeArea(
           child: AppButton.primary(
-            text: 'CHECKOUT',
+            text: _isCheckingOut ? 'SECURING ESCROW...' : 'CHECKOUT',
             height: 50,
-            onPressed: () => context.push('/order-confirmation'),
+            onPressed: _isCheckingOut ? null : _handleCheckout,
             suffixIcon: const Icon(Icons.arrow_forward, size: 16, color: AppColors.textOnGold),
           ),
         ),

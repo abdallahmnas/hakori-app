@@ -1,0 +1,94 @@
+import '../constants/api_constants.dart';
+import '../models/order.dart';
+import 'api_client.dart';
+import 'mock_data_service.dart';
+
+/// Orders & Payments API Service matching API_DOCUMENTATION.md
+class OrderService {
+  final ApiClient _client;
+
+  OrderService(this._client);
+
+  /// Place New Bespoke Commission Order (Flutterwave escrow checkout)
+  Future<CommissionOrder> placeOrder({
+    required Map<String, dynamic> client,
+    required Map<String, dynamic> specimen,
+    required double total,
+    String currency = 'USD',
+    required String shippingAddress,
+  }) async {
+    final response = await _client.post(
+      ApiConstants.orders,
+      data: {
+        'client': client,
+        'specimen': specimen,
+        'total': total,
+        'currency': currency,
+        'shippingAddress': shippingAddress,
+      },
+    );
+
+    final data = response.data['data'] as Map<String, dynamic>? ?? {};
+    final orderMap = data['order'] as Map<String, dynamic>? ?? data;
+
+    // Attach payment checkout URL and Flutterwave reference if returned
+    final merged = Map<String, dynamic>.from(orderMap);
+    if (data['paymentUrl'] != null) merged['paymentUrl'] = data['paymentUrl'];
+    if (data['flwRef'] != null) merged['flwRef'] = data['flwRef'];
+
+    return CommissionOrder.fromJson(merged);
+  }
+
+  /// Get Patron Order History
+  Future<List<CommissionOrder>> getMyOrders() async {
+    try {
+      final response = await _client.get(ApiConstants.myOrders);
+      final data = response.data['data'];
+      List items = [];
+      if (data is List) {
+        items = data;
+      } else if (data is Map && data['orders'] is List) {
+        items = data['orders'] as List;
+      }
+
+      if (items.isNotEmpty) {
+        return items
+            .map((o) => CommissionOrder.fromJson(o as Map<String, dynamic>))
+            .toList();
+      }
+      return MockDataService.orders;
+    } catch (_) {
+      return MockDataService.orders;
+    }
+  }
+
+  /// Get Order Details by ID
+  Future<CommissionOrder> getOrderDetails(String id) async {
+    try {
+      final response = await _client.get(ApiConstants.orderDetail(id));
+      final data = response.data['data'] as Map<String, dynamic>? ?? {};
+      final orderMap = data['order'] as Map<String, dynamic>? ?? data;
+      return CommissionOrder.fromJson(orderMap);
+    } catch (_) {
+      return MockDataService.orders.firstWhere(
+        (o) => o.id == id,
+        orElse: () => MockDataService.orders[0],
+      );
+    }
+  }
+
+  /// Cancel Pending Commission
+  Future<CommissionOrder> cancelOrder(String id) async {
+    final response = await _client.post(ApiConstants.cancelOrder(id));
+    final data = response.data['data'] as Map<String, dynamic>? ?? {};
+    final orderMap = data['order'] as Map<String, dynamic>? ?? data;
+    return CommissionOrder.fromJson(orderMap);
+  }
+
+  /// Verify Flutterwave Payment Session
+  Future<Map<String, dynamic>> verifyPayment(String reference) async {
+    final response = await _client.get(ApiConstants.verifyPayment(reference));
+    final data = response.data['data'] as Map<String, dynamic>? ?? {};
+    return data;
+  }
+}

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/services/auth_provider.dart';
 import '../../core/services/currency_provider.dart';
 import '../../core/widgets/app_bar_luxury.dart';
 import '../../core/widgets/app_button.dart';
@@ -19,7 +20,7 @@ class VipProfileScreen extends StatefulWidget {
 }
 
 class _VipProfileScreenState extends State<VipProfileScreen> {
-  // Mock Profile State
+  // Fallback Profile State
   String _userName = 'Alexander Wright';
   String _userEmail = 'alexander.wright@hakorialmadinah.com';
   String _userPhone = '+1 (555) 382-9012';
@@ -33,8 +34,22 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
   bool _biometricEnabled = true;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AuthProvider>(context, listen: false).refreshProfile();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final currencyProvider = Provider.of<CurrencyProvider>(context);
+    final auth = Provider.of<AuthProvider>(context);
+    final user = auth.currentUser;
+
+    final displayName = user?.fullName.isNotEmpty == true ? user!.fullName : _userName;
+    final displayEmail = user?.email.isNotEmpty == true ? user!.email : _userEmail;
+    final displayTier = user?.tier ?? 'VIP MEMBER';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -72,7 +87,7 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                             ),
                             child: Center(
                               child: Text(
-                                _getInitials(_userName),
+                                _getInitials(displayName),
                                 style: AppTypography.headlineMD(color: AppColors.primaryGold),
                               ),
                             ),
@@ -99,20 +114,20 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const AppBadgeChip(
-                              label: 'VIP MEMBER',
+                            AppBadgeChip(
+                              label: displayTier.toUpperCase(),
                               variant: BadgeChipVariant.goldPurity,
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              _userName,
+                              displayName,
                               style: AppTypography.headlineMD(color: AppColors.textPrimary),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              _userEmail,
+                              displayEmail,
                               style: AppTypography.bodyXS(color: AppColors.textSecondary),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -312,10 +327,12 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
 
   // Edit Profile Bottom Sheet
   void _showEditProfileSheet() {
-    final nameCtrl = TextEditingController(text: _userName);
-    final emailCtrl = TextEditingController(text: _userEmail);
-    final phoneCtrl = TextEditingController(text: _userPhone);
-    final addressCtrl = TextEditingController(text: _userAddress);
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final user = auth.currentUser;
+    final nameCtrl = TextEditingController(text: user?.fullName.isNotEmpty == true ? user!.fullName : _userName);
+    final emailCtrl = TextEditingController(text: user?.email.isNotEmpty == true ? user!.email : _userEmail);
+    final phoneCtrl = TextEditingController(text: user?.phone?.isNotEmpty == true ? user!.phone : _userPhone);
+    final addressCtrl = TextEditingController(text: user?.location?.isNotEmpty == true ? user!.location : _userAddress);
 
     showModalBottomSheet(
       context: context,
@@ -379,13 +396,23 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
               const SizedBox(height: 24),
               AppButton.primary(
                 text: 'SAVE CHANGES',
-                onPressed: () {
+                onPressed: () async {
+                  final name = nameCtrl.text.trim();
+                  final names = name.split(' ');
+                  final firstName = names.isNotEmpty ? names.first : '';
+                  final lastName = names.length > 1 ? names.sublist(1).join(' ') : '';
+                  await auth.updateProfile(
+                    firstName: firstName,
+                    lastName: lastName,
+                    phone: phoneCtrl.text.trim(),
+                    address: addressCtrl.text.trim(),
+                  );
                   setState(() {
-                    _userName = nameCtrl.text.trim().isEmpty ? _userName : nameCtrl.text.trim();
-                    _userEmail = emailCtrl.text.trim().isEmpty ? _userEmail : emailCtrl.text.trim();
+                    _userName = name.isEmpty ? _userName : name;
                     _userPhone = phoneCtrl.text.trim().isEmpty ? _userPhone : phoneCtrl.text.trim();
                     _userAddress = addressCtrl.text.trim().isEmpty ? _userAddress : addressCtrl.text.trim();
                   });
+                  if (!mounted) return;
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -623,9 +650,13 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
               backgroundColor: AppColors.rubyRed,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(ctx);
-              context.go('/welcome');
+              final auth = Provider.of<AuthProvider>(context, listen: false);
+              await auth.logout();
+              if (mounted) {
+                context.go('/welcome');
+              }
             },
             child: Text('LOG OUT', style: AppTypography.labelMD(color: Colors.white)),
           ),

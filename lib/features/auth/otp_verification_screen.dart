@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
-import '../../core/widgets/app_button.dart';
+import '../../core/services/auth_provider.dart';
 import '../../core/widgets/otp_input_field.dart';
 import '../../core/widgets/custom_numpad.dart';
 
@@ -17,9 +18,10 @@ class OtpVerificationScreen extends StatefulWidget {
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
-  String _code = '894';
+  String _code = '';
   int _secondsRemaining = 45;
   Timer? _timer;
+  bool _isVerifying = false;
 
   @override
   void initState() {
@@ -46,22 +48,19 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   }
 
   void _onDigitTap(String digit) {
+    if (_isVerifying) return;
     if (_code.length < 6) {
       setState(() {
         _code += digit;
       });
       if (_code.length == 6) {
-        // Auto submit
-        Future.delayed(const Duration(milliseconds: 300), () {
-          if (mounted) {
-            context.go('/home');
-          }
-        });
+        _verifyCode();
       }
     }
   }
 
   void _onDeleteTap() {
+    if (_isVerifying) return;
     if (_code.isNotEmpty) {
       setState(() {
         _code = _code.substring(0, _code.length - 1);
@@ -69,8 +68,100 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     }
   }
 
+  Future<void> _verifyCode() async {
+    setState(() => _isVerifying = true);
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+
+    // If part of signup flow
+    if (auth.signupSessionToken != null) {
+      final verifyOk = await auth.verifySignupOtp(_code);
+      if (!verifyOk) {
+        if (!mounted) return;
+        setState(() {
+          _isVerifying = false;
+          _code = '';
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(auth.errorMessage ?? 'Invalid verification code.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return;
+      }
+
+      // Step 3: Complete registration
+      final completeOk = await auth.completeSignup(
+        password: auth.pendingPassword ?? 'Hakori@2026',
+        fullName: auth.pendingFullName ?? 'VIP Patron',
+        phone: auth.pendingPhone,
+      );
+
+      if (!mounted) return;
+      setState(() => _isVerifying = false);
+
+      if (completeOk) {
+        context.go('/home');
+      } else {
+        setState(() => _code = '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(auth.errorMessage ?? 'Account completion failed.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
+
+    // If part of password reset flow
+    if (auth.resetSessionToken != null) {
+      final verifyResetOk = await auth.verifyResetOtp(_code);
+      if (!mounted) return;
+      setState(() => _isVerifying = false);
+
+      if (verifyResetOk) {
+        context.push('/recovery');
+      } else {
+        setState(() => _code = '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(auth.errorMessage ?? 'Invalid reset code.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Default fallback
+    if (!mounted) return;
+    setState(() => _isVerifying = false);
+    context.go('/home');
+  }
+
+  Future<void> _resendCode() async {
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    if (auth.lastEmail != null && auth.lastEmail!.isNotEmpty) {
+      final ok = await auth.initiateSignup(auth.lastEmail!);
+      if (ok) {
+        _startTimer();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('A new 6-digit cryptographic code has been sent.'),
+            backgroundColor: AppColors.darkBase,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthProvider>(context);
+    final targetContact = auth.lastEmail ?? '+234 (***) ***-8942';
+
     return Scaffold(
       backgroundColor: AppColors.darkBase,
       appBar: AppBar(
@@ -113,7 +204,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                'Encrypted authorization token dispatched to\n+234 (***) ***-8942',
+                'Encrypted authorization token dispatched to\n$targetContact',
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySM(color: AppColors.textMuted),
               ),
@@ -125,6 +216,18 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 isDark: true,
               ),
               const SizedBox(height: 16),
+              if (_isVerifying)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                    ),
+                  ),
+                ),
               // Resend Timer Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -138,9 +241,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   if (_secondsRemaining == 0) ...[
                     const SizedBox(width: 8),
                     InkWell(
-                      onTap: _startTimer,
+                      onTap: _resendCode,
                       child: Text(
-                        'Request New Code',
+                        'Request New',
                         style: AppTypography.labelMD(color: AppColors.primaryGold),
                       ),
                     ),
@@ -148,18 +251,10 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 ],
               ),
               const Spacer(),
-              // Custom Luxury Numpad
+              // Custom Numeric Dialpad
               CustomNumpad(
                 onDigitTap: _onDigitTap,
                 onDeleteTap: _onDeleteTap,
-                onBiometricTap: () => context.go('/home'),
-                isDark: true,
-              ),
-              const SizedBox(height: 16),
-              // Verify Button
-              AppButton.primary(
-                text: 'VERIFY & UNLOCK VAULT',
-                onPressed: _code.length >= 4 ? () => context.go('/home') : null,
               ),
               const SizedBox(height: 12),
             ],

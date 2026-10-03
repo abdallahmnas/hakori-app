@@ -3,14 +3,18 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/models/order.dart';
 import '../../core/services/cart_provider.dart';
+import '../../core/services/order_provider.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/badge_chip.dart';
 
 /// Screen 15: order_confirmation_tracking
 /// Post-checkout confirmation screen with live timeline tracking and certificate download
 class OrderConfirmationScreen extends StatefulWidget {
-  const OrderConfirmationScreen({super.key});
+  final CommissionOrder? order;
+
+  const OrderConfirmationScreen({super.key, this.order});
 
   @override
   State<OrderConfirmationScreen> createState() => _OrderConfirmationScreenState();
@@ -28,6 +32,16 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final orderProvider = Provider.of<OrderProvider>(context);
+    final activeOrder = widget.order ??
+        orderProvider.lastCreatedOrder ??
+        (orderProvider.orders.isNotEmpty ? orderProvider.orders.first : null);
+
+    final commissionNumber = activeOrder?.commissionNumber ?? '#HK-2026-8942';
+    final estDelivery = activeOrder?.estimatedDelivery ?? 'OCT 12, 2026';
+    final deliveryAddress = activeOrder?.deliveryAddress ?? 'Victoria Island Penthouse 4B, Lagos, Nigeria';
+    final steps = activeOrder?.trackingSteps ?? const [];
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -65,7 +79,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                'Commission #HK-2026-8942 • Escrow Secured',
+                'Commission $commissionNumber • Escrow Secured',
                 style: AppTypography.bodyMD(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 24),
@@ -84,85 +98,117 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Expanded(
+                      children: [
+                        const Expanded(
                           child: Text(
                             'ATELIER PRODUCTION LOG',
                             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1.2),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         AppBadgeChip(
-                          label: 'EST. ARRIVAL: OCT 02',
+                          label: 'EST. ARRIVAL: $estDelivery',
                           variant: BadgeChipVariant.goldPurity,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    _buildTimelineItem(
-                      title: '1. Vault Escrow & Order Authenticated',
-                      subtitle: 'Payment verified with 256-bit encryption.',
-                      time: 'Today, 10:45 AM',
-                      isCompleted: true,
-                      isLast: false,
+                    const SizedBox(height: 18),
+
+                    if (steps.isNotEmpty)
+                      ...List.generate(steps.length, (index) {
+                        final step = steps[index];
+                        return _buildTimelineStep(
+                          title: step.title,
+                          subtitle: step.description,
+                          time: step.timestamp,
+                          isCompleted: step.isCompleted,
+                          isCurrent: step.isCurrent,
+                          isLast: index == steps.length - 1,
+                        );
+                      })
+                    else ...[
+                      _buildTimelineStep(
+                        title: 'Escrow Secured & CAD Verified',
+                        subtitle: 'Payment confirmed via Flutterwave escrow. 3D intraoral CAD model verified by master jeweler.',
+                        time: 'Confirmed',
+                        isCompleted: true,
+                        isCurrent: false,
+                      ),
+                      _buildTimelineStep(
+                        title: 'Precision Lost-Wax Investment Casting',
+                        subtitle: 'Hand-poured 18K solid royal gold ingot casting in progress.',
+                        time: 'In Progress',
+                        isCompleted: false,
+                        isCurrent: true,
+                      ),
+                      _buildTimelineStep(
+                        title: 'Microscopic Pavé Diamond Setting',
+                        subtitle: 'Hand-setting VVS1 colorless melee diamonds under 40x Leica microscope.',
+                        time: 'Upcoming',
+                        isCompleted: false,
+                        isCurrent: false,
+                        isLast: true,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Armored Delivery Location Card
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.outlineLight),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.goldContainer,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.location_on, color: AppColors.primaryGold, size: 20),
                     ),
-                    _buildTimelineItem(
-                      title: '2. 3D Dental Impression Kit Dispatched',
-                      subtitle: 'Express DHL courier dispatched with prepaid return bag.',
-                      time: 'In Transit • Est. Tomorrow',
-                      isCompleted: true,
-                      isLast: false,
-                    ),
-                    _buildTimelineItem(
-                      title: '3. 3D Intraoral Scan Verified by DDS',
-                      subtitle: 'Dr. Adebayo verifies 0.05mm margin accuracy.',
-                      time: 'Pending Impression Return',
-                      isCompleted: false,
-                      isCurrent: true,
-                      isLast: false,
-                    ),
-                    _buildTimelineItem(
-                      title: '4. Molten 18K Cast & Diamond Setting',
-                      subtitle: 'Master Jeweler hand-sets each VVS stone in Paris.',
-                      time: 'Est. Sept 26',
-                      isCompleted: false,
-                      isLast: false,
-                    ),
-                    _buildTimelineItem(
-                      title: '5. Armored Diplomatic Vault Delivery',
-                      subtitle: 'Hand-delivered to your registered address in VIP case.',
-                      time: 'Est. Oct 02',
-                      isCompleted: false,
-                      isLast: true,
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Armored Delivery Destination', style: AppTypography.labelMD(color: AppColors.textPrimary)),
+                          const SizedBox(height: 2),
+                          Text(
+                            deliveryAddress,
+                            style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 24),
 
-              // Action Buttons
+              // Actions: Track in Detail & Return Home
               AppButton.primary(
-                text: 'TRACK LIVE TRANSIT',
-                onPressed: () => context.push('/commission-tracker/ord_1'),
-                suffixIcon: const Icon(Icons.location_on_outlined, size: 18, color: AppColors.textOnGold),
+                text: 'VIEW LIVE TELEMETRY',
+                height: 50,
+                onPressed: () {
+                  final id = activeOrder?.id.isNotEmpty == true ? activeOrder!.id : 'ord_1';
+                  context.push('/commission-tracker/$id');
+                },
+                prefixIcon: const Icon(Icons.gps_fixed, size: 18, color: AppColors.textOnGold),
               ),
               const SizedBox(height: 12),
               AppButton.outline(
-                text: 'DOWNLOAD CERTIFICATE OF AUTHENTICITY (PDF)',
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Downloading 18K Gold Certificate of Authenticity...')),
-                  );
-                },
-                prefixIcon: const Icon(Icons.picture_as_pdf_outlined, size: 18, color: AppColors.primaryGold),
-              ),
-              const SizedBox(height: 12),
-              AppButton.ghost(
-                text: 'RETURN TO ATELIER HOME',
+                text: 'RETURN TO ATELIER DISCOVERY',
+                height: 50,
                 onPressed: () => context.go('/home'),
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -170,13 +216,13 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
     );
   }
 
-  Widget _buildTimelineItem({
+  Widget _buildTimelineStep({
     required String title,
     required String subtitle,
     required String time,
     required bool isCompleted,
-    bool isCurrent = false,
-    required bool isLast,
+    required bool isCurrent,
+    bool isLast = false,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

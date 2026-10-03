@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
 import '../../core/services/mock_data_service.dart';
+import '../../core/services/order_provider.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/badge_chip.dart';
 
@@ -18,10 +20,14 @@ class CommissionTrackerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final order = MockDataService.orders.firstWhere(
-      (o) => o.id == orderId,
-      orElse: () => MockDataService.orders[0],
-    );
+    final orderProvider = Provider.of<OrderProvider>(context);
+    final match = orderProvider.orders.where((o) => o.id == orderId);
+    final order = match.isNotEmpty
+        ? match.first
+        : (orderProvider.lastCreatedOrder ?? MockDataService.orders.firstWhere(
+            (o) => o.id == orderId,
+            orElse: () => MockDataService.orders[0],
+          ));
 
     return Scaffold(
       backgroundColor: AppColors.background,

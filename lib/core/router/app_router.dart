@@ -19,6 +19,7 @@ import '../../features/orders/order_confirmation_screen.dart';
 import '../../features/orders/my_orders_screen.dart';
 import '../../features/orders/commission_tracker_screen.dart';
 import '../../features/wishlist/wishlist_screen.dart';
+import '../models/order.dart';
 import '../../features/profile/vip_profile_screen.dart';
 import '../../features/profile/fx_ledger_screen.dart';
 import '../../features/profile/dental_vault_scans_screen.dart';
@@ -38,7 +39,6 @@ class AppRouter {
   static final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> _homeNavigatorKey = GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> _catalogNavigatorKey = GlobalKey<NavigatorState>();
-  static final GlobalKey<NavigatorState> _bagNavigatorKey = GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> _ordersNavigatorKey = GlobalKey<NavigatorState>();
   static final GlobalKey<NavigatorState> _profileNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -192,7 +192,10 @@ class AppRouter {
         path: '/order-confirmation',
         name: 'order-confirmation',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const OrderConfirmationScreen(),
+        builder: (context, state) {
+          final order = state.extra as CommissionOrder?;
+          return OrderConfirmationScreen(order: order);
+        },
       ),
       GoRoute(
         path: '/commission-tracker/:id',

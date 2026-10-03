@@ -7,6 +7,8 @@ import '../../core/models/product.dart';
 import '../../core/services/mock_data_service.dart';
 import '../../core/services/cart_provider.dart';
 import '../../core/services/wishlist_provider.dart';
+import '../../core/services/product_provider.dart';
+import '../../core/services/product_service.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/badge_chip.dart';
 import '../../core/widgets/dual_price_text.dart';
@@ -32,23 +34,68 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   String _selectedArch = 'Top 6 Arch';
   bool _includeImpressionKit = true;
 
-  late Product _product;
+  Product? _product;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _product = MockDataService.products.firstWhere(
-      (p) => p.id == widget.productId,
-      orElse: () => MockDataService.products[0],
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadProduct());
+  }
+
+  Future<void> _loadProduct() async {
+    final productProvider = Provider.of<ProductProvider>(context, listen: false);
+    final existing = productProvider.findProductById(widget.productId);
+    if (existing != null) {
+      if (mounted) {
+        setState(() {
+          _product = existing;
+          _isLoading = false;
+        });
+      }
+      return;
+    }
+
+    try {
+      final productService = Provider.of<ProductService>(context, listen: false);
+      final fetched = await productService.getProductById(widget.productId);
+      if (mounted) {
+        setState(() {
+          _product = fetched;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _product = MockDataService.products.firstWhere(
+            (p) => p.id == widget.productId,
+            orElse: () => MockDataService.products[0],
+          );
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading || _product == null) {
+      return const Scaffold(
+        backgroundColor: AppColors.background,
+        body: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+          ),
+        ),
+      );
+    }
+
+    final product = _product!;
     final wishlistProvider = Provider.of<WishlistProvider>(context);
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
-    final isFav = wishlistProvider.isFavorite(_product.id);
-    final images = _product.galleryImages.isNotEmpty ? _product.galleryImages : [_product.imageUrl];
+    final isFav = wishlistProvider.isFavorite(product.id);
+    final images = product.galleryImages.isNotEmpty ? product.galleryImages : [product.imageUrl];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -71,7 +118,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       isFav ? Icons.favorite : Icons.favorite_border,
                       color: isFav ? AppColors.rubyRed : AppColors.textPrimary,
                     ),
-                    onPressed: () => wishlistProvider.toggleFavorite(_product.id),
+                    onPressed: () => wishlistProvider.toggleFavorite(product.id),
                   ),
                   IconButton(
                     icon: const Icon(Icons.share_outlined),
@@ -164,17 +211,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       // Purity & Rating Row
                       Row(
                         children: [
-                          AppBadgeChip.purity(label: _product.purity),
+                          AppBadgeChip.purity(label: product.purity),
                           const SizedBox(width: 8),
                           AppBadgeChip(
-                            label: _product.diamondClarity,
+                            label: product.diamondClarity,
                             variant: BadgeChipVariant.darkTag,
                           ),
                           const Spacer(),
                           const Icon(Icons.star, size: 15, color: AppColors.primaryGold),
                           const SizedBox(width: 4),
                           Text(
-                            '${_product.rating} (${_product.reviewCount} verified)',
+                            '${product.rating} (${product.reviewCount} verified)',
                             style: AppTypography.labelSM(color: AppColors.textPrimary),
                           ),
                         ],
@@ -183,15 +230,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                       // Title
                       Text(
-                        _product.name,
+                        product.name,
                         style: AppTypography.headlineXL(color: AppColors.textPrimary),
                       ),
                       const SizedBox(height: 8),
 
                       // Dual Price Display
                       DualPriceText(
-                        priceUsd: _product.priceUsd,
-                        priceNgn: _product.priceNgn,
+                        priceUsd: product.priceUsd,
+                        priceNgn: product.priceNgn,
                       ),
                       const SizedBox(height: 18),
                       const Divider(),
@@ -206,7 +253,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: _product.metalOptions.map((metal) {
+                        children: product.metalOptions.map((metal) {
                           final isSelected = metal == _selectedMetal;
                           return AppBadgeChip(
                             label: metal,
@@ -227,7 +274,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: _product.stoneOptions.map((stone) {
+                        children: product.stoneOptions.map((stone) {
                           final isSelected = stone == _selectedStone;
                           return AppBadgeChip(
                             label: stone,
@@ -305,7 +352,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _product.description,
+                        product.description,
                         style: AppTypography.bodyMD(color: AppColors.textSecondary).copyWith(height: 1.6),
                       ),
                       const SizedBox(height: 20),
@@ -375,14 +422,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         text: 'ADD TO CART',
                         onPressed: () {
                           cartProvider.addToCart(
-                            _product,
+                            product,
                             metal: _selectedMetal,
                             stone: _selectedStone,
                             arch: _selectedArch,
                           );
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('Added ${_product.name} to Cart'),
+                              content: Text('Added ${product.name} to Cart'),
                               action: SnackBarAction(
                                 label: 'VIEW CART',
                                 textColor: AppColors.primaryGold,

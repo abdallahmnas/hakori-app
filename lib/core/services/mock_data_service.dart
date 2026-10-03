@@ -66,7 +66,7 @@ class MockDataService {
     ),
   ];
 
-  static const List<Product> products = [
+  static final List<Product> products = [
     Product(
       id: 'prod_1',
       name: '18K VVS1 Flawless Diamond Cut Top 6',
@@ -192,7 +192,7 @@ class MockDataService {
     ),
   ];
 
-  static const List<CommissionOrder> orders = [
+  static final List<CommissionOrder> orders = [
     CommissionOrder(
       id: 'ord_1',
       commissionNumber: '#HK-2026-8942',

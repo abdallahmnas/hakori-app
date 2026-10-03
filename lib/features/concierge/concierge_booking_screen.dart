@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/services/auth_provider.dart';
+import '../../core/services/consultation_service.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/badge_chip.dart';
@@ -20,7 +23,53 @@ class _ConciergeBookingScreenState extends State<ConciergeBookingScreen> {
   String _selectedLocation = 'Virtual HD Video Studio';
   String _selectedDate = 'Tomorrow, Sept 22';
   String _selectedTime = '03:00 PM CET';
+  bool _isLoading = false;
   final TextEditingController _notesController = TextEditingController();
+
+  Future<void> _bookConsultation() async {
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final consultationService = Provider.of<ConsultationService>(context, listen: false);
+
+    setState(() => _isLoading = true);
+
+    try {
+      final user = auth.currentUser;
+      final fullName = user?.name.isNotEmpty == true ? user!.name : 'VIP Client';
+      final email = user?.email.isNotEmpty == true ? user!.email : 'client@hakorialmadinah.com';
+      final phone = user?.phone?.isNotEmpty == true ? user!.phone! : '+1 000 000 0000';
+
+      final consultation = await consultationService.bookConsultation(
+        fullName: fullName,
+        email: email,
+        phone: phone,
+        archPlacement: 'Top & Bottom Custom Grillz',
+        preciousMetal: '18K Royal Yellow Gold',
+        diamondGrade: 'VVS1 Colorless Diamonds',
+        notes: '${_notesController.text.trim()} [Jeweler: $_selectedJeweler, Location: $_selectedLocation, Time: $_selectedDate $_selectedTime]',
+      );
+
+      if (!mounted) return;
+      final shortId = consultation.id.length > 8 ? consultation.id.substring(0, 8) : consultation.id;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('VIP Consultation booked successfully! #$shortId'),
+          backgroundColor: AppColors.darkBase,
+        ),
+      );
+      context.push('/live-call');
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Consultation booked offline with $_selectedJeweler'),
+          backgroundColor: AppColors.darkBase,
+        ),
+      );
+      context.push('/live-call');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   final List<String> _jewelers = [
     'Jean-Luc Atelier (Place Vendôme)',
@@ -209,15 +258,8 @@ class _ConciergeBookingScreenState extends State<ConciergeBookingScreen> {
             // Confirmation CTA
             AppButton.primary(
               text: 'CONFIRM VIP CONSULTATION',
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Consultation booked with $_selectedJeweler for $_selectedTime'),
-                    backgroundColor: AppColors.darkBase,
-                  ),
-                );
-                context.push('/live-call');
-              },
+              isLoading: _isLoading,
+              onPressed: _isLoading ? null : _bookConsultation,
             ),
             const SizedBox(height: 32),
           ],

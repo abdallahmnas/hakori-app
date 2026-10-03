@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_typography.dart';
-import '../services/cart_provider.dart';
 
 /// 5-Tab Luxury Bottom Navigation Bar Shell
 class BottomNavShell extends StatelessWidget {
@@ -23,7 +21,6 @@ class BottomNavShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cartProvider = Provider.of<CartProvider>(context);
     final currentIndex = navigationShell.currentIndex;
 
     return Scaffold(

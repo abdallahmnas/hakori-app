@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/services/auth_provider.dart';
+import '../../core/services/product_provider.dart';
 
 /// Animated Luxury Splash Screen with Hakori Al Madinah Logo and Gold Shimmer
 class SplashScreen extends StatefulWidget {
@@ -35,12 +38,41 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
 
     _controller.forward();
-
-    Timer(const Duration(milliseconds: 2600), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        context.go('/welcome');
+        _initializeApp();
       }
     });
+  }
+
+  Future<void> _initializeApp() async {
+    final startTime = DateTime.now();
+    bool isAuthenticated = false;
+
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final productProvider = Provider.of<ProductProvider>(context, listen: false);
+
+      final results = await Future.wait([
+        authProvider.restoreSession(),
+        productProvider.fetchCatalog(silent: true),
+      ]);
+      isAuthenticated = results[0] as bool;
+    } catch (_) {}
+
+    final elapsed = DateTime.now().difference(startTime);
+    const minSplashDuration = Duration(milliseconds: 2200);
+    if (elapsed < minSplashDuration) {
+      await Future.delayed(minSplashDuration - elapsed);
+    }
+
+    if (mounted) {
+      if (isAuthenticated) {
+        context.go('/home');
+      } else {
+        context.go('/welcome');
+      }
+    }
   }
 
   @override

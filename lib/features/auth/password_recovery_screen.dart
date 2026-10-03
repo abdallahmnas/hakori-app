@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/services/auth_provider.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 
 /// Screen 5: password_recovery_security_reset
-/// Multi-step password recovery & master credential reset
+/// Multi-step password recovery & master credential reset matching API_DOCUMENTATION.md
 class PasswordRecoveryScreen extends StatefulWidget {
   const PasswordRecoveryScreen({super.key});
 
@@ -16,10 +18,11 @@ class PasswordRecoveryScreen extends StatefulWidget {
 
 class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
   int _currentStep = 1;
-  final _emailController = TextEditingController(text: 'vip.collector@placevendome.com');
+  final _emailController = TextEditingController();
   final _tokenController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -30,11 +33,87 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
     super.dispose();
   }
 
-  void _nextStep() {
-    if (_currentStep < 3) {
-      setState(() => _currentStep++);
-    } else {
-      context.push('/password-success');
+  Future<void> _handleNextStep() async {
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+
+    if (_currentStep == 1) {
+      final email = _emailController.text.trim();
+      if (email.isEmpty || !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter a valid VIP email address.'), backgroundColor: AppColors.error),
+        );
+        return;
+      }
+
+      setState(() => _isLoading = true);
+      final ok = await auth.forgotPassword(email);
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      if (ok) {
+        setState(() => _currentStep = 2);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(auth.errorMessage ?? 'Failed to request recovery code.'), backgroundColor: AppColors.error),
+        );
+      }
+      return;
+    }
+
+    if (_currentStep == 2) {
+      final token = _tokenController.text.trim();
+      if (token.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter the security recovery code.'), backgroundColor: AppColors.error),
+        );
+        return;
+      }
+
+      setState(() => _isLoading = true);
+      final ok = await auth.verifyResetOtp(token);
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      if (ok) {
+        setState(() => _currentStep = 3);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(auth.errorMessage ?? 'Invalid security token.'), backgroundColor: AppColors.error),
+        );
+      }
+      return;
+    }
+
+    if (_currentStep == 3) {
+      final newPass = _newPasswordController.text;
+      final confirmPass = _confirmPasswordController.text;
+
+      if (newPass.length < 6) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('New password must be at least 6 characters.'), backgroundColor: AppColors.error),
+        );
+        return;
+      }
+
+      if (newPass != confirmPass) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Passwords do not match.'), backgroundColor: AppColors.error),
+        );
+        return;
+      }
+
+      setState(() => _isLoading = true);
+      final ok = await auth.resetPassword(newPass);
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      if (ok) {
+        context.push('/password-success');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(auth.errorMessage ?? 'Failed to update master password.'), backgroundColor: AppColors.error),
+        );
+      }
     }
   }
 
@@ -92,7 +171,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
               const SizedBox(height: 8),
               Text(
                 _currentStep == 1
-                    ? 'Enter the VIP email or phone associated with your Place Vendôme vault certificate.'
+                    ? 'Enter the VIP email associated with your Place Vendôme vault certificate.'
                     : (_currentStep == 2
                         ? 'Enter the 6-digit emergency security code sent to your verified device.'
                         : 'Choose a high-entropy password to re-encrypt your digital 3D scans and orders.'),
@@ -102,22 +181,22 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
               // Step Content
               if (_currentStep == 1) ...[
                 AppTextField(
-                  label: 'Registered Collector Email / Phone',
-                  hintText: 'collector@domain.com',
+                  label: 'Registered Collector Email',
+                  hintText: 'collector@placevendome.com',
                   controller: _emailController,
+                  keyboardType: TextInputType.emailAddress,
                   prefixIcon: const Icon(Icons.mail_outline, color: AppColors.primaryGold),
                 ),
               ] else if (_currentStep == 2) ...[
                 AppTextField(
-                  label: '6-Digit Security Token',
-                  hintText: '894210',
+                  label: 'Security Reset Token (OTP)',
+                  hintText: 'e.g. 894102',
                   controller: _tokenController,
-                  keyboardType: TextInputType.number,
-                  prefixIcon: const Icon(Icons.security, color: AppColors.primaryGold),
+                  prefixIcon: const Icon(Icons.key, color: AppColors.primaryGold),
                 ),
-              ] else ...[
+              ] else if (_currentStep == 3) ...[
                 AppTextField(
-                  label: 'New Master Password',
+                  label: 'New Master Vault Password',
                   hintText: '••••••••••••',
                   controller: _newPasswordController,
                   isPassword: true,
@@ -129,25 +208,16 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
                   hintText: '••••••••••••',
                   controller: _confirmPasswordController,
                   isPassword: true,
-                  prefixIcon: const Icon(Icons.lock_reset, color: AppColors.primaryGold),
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Icon(Icons.check_circle, size: 14, color: AppColors.emeraldGreen),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Meets Place Vendôme 256-Bit Vault Standard',
-                      style: AppTypography.bodyXS(color: AppColors.emeraldGreen),
-                    ),
-                  ],
+                  prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primaryGold),
                 ),
               ],
-              const SizedBox(height: 36),
-              // Action Button
+              const SizedBox(height: 32),
+              // Next / Complete Button
               AppButton.primary(
-                text: _currentStep == 3 ? 'RESET MASTER CREDENTIAL' : 'CONTINUE PROTOCOL',
-                onPressed: _nextStep,
+                text: _isLoading
+                    ? 'PROCESSING PROTOCOL...'
+                    : (_currentStep == 3 ? 'UPDATE MASTER CREDENTIALS' : 'CONTINUE PROTOCOL'),
+                onPressed: _isLoading ? null : _handleNextStep,
               ),
             ],
           ),

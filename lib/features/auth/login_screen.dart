@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/services/auth_provider.dart';
+import '../../core/services/storage_service.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 
@@ -18,12 +21,81 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController(text: '');
   final _passwordController = TextEditingController(text: '');
   bool _rememberMe = true;
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final storage = Provider.of<StorageService>(context, listen: false);
+      final savedEmail = storage.getSavedEmail();
+      if (savedEmail != null && savedEmail.isNotEmpty) {
+        _emailController.text = savedEmail;
+      }
+    });
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please provide your VIP email address.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid email address format.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    if (password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please provide your encrypted vault password.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final success = await auth.login(
+      email: email,
+      password: password,
+      rememberMe: _rememberMe,
+    );
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
+
+    if (success) {
+      context.go('/home');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(auth.errorMessage ?? 'Authentication failed.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 
   void _simulateBiometricAuth() {
@@ -208,8 +280,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Expanded(
                     child: AppButton.primary(
-                      text: 'Login',
-                      onPressed: () => context.go('/home'),
+                      text: _isSubmitting ? 'AUTHENTICATING...' : 'Login',
+                      onPressed: _isSubmitting ? null : _handleLogin,
                     ),
                   ),
                   const SizedBox(width: 12),

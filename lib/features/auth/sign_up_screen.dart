@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/services/auth_provider.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 
@@ -21,6 +23,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
   bool _agreedToTerms = true;
   String _selectedCountryCode = '+234';
+  bool _isSubmitting = false;
 
   @override
   void dispose() {
@@ -29,6 +32,71 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSignUp() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = '$_selectedCountryCode ${_phoneController.text.trim()}'.trim();
+    final password = _passwordController.text;
+
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your full legal name.'), backgroundColor: AppColors.error),
+      );
+      return;
+    }
+
+    if (email.isEmpty || !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid VIP email address.'), backgroundColor: AppColors.error),
+      );
+      return;
+    }
+
+    if (_phoneController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter your direct phone number.'), backgroundColor: AppColors.error),
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Master vault password must be at least 6 characters.'), backgroundColor: AppColors.error),
+      );
+      return;
+    }
+
+    if (!_agreedToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please accept the Terms of Commission.'), backgroundColor: AppColors.error),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    auth.setPendingRegistration(
+      fullName: name,
+      phone: phone,
+      password: password,
+    );
+
+    final success = await auth.initiateSignup(email);
+    if (!mounted) return;
+    setState(() => _isSubmitting = false);
+
+    if (success) {
+      context.push('/otp');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(auth.errorMessage ?? 'Registration initiation failed.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 
   @override
@@ -200,8 +268,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 24),
               // Primary Register CTA
               AppButton.primary(
-                text: 'INITIALIZE ATELIER ACCOUNT',
-                onPressed: () => context.push('/otp'),
+                text: _isSubmitting ? 'DISPATCHING SECURE OTP...' : 'INITIALIZE ATELIER ACCOUNT',
+                onPressed: _isSubmitting ? null : _handleSignUp,
               ),
               const SizedBox(height: 20),
               // Social Auth Divider

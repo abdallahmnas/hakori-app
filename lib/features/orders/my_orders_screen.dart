@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
-import '../../core/services/mock_data_service.dart';
+import '../../core/models/order.dart';
+import '../../core/services/order_provider.dart';
 import '../../core/widgets/app_bar_luxury.dart';
 import '../../core/widgets/badge_chip.dart';
 import '../../core/widgets/dual_price_text.dart';
 
 /// Screen 16: my_orders_commission_history
-/// Orders & Commissions hub with active production status tabs and history cards
+/// Orders & Commissions hub with active production status tabs and history cards connected to OrderProvider
 class MyOrdersScreen extends StatefulWidget {
   const MyOrdersScreen({super.key});
 
@@ -23,6 +25,9 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<OrderProvider>(context, listen: false).fetchOrders();
+    });
   }
 
   @override
@@ -33,6 +38,10 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
 
   @override
   Widget build(BuildContext context) {
+    final orderProvider = Provider.of<OrderProvider>(context);
+    final activeOrders = orderProvider.activeOrders;
+    final completedOrders = orderProvider.completedOrders;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: const LuxuryAppBar(
@@ -51,25 +60,30 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
               labelColor: AppColors.primaryGold,
               unselectedLabelColor: AppColors.textSecondary,
               labelStyle: AppTypography.labelSM(),
-              tabs: const [
-                Tab(text: 'ACTIVE (1)'),
-                Tab(text: 'COMPLETED (1)'),
-                Tab(text: 'SAVED QUOTES (2)'),
+              tabs: [
+                Tab(text: 'ACTIVE (${activeOrders.length})'),
+                Tab(text: 'COMPLETED (${completedOrders.length})'),
+                const Tab(text: 'SAVED QUOTES (2)'),
               ],
             ),
           ),
           // Tab Views
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                // Active Orders Tab
-                _buildOrderList([MockDataService.orders[0]]),
-                // Completed Orders Tab
-                _buildOrderList([MockDataService.orders[1]]),
-                // Saved Quotes Tab
-                _buildQuotesList(),
-              ],
+            child: RefreshIndicator(
+              color: AppColors.primaryGold,
+              backgroundColor: AppColors.darkBase,
+              onRefresh: () => orderProvider.fetchOrders(),
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  // Active Orders Tab
+                  _buildOrderList(activeOrders, 'No active commissions currently in atelier production.'),
+                  // Completed Orders Tab
+                  _buildOrderList(completedOrders, 'No completed or delivered commissions yet.'),
+                  // Saved Quotes Tab
+                  _buildQuotesList(),
+                ],
+              ),
             ),
           ),
         ],
@@ -77,13 +91,38 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
     );
   }
 
-  Widget _buildOrderList(List orders) {
+  Widget _buildOrderList(List<CommissionOrder> orders, String emptyMsg) {
+    if (orders.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.inventory_2_outlined, size: 48, color: AppColors.textMuted),
+              const SizedBox(height: 12),
+              Text(
+                'No Commissions Found',
+                style: AppTypography.headlineSM(color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                emptyMsg,
+                textAlign: TextAlign.center,
+                style: AppTypography.bodyXS(color: AppColors.textSecondary),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       itemCount: orders.length,
       itemBuilder: (context, index) {
         final order = orders[index];
-        final firstItem = order.items.first;
+        final firstItem = order.items.isNotEmpty ? order.items.first : null;
 
         return Container(
           margin: const EdgeInsets.only(bottom: 14),
@@ -97,7 +136,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Bar: Commission # and Status Pill (Flexible & responsive to prevent overflow)
+              // Top Bar: Commission # and Status Pill
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -117,7 +156,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                     flex: 6,
                     child: AppBadgeChip(
                       label: order.status.toUpperCase(),
-                      variant: order.status.contains('Delivered')
+                      variant: order.status.toLowerCase().contains('delivered') || order.status.toLowerCase().contains('settled')
                           ? BadgeChipVariant.statusSage
                           : BadgeChipVariant.statusGold,
                     ),
@@ -138,7 +177,8 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      firstItem.imageUrl,
+                      firstItem?.imageUrl ??
+                          'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1000&auto=format&fit=crop',
                       width: 58,
                       height: 58,
                       fit: BoxFit.cover,
@@ -156,14 +196,14 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          firstItem.name,
+                          firstItem?.name ?? 'Bespoke Atelier Piece',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.headlineSM(color: AppColors.textPrimary).copyWith(fontSize: 13),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          firstItem.purity,
+                          firstItem?.purity ?? '18K Yellow Gold',
                           style: AppTypography.bodyXS(color: AppColors.textSecondary).copyWith(fontSize: 11),
                         ),
                         const SizedBox(height: 4),
