@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'app_colors.dart';
 
-/// Haute Joaillerie typography pairing:
-/// Playfair Display (High-contrast luxury serif for headlines)
-/// Inter (Clean, precise Swiss sans-serif for metadata and body)
+/// Clean native system typography:
+/// Uses default system fonts on the device (San Francisco on iOS, Roboto on Android)
+/// so that system keyboards, input methods, and emojis are never overridden.
 class AppTypography {
   AppTypography._();
 
-  // Serif Headlines (Playfair Display)
+  // Headlines
   static TextStyle headline2XL({Color color = AppColors.textPrimary}) =>
-      GoogleFonts.playfairDisplay(
+      TextStyle(
         fontSize: 36,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.5,
@@ -19,7 +18,7 @@ class AppTypography {
       );
 
   static TextStyle headlineXL({Color color = AppColors.textPrimary}) =>
-      GoogleFonts.playfairDisplay(
+      TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.w600,
         letterSpacing: -0.4,
@@ -28,7 +27,7 @@ class AppTypography {
       );
 
   static TextStyle headlineLG({Color color = AppColors.textPrimary}) =>
-      GoogleFonts.playfairDisplay(
+      TextStyle(
         fontSize: 22,
         fontWeight: FontWeight.w600,
         letterSpacing: -0.3,
@@ -37,7 +36,7 @@ class AppTypography {
       );
 
   static TextStyle headlineMD({Color color = AppColors.textPrimary}) =>
-      GoogleFonts.playfairDisplay(
+      TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w600,
         height: 1.35,
@@ -45,16 +44,16 @@ class AppTypography {
       );
 
   static TextStyle headlineSM({Color color = AppColors.textPrimary}) =>
-      GoogleFonts.playfairDisplay(
+      TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
         height: 1.4,
         color: color,
       );
 
-  // Sans-serif Body (Inter)
+  // Body
   static TextStyle bodyLG({Color color = AppColors.textPrimary}) =>
-      GoogleFonts.inter(
+      TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w400,
         height: 1.5,
@@ -62,7 +61,7 @@ class AppTypography {
       );
 
   static TextStyle bodyMD({Color color = AppColors.textPrimary}) =>
-      GoogleFonts.inter(
+      TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w400,
         height: 1.45,
@@ -70,7 +69,7 @@ class AppTypography {
       );
 
   static TextStyle bodySM({Color color = AppColors.textSecondary}) =>
-      GoogleFonts.inter(
+      TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w400,
         height: 1.4,
@@ -78,16 +77,16 @@ class AppTypography {
       );
 
   static TextStyle bodyXS({Color color = AppColors.textMuted}) =>
-      GoogleFonts.inter(
+      TextStyle(
         fontSize: 10,
         fontWeight: FontWeight.w400,
         height: 1.3,
         color: color,
       );
 
-  // Sans-serif Labels & Buttons
+  // Labels & Buttons
   static TextStyle labelLG({Color color = AppColors.textPrimary}) =>
-      GoogleFonts.inter(
+      TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.2,
@@ -95,7 +94,7 @@ class AppTypography {
       );
 
   static TextStyle labelMD({Color color = AppColors.textPrimary}) =>
-      GoogleFonts.inter(
+      TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.3,
@@ -103,7 +102,7 @@ class AppTypography {
       );
 
   static TextStyle labelSM({Color color = AppColors.textSecondary}) =>
-      GoogleFonts.inter(
+      TextStyle(
         fontSize: 10,
         fontWeight: FontWeight.w700,
         letterSpacing: 0.8,
@@ -111,7 +110,7 @@ class AppTypography {
       );
 
   static TextStyle priceDisplay({Color color = AppColors.textPrimary}) =>
-      GoogleFonts.inter(
+      TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w700,
         letterSpacing: -0.2,
@@ -119,7 +118,7 @@ class AppTypography {
       );
 
   static TextStyle priceSecondary({Color color = AppColors.textSecondary}) =>
-      GoogleFonts.inter(
+      TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w500,
         color: color,

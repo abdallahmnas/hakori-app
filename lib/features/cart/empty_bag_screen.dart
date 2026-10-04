@@ -47,7 +47,7 @@ class EmptyBagScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Text(
-                  'Explore our Place Vendôme fine jewelry commissions or design your custom tooth-by-tooth 3D arch.',
+                  'Explore our Place Vendôme fine jewelry commissions handcrafted in solid gold, diamonds, and silver.',
                   textAlign: TextAlign.center,
                   style: AppTypography.bodySM(color: AppColors.textSecondary),
                 ),

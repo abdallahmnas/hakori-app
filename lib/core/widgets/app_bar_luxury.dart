@@ -6,6 +6,7 @@ import '../constants/app_constants.dart';
 import '../constants/app_typography.dart';
 import '../services/currency_provider.dart';
 import '../services/wishlist_provider.dart';
+import '../services/auth_provider.dart';
 import '../services/cart_provider.dart';
 
 /// Haute Joaillerie Luxury App Bar with brand logo, currency selector, and badge actions
@@ -41,6 +42,7 @@ class LuxuryAppBar extends StatelessWidget implements PreferredSizeWidget {
     final currencyProvider = Provider.of<CurrencyProvider>(context);
     final wishlistProvider = Provider.of<WishlistProvider>(context);
     final cartProvider = Provider.of<CartProvider>(context);
+    final auth = Provider.of<AuthProvider>(context);
 
     final bgColor = isDark ? AppColors.darkBase : AppColors.surface;
     final textColor = isDark ? AppColors.textOnDark : AppColors.textPrimary;
@@ -181,6 +183,28 @@ class LuxuryAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
             ],
+          ),
+        if (!auth.isAuthenticated)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+            child: InkWell(
+              onTap: () => context.push('/login'),
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryGold,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Text(
+                  'LOG IN',
+                  style: AppTypography.labelSM(color: AppColors.textOnGold).copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                  ),
+                ),
+              ),
+            ),
           ),
         if (extraActions != null) ...extraActions!,
         const SizedBox(width: 8),

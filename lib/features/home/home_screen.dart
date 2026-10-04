@@ -3,9 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/services/auth_provider.dart';
+import '../../core/services/order_provider.dart';
 import '../../core/services/product_provider.dart';
 import '../../core/widgets/app_bar_luxury.dart';
 import '../../core/widgets/app_button.dart';
+import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/product_card.dart';
 import '../../core/widgets/section_header.dart';
 import '../../core/widgets/badge_chip.dart';
@@ -28,8 +31,13 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final productProvider = Provider.of<ProductProvider>(context, listen: false);
-      if (productProvider.allProducts.isEmpty) {
-        productProvider.fetchCatalog();
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+
+      productProvider.fetchCatalog();
+      if (authProvider.isAuthenticated) {
+        authProvider.refreshProfile();
+        orderProvider.fetchOrders();
       }
     });
   }
@@ -49,9 +57,149 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _openDashboardLoginSheet() {
+    final emailCtrl = TextEditingController();
+    final passCtrl = TextEditingController();
+    bool isLoggingIn = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) {
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 24,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: AppColors.outlineLight,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Log In to Hakori',
+                      style: AppTypography.headlineMD(color: AppColors.textPrimary),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Access your bespoke commissions, orders, and private catalog.',
+                      style: AppTypography.bodySM(color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 20),
+                    AppTextField(
+                      label: 'Email',
+                      hintText: 'you@example.com',
+                      controller: emailCtrl,
+                      keyboardType: TextInputType.emailAddress,
+                      prefixIcon: const Icon(Icons.mail_outline, size: 20, color: AppColors.primaryGold),
+                    ),
+                    const SizedBox(height: 14),
+                    AppTextField(
+                      label: 'Password',
+                      hintText: '••••••••',
+                      controller: passCtrl,
+                      isPassword: true,
+                      prefixIcon: const Icon(Icons.lock_outline, size: 20, color: AppColors.primaryGold),
+                    ),
+                    const SizedBox(height: 22),
+                    AppButton.primary(
+                      text: isLoggingIn ? 'LOGGING IN...' : 'LOG IN',
+                      onPressed: isLoggingIn
+                          ? null
+                          : () async {
+                              final email = emailCtrl.text.trim();
+                              final pass = passCtrl.text;
+                              if (email.isEmpty || pass.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Please enter both email and password.'),
+                                    backgroundColor: AppColors.error,
+                                  ),
+                                );
+                                return;
+                              }
+                              setSheetState(() => isLoggingIn = true);
+                              final auth = Provider.of<AuthProvider>(context, listen: false);
+                              final ok = await auth.login(email: email, password: pass);
+                              if (!mounted) return;
+                              setSheetState(() => isLoggingIn = false);
+
+                              if (ok) {
+                                final productProvider = Provider.of<ProductProvider>(context, listen: false);
+                                final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+                                productProvider.fetchCatalog();
+                                orderProvider.fetchOrders();
+                                auth.refreshProfile();
+
+                                if (ctx.mounted) {
+                                  Navigator.of(ctx).pop();
+                                }
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Welcome back! Logged in successfully.'),
+                                      backgroundColor: AppColors.darkBase,
+                                    ),
+                                  );
+                                }
+                              } else {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(auth.errorMessage ?? 'Login failed. Please check credentials.'),
+                                      backgroundColor: AppColors.error,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                    ),
+                    const SizedBox(height: 14),
+                    Center(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          context.push('/signup');
+                        },
+                        child: Text(
+                          "Don't have an account? Sign Up",
+                          style: AppTypography.labelSM(color: AppColors.primaryGold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final productProvider = Provider.of<ProductProvider>(context);
+    final auth = Provider.of<AuthProvider>(context);
     final displayedProducts = productProvider.products;
     final categoryFilters = productProvider.categoryFilters;
     final selectedCategory = productProvider.selectedCategory;
@@ -62,7 +210,17 @@ class _HomeScreenState extends State<HomeScreen> {
       body: RefreshIndicator(
         color: AppColors.primaryGold,
         backgroundColor: AppColors.darkBase,
-        onRefresh: () => productProvider.fetchCatalog(),
+        onRefresh: () async {
+          final authProvider = Provider.of<AuthProvider>(context, listen: false);
+          final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+          await Future.wait([
+            productProvider.fetchCatalog(),
+            if (authProvider.isAuthenticated) ...[
+              authProvider.refreshProfile(),
+              orderProvider.fetchOrders(),
+            ],
+          ]);
+        },
         child: CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
@@ -85,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onChanged: (val) => productProvider.setSearchQuery(val),
                           style: AppTypography.bodyMD(),
                           decoration: InputDecoration(
-                            hintText: 'Search 18K grillz, baguettes...',
+                            hintText: 'Search fine jewelry, gold, diamonds...',
                             hintStyle: AppTypography.bodySM(
                               color: AppColors.textMuted,
                             ),
@@ -137,6 +295,60 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
+            // Guest Login Banner (if not authenticated)
+            if (!auth.isAuthenticated)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    decoration: BoxDecoration(
+                      color: AppColors.darkCard,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.primaryGold.withAlpha(140), width: 1),
+                      boxShadow: const [AppColors.goldGlow],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.surface,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.primaryGold, width: 1),
+                          ),
+                          child: const Icon(Icons.lock_outline, size: 16, color: AppColors.primaryGold),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Browsing as Guest',
+                                style: AppTypography.labelMD(color: AppColors.textOnDark),
+                              ),
+                              Text(
+                                'Log in to view orders, profile, and private pieces.',
+                                style: AppTypography.bodyXS(color: AppColors.surfaceContainerHigh),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        AppButton.primary(
+                          text: 'LOG IN',
+                          height: 34,
+                          width: 80,
+                          borderRadius: 8,
+                          onPressed: _openDashboardLoginSheet,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
             // Editorial Hero Carousel Banner
             SliverToBoxAdapter(
               child: Padding(
@@ -184,7 +396,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Engineered with 3D intraoral dental accuracy.',
+                          'Handcrafted fine jewelry in gold, diamonds, and sterling silver.',
                           style: AppTypography.bodyXS(
                             color: AppColors.surfaceContainerHigh,
                           ),
@@ -200,14 +412,15 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: 136,
                               borderRadius: 18,
                               onPressed: () {
-                                final firstProdId = displayedProducts.isNotEmpty
-                                    ? displayedProducts.first.id
-                                    : 'prod_1';
-                                context.push('/product/$firstProdId');
+                                if (displayedProducts.isNotEmpty) {
+                                  context.push('/product/${displayedProducts.first.id}');
+                                } else {
+                                  context.push('/categories');
+                                }
                               },
                             ),
                             AppButton.outline(
-                              text: '3D TRY ON',
+                              text: 'TRY ON',
                               height: 36,
                               width: 114,
                               borderRadius: 18,

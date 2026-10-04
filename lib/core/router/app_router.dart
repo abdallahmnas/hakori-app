@@ -8,6 +8,7 @@ import '../../features/auth/login_screen.dart';
 import '../../features/auth/otp_verification_screen.dart';
 import '../../features/auth/password_recovery_screen.dart';
 import '../../features/auth/password_reset_success_screen.dart';
+import '../../features/auth/complete_profile_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/catalog/categories_screen.dart';
 import '../../features/catalog/product_detail_screen.dart';
@@ -79,6 +80,12 @@ class AppRouter {
         name: 'otp',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const OtpVerificationScreen(),
+      ),
+      GoRoute(
+        path: '/complete-profile',
+        name: 'complete-profile',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CompleteProfileScreen(),
       ),
       GoRoute(
         path: '/recovery',

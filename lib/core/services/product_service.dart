@@ -2,7 +2,6 @@ import '../constants/api_constants.dart';
 import '../models/product.dart';
 import '../models/category.dart';
 import 'api_client.dart';
-import 'mock_data_service.dart';
 
 /// Product & Category API Service matching API_DOCUMENTATION.md
 class ProductService {
@@ -10,7 +9,7 @@ class ProductService {
 
   ProductService(this._client);
 
-  /// Get Public Catalog Listing
+  /// Get Public Catalog Listing from API
   Future<List<Product>> getProducts({
     String? category,
     String? search,
@@ -47,50 +46,33 @@ class ProductService {
             .map((p) => Product.fromJson(p as Map<String, dynamic>))
             .toList();
       }
-
-      // If backend returns empty catalog, provide default showcase items
-      return MockDataService.products;
-    } catch (e) {
-      // Graceful fallback for catalog continuity if network down
-      return MockDataService.products;
+      return [];
+    } catch (_) {
+      return [];
     }
   }
 
-  /// Get Public Product Categories
+  /// Get Public Product Categories from API
   Future<List<String>> getProductCategories() async {
     try {
       final response = await _client.get(ApiConstants.productCategories);
       final data = response.data['data'];
-      if (data is List) {
+      if (data is List && data.isNotEmpty) {
         return data.map((e) => e.toString()).toList();
       }
     } catch (_) {}
-    return const [
-      'ALL',
-      'DIAMOND PAVÉ',
-      'SOLID GOLD',
-      'OPEN FACE',
-      'FANGS & CAPS',
-      'OPAL & GEMS',
-    ];
+    return const ['ALL'];
   }
 
-  /// Get Product Details by ID
+  /// Get Product Details by ID from API
   Future<Product> getProductById(String id) async {
-    try {
-      final response = await _client.get(ApiConstants.productDetail(id));
-      final data = response.data['data'] as Map<String, dynamic>? ?? {};
-      final prodMap = data['product'] as Map<String, dynamic>? ?? data;
-      return Product.fromJson(prodMap);
-    } catch (_) {
-      return MockDataService.products.firstWhere(
-        (p) => p.id == id,
-        orElse: () => MockDataService.products[0],
-      );
-    }
+    final response = await _client.get(ApiConstants.productDetail(id));
+    final data = response.data['data'] as Map<String, dynamic>? ?? {};
+    final prodMap = data['product'] as Map<String, dynamic>? ?? data;
+    return Product.fromJson(prodMap);
   }
 
-  /// List Public Collections & Taxonomy
+  /// List Public Collections & Taxonomy from API
   Future<List<Category>> getCategories() async {
     try {
       final response = await _client.get(ApiConstants.categories);
@@ -107,24 +89,17 @@ class ProductService {
             .map((c) => Category.fromJson(c as Map<String, dynamic>))
             .toList();
       }
-      return MockDataService.categories;
+      return [];
     } catch (_) {
-      return MockDataService.categories;
+      return [];
     }
   }
 
-  /// Get Collection by ID or Slug
+  /// Get Collection by ID or Slug from API
   Future<Category> getCategoryById(String id) async {
-    try {
-      final response = await _client.get(ApiConstants.categoryDetail(id));
-      final data = response.data['data'] as Map<String, dynamic>? ?? {};
-      final catMap = data['category'] as Map<String, dynamic>? ?? data;
-      return Category.fromJson(catMap);
-    } catch (_) {
-      return MockDataService.categories.firstWhere(
-        (c) => c.id == id,
-        orElse: () => MockDataService.categories[0],
-      );
-    }
+    final response = await _client.get(ApiConstants.categoryDetail(id));
+    final data = response.data['data'] as Map<String, dynamic>? ?? {};
+    final catMap = data['category'] as Map<String, dynamic>? ?? data;
+    return Category.fromJson(catMap);
   }
 }

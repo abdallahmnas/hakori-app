@@ -398,7 +398,7 @@ class _CartScreenState extends State<CartScreen> {
                 children: [
                   _buildSummaryRow('Subtotal', currencyProvider.formatPrice(cart.subtotalUsd)),
                   const SizedBox(height: 6),
-                  _buildSummaryRow('3D Impression Kit', 'FREE'),
+                  _buildSummaryRow('Jewelry Sizing Kit', 'FREE'),
                   const SizedBox(height: 6),
                   _buildSummaryRow('Vault Insurance', cart.vaultInsurance ? currencyProvider.formatPrice(cart.insuranceCostUsd) : 'Waived'),
                   if (cart.discountPercentage > 0) ...[

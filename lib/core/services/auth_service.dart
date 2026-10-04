@@ -1,21 +1,29 @@
+import 'package:dio/dio.dart';
 import '../constants/api_constants.dart';
 import '../models/user.dart';
 import 'api_client.dart';
 
-/// Authentication & Patron User API Service matching API_DOCUMENTATION.md
+/// Authentication & User API Service matching API_DOCUMENTATION.md
 class AuthService {
   final ApiClient _client;
 
   AuthService(this._client);
 
-  /// Step 1: Initiate Patron Signup (dispatches OTP)
+  /// Step 1: Initiate Signup (dispatches 6-digit OTP)
   Future<Map<String, dynamic>> signupInit(String email) async {
     final response = await _client.post(
       ApiConstants.signupInit,
       data: {'email': email.trim()},
     );
-    final data = response.data['data'] as Map<String, dynamic>? ?? {};
-    return data;
+    if (response.data is Map<String, dynamic>) {
+      final map = response.data as Map<String, dynamic>;
+      final inner = map['data'];
+      if (inner is Map<String, dynamic>) {
+        return inner;
+      }
+      return map;
+    }
+    return {};
   }
 
   /// Step 2: Verify Signup OTP
@@ -26,40 +34,87 @@ class AuthService {
   }) async {
     final response = await _client.post(
       ApiConstants.signupVerify,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $sessionToken',
+        },
+      ),
       data: {
+        'otp': otp.trim(),
         'email': email.trim(),
         'sessionToken': sessionToken,
-        'otp': otp.trim(),
       },
     );
-    final data = response.data['data'] as Map<String, dynamic>? ?? {};
-    return data;
+    if (response.data is Map<String, dynamic>) {
+      final map = response.data as Map<String, dynamic>;
+      final inner = map['data'];
+      if (inner is Map<String, dynamic>) {
+        return inner;
+      }
+      return map;
+    }
+    return {};
   }
 
-  /// Step 3: Complete Profile & Register
+  /// Step 3: Complete Profile & Register in Database
   Future<Map<String, dynamic>> signupComplete({
     required String verificationToken,
     required String email,
     required String password,
-    required String fullName,
+    String? firstName,
+    String? lastName,
+    String? fullName,
     String? phone,
+    String? city,
+    String? country,
+    String? address,
     String? location,
     String tier = 'VIP Private Client',
   }) async {
+    final effectiveFirstName = firstName ??
+        (fullName != null ? fullName.trim().split(' ').first : 'Patron');
+    final effectiveLastName = lastName ??
+        (fullName != null && fullName.trim().contains(' ')
+            ? fullName.trim().split(' ').sublist(1).join(' ')
+            : '');
+    final effectiveFullName =
+        fullName ?? '$effectiveFirstName $effectiveLastName'.trim();
+    final effectiveLocation = location ??
+        [address, city, country]
+            .where((e) => e != null && e.trim().isNotEmpty)
+            .join(', ');
+
     final response = await _client.post(
       ApiConstants.signupComplete,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $verificationToken',
+        },
+      ),
       data: {
         'verificationToken': verificationToken,
         'email': email.trim(),
         'password': password,
-        'fullName': fullName.trim(),
+        'firstName': effectiveFirstName,
+        'lastName': effectiveLastName,
+        'fullName': effectiveFullName,
         if (phone != null && phone.isNotEmpty) 'phone': phone.trim(),
-        if (location != null && location.isNotEmpty) 'location': location.trim(),
+        if (city != null && city.isNotEmpty) 'city': city.trim(),
+        if (country != null && country.isNotEmpty) 'country': country.trim(),
+        if (address != null && address.isNotEmpty) 'address': address.trim(),
+        if (effectiveLocation.isNotEmpty) 'location': effectiveLocation,
         'tier': tier,
       },
     );
-    final data = response.data['data'] as Map<String, dynamic>? ?? {};
-    return data;
+    if (response.data is Map<String, dynamic>) {
+      final map = response.data as Map<String, dynamic>;
+      final inner = map['data'];
+      if (inner is Map<String, dynamic>) {
+        return inner;
+      }
+      return map;
+    }
+    return {};
   }
 
   /// Patron & Admin Login
@@ -74,7 +129,7 @@ class AuthService {
         'password': password,
       },
     );
-    final data = response.data['data'] as Map<String, dynamic>? ?? {};
+    final data = response.data['data'] as Map<String, dynamic>? ?? response.data as Map<String, dynamic>? ?? {};
     return data;
   }
 
@@ -84,8 +139,9 @@ class AuthService {
       ApiConstants.forgotPassword,
       data: {'email': email.trim()},
     );
-    final data = response.data['data'] as Map<String, dynamic>? ?? {};
-    return data['sessionToken']?.toString() ?? '';
+    final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : {};
+    final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
+    return data['token']?.toString() ?? data['sessionToken']?.toString() ?? '';
   }
 
   /// Verify Password Reset OTP
@@ -102,8 +158,9 @@ class AuthService {
         'otp': otp.trim(),
       },
     );
-    final data = response.data['data'] as Map<String, dynamic>? ?? {};
-    return data['resetToken']?.toString() ?? '';
+    final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : {};
+    final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
+    return data['token']?.toString() ?? data['resetToken']?.toString() ?? '';
   }
 
   /// Set New Password

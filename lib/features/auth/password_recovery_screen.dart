@@ -38,9 +38,10 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
 
     if (_currentStep == 1) {
       final email = _emailController.text.trim();
-      if (email.isEmpty || !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      final emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+      if (email.isEmpty || !emailRegex.hasMatch(email)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enter a valid VIP email address.'), backgroundColor: AppColors.error),
+          const SnackBar(content: Text('Please enter a valid email address.'), backgroundColor: AppColors.error),
         );
         return;
       }
@@ -164,39 +165,40 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
               // Step Header
               Text(
                 _currentStep == 1
-                    ? 'Identify Vault Account'
-                    : (_currentStep == 2 ? 'Verify Security Token' : 'Establish New Master Password'),
+                    ? 'Forgot Password'
+                    : (_currentStep == 2 ? 'Verify Code' : 'Create New Password'),
                 style: AppTypography.headlineXL(color: AppColors.textPrimary),
               ),
               const SizedBox(height: 8),
               Text(
                 _currentStep == 1
-                    ? 'Enter the VIP email associated with your Place Vendôme vault certificate.'
+                    ? 'Enter your registered email address to receive a verification code.'
                     : (_currentStep == 2
-                        ? 'Enter the 6-digit emergency security code sent to your verified device.'
-                        : 'Choose a high-entropy password to re-encrypt your digital 3D scans and orders.'),
+                        ? 'Enter the 6-digit verification code sent to your email.'
+                        : 'Choose a new password for your account.'),
                 style: AppTypography.bodyMD(color: AppColors.textSecondary),
               ),
               const SizedBox(height: 32),
               // Step Content
               if (_currentStep == 1) ...[
                 AppTextField(
-                  label: 'Registered Collector Email',
-                  hintText: 'collector@placevendome.com',
+                  label: 'Email',
+                  hintText: 'you@example.com',
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   prefixIcon: const Icon(Icons.mail_outline, color: AppColors.primaryGold),
                 ),
               ] else if (_currentStep == 2) ...[
                 AppTextField(
-                  label: 'Security Reset Token (OTP)',
-                  hintText: 'e.g. 894102',
+                  label: 'Verification Code (OTP)',
+                  hintText: 'e.g. 123456',
                   controller: _tokenController,
-                  prefixIcon: const Icon(Icons.key, color: AppColors.primaryGold),
+                  keyboardType: TextInputType.number,
+                  prefixIcon: const Icon(Icons.pin_outlined, color: AppColors.primaryGold),
                 ),
               ] else if (_currentStep == 3) ...[
                 AppTextField(
-                  label: 'New Master Vault Password',
+                  label: 'New Password',
                   hintText: '••••••••••••',
                   controller: _newPasswordController,
                   isPassword: true,
@@ -204,7 +206,7 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
                 ),
                 const SizedBox(height: 16),
                 AppTextField(
-                  label: 'Confirm Master Password',
+                  label: 'Confirm Password',
                   hintText: '••••••••••••',
                   controller: _confirmPasswordController,
                   isPassword: true,
@@ -215,8 +217,8 @@ class _PasswordRecoveryScreenState extends State<PasswordRecoveryScreen> {
               // Next / Complete Button
               AppButton.primary(
                 text: _isLoading
-                    ? 'PROCESSING PROTOCOL...'
-                    : (_currentStep == 3 ? 'UPDATE MASTER CREDENTIALS' : 'CONTINUE PROTOCOL'),
+                    ? 'PLEASE WAIT...'
+                    : (_currentStep == 3 ? 'RESET PASSWORD' : 'CONTINUE'),
                 onPressed: _isLoading ? null : _handleNextStep,
               ),
             ],

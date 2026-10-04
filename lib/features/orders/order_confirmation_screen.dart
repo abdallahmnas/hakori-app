@@ -130,7 +130,7 @@ class _OrderConfirmationScreenState extends State<OrderConfirmationScreen> {
                     else ...[
                       _buildTimelineStep(
                         title: 'Escrow Secured & CAD Verified',
-                        subtitle: 'Payment confirmed via Flutterwave escrow. 3D intraoral CAD model verified by master jeweler.',
+                        subtitle: 'Payment confirmed via Flutterwave escrow. Jewelry specifications verified by master jeweler.',
                         time: 'Confirmed',
                         isCompleted: true,
                         isCurrent: false,

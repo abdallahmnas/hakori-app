@@ -38,7 +38,7 @@ class PasswordResetSuccessScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               Text(
-                'Vault Access Restored',
+                'Password Reset Successful',
                 textAlign: TextAlign.center,
                 style: AppTypography.headlineXL(color: AppColors.textOnDark),
               ),
@@ -46,7 +46,7 @@ class PasswordResetSuccessScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
-                  'Your master encryption key has been successfully updated. All saved 3D intraoral scans and active commissions are re-secured.',
+                  'Your password has been successfully updated. You can now log in or continue to your account.',
                   textAlign: TextAlign.center,
                   style: AppTypography.bodyMD(color: AppColors.textMuted).copyWith(height: 1.5),
                 ),
@@ -62,19 +62,19 @@ class PasswordResetSuccessScreen extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.lock_outline, color: AppColors.primaryGold, size: 20),
+                    const Icon(Icons.check_circle_outline, color: AppColors.primaryGold, size: 20),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'ENCRYPTION STATUS',
+                            'ACCOUNT STATUS',
                             style: AppTypography.labelSM(color: AppColors.goldAccent),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'AES-256 GCM • Active Biometric Token',
+                            'Verified & Active',
                             style: AppTypography.bodyXS(color: AppColors.textOnDark),
                           ),
                         ],
@@ -85,7 +85,7 @@ class PasswordResetSuccessScreen extends StatelessWidget {
               ),
               const Spacer(),
               AppButton.primary(
-                text: 'ENTER VAULT NOW',
+                text: 'CONTINUE TO HOME',
                 onPressed: () => context.go('/home'),
               ),
               const SizedBox(height: 16),

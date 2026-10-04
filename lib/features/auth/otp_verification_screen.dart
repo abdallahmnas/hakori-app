@@ -8,8 +8,8 @@ import '../../core/services/auth_provider.dart';
 import '../../core/widgets/otp_input_field.dart';
 import '../../core/widgets/custom_numpad.dart';
 
-/// Screen 4: otp_biometric_verification
-/// 6-digit OTP verification with custom luxury gold dialpad
+/// Screen: OTP Verification (Step 2 of Onboarding / Password Reset)
+/// 6-digit verification code entry with keypad and resend timer
 class OtpVerificationScreen extends StatefulWidget {
   const OtpVerificationScreen({super.key});
 
@@ -72,41 +72,20 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     setState(() => _isVerifying = true);
     final auth = Provider.of<AuthProvider>(context, listen: false);
 
-    // If part of signup flow
+    // If part of signup flow (Step 2)
     if (auth.signupSessionToken != null) {
       final verifyOk = await auth.verifySignupOtp(_code);
-      if (!verifyOk) {
-        if (!mounted) return;
-        setState(() {
-          _isVerifying = false;
-          _code = '';
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(auth.errorMessage ?? 'Invalid verification code.'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-        return;
-      }
-
-      // Step 3: Complete registration
-      final completeOk = await auth.completeSignup(
-        password: auth.pendingPassword ?? 'Hakori@2026',
-        fullName: auth.pendingFullName ?? 'VIP Patron',
-        phone: auth.pendingPhone,
-      );
-
       if (!mounted) return;
       setState(() => _isVerifying = false);
 
-      if (completeOk) {
-        context.go('/home');
+      if (verifyOk) {
+        // Step 2 succeeded -> navigate to Step 3: Complete Profile
+        context.push('/complete-profile');
       } else {
         setState(() => _code = '');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(auth.errorMessage ?? 'Account completion failed.'),
+            content: Text(auth.errorMessage ?? 'Invalid verification code.'),
             backgroundColor: AppColors.error,
           ),
         );
@@ -134,10 +113,25 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       return;
     }
 
-    // Default fallback
+    // Fallback: Attempt verifySignupOtp or show explicit session error
+    final verifyOk = await auth.verifySignupOtp(_code);
     if (!mounted) return;
     setState(() => _isVerifying = false);
-    context.go('/home');
+
+    if (verifyOk) {
+      context.push('/complete-profile');
+    } else {
+      setState(() => _code = '');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            auth.errorMessage ??
+                'Verification session expired. Please restart registration.',
+          ),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
   }
 
   Future<void> _resendCode() async {
@@ -149,30 +143,51 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('A new 6-digit cryptographic code has been sent.'),
+            content: Text('A new 6-digit verification code has been sent.'),
             backgroundColor: AppColors.darkBase,
           ),
         );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(auth.errorMessage ?? 'Failed to resend code.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
       }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No email address found. Please restart signup.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
-    final targetContact = auth.lastEmail ?? '+234 (***) ***-8942';
+    final targetContact = auth.lastEmail ?? 'your email address';
 
     return Scaffold(
       backgroundColor: AppColors.darkBase,
       appBar: AppBar(
         backgroundColor: AppColors.darkBase,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: AppColors.primaryGold),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            size: 18,
+            color: AppColors.primaryGold,
+          ),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         title: Text(
-          'SECURITY PROTOCOL',
-          style: AppTypography.labelLG(color: AppColors.textOnDark).copyWith(letterSpacing: 2),
+          'VERIFY CODE',
+          style: AppTypography.labelLG(
+            color: AppColors.textOnDark,
+          ).copyWith(letterSpacing: 2),
         ),
       ),
       body: SafeArea(
@@ -180,8 +195,48 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           child: Column(
             children: [
+              // Progress Bar (Step 2 of 3)
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryGold,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryGold,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Container(
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AppColors.outlineLight,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 12),
-              // Security Shield Icon
+              Text(
+                'Step 2 of 3: Email Verification',
+                style: AppTypography.labelSM(color: AppColors.primaryGold),
+              ),
+              const SizedBox(height: 18),
+
+              // Shield Icon
               Container(
                 width: 60,
                 height: 60,
@@ -192,29 +247,26 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   boxShadow: const [AppColors.goldGlow],
                 ),
                 child: const Icon(
-                  Icons.lock_clock_outlined,
+                  Icons.mark_email_read_outlined,
                   size: 28,
                   color: AppColors.primaryGold,
                 ),
               ),
               const SizedBox(height: 18),
               Text(
-                'Enter 6-Digit Token',
+                'Enter Verification Code',
                 style: AppTypography.headlineLG(color: AppColors.textOnDark),
               ),
               const SizedBox(height: 6),
               Text(
-                'Encrypted authorization token dispatched to\n$targetContact',
+                'Enter the 6-digit code sent to\n$targetContact',
                 textAlign: TextAlign.center,
                 style: AppTypography.bodySM(color: AppColors.textMuted),
               ),
               const SizedBox(height: 28),
+
               // OTP Input Boxes
-              OtpInputField(
-                currentCode: _code,
-                length: 6,
-                isDark: true,
-              ),
+              OtpInputField(currentCode: _code, length: 6, isDark: true),
               const SizedBox(height: 16),
               if (_isVerifying)
                 const Padding(
@@ -224,17 +276,20 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     width: 20,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.primaryGold,
+                      ),
                     ),
                   ),
                 ),
+
               // Resend Timer Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     _secondsRemaining > 0
-                        ? 'Resend token in 00:${_secondsRemaining.toString().padLeft(2, '0')}'
+                        ? 'Resend code in 00:${_secondsRemaining.toString().padLeft(2, '0')}'
                         : 'Did not receive code?',
                     style: AppTypography.bodySM(color: AppColors.textMuted),
                   ),
@@ -243,19 +298,19 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                     InkWell(
                       onTap: _resendCode,
                       child: Text(
-                        'Request New',
-                        style: AppTypography.labelMD(color: AppColors.primaryGold),
+                        'Resend Code',
+                        style: AppTypography.labelMD(
+                          color: AppColors.primaryGold,
+                        ),
                       ),
                     ),
                   ],
                 ],
               ),
               const Spacer(),
-              // Custom Numeric Dialpad
-              CustomNumpad(
-                onDigitTap: _onDigitTap,
-                onDeleteTap: _onDeleteTap,
-              ),
+
+              // Numeric Dialpad
+              CustomNumpad(onDigitTap: _onDigitTap, onDeleteTap: _onDeleteTap),
               const SizedBox(height: 12),
             ],
           ),

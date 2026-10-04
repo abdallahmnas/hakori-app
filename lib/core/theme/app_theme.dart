@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_typography.dart';
 
 /// Central theme configuration for Hakori Al Madinah app.
+/// Uses native device system fonts so inputs and keyboards are never overridden.
 class AppTheme {
   AppTheme._();
 
   static ThemeData get lightTheme {
-    final textTheme = GoogleFonts.interTextTheme();
-
     return ThemeData(
       useMaterial3: true,
       scaffoldBackgroundColor: AppColors.background,
@@ -33,7 +31,7 @@ class AppTheme {
         outline: AppColors.outline,
         outlineVariant: AppColors.outlineLight,
       ),
-      textTheme: textTheme.copyWith(
+      textTheme: TextTheme(
         displayLarge: AppTypography.headline2XL(),
         displayMedium: AppTypography.headlineXL(),
         displaySmall: AppTypography.headlineLG(),
@@ -138,6 +136,19 @@ class AppTheme {
         outline: AppColors.darkBorder,
         outlineVariant: AppColors.darkBorder,
       ),
+      textTheme: TextTheme(
+        displayLarge: AppTypography.headline2XL(color: AppColors.textOnDark),
+        displayMedium: AppTypography.headlineXL(color: AppColors.textOnDark),
+        displaySmall: AppTypography.headlineLG(color: AppColors.textOnDark),
+        headlineMedium: AppTypography.headlineMD(color: AppColors.textOnDark),
+        headlineSmall: AppTypography.headlineSM(color: AppColors.textOnDark),
+        bodyLarge: AppTypography.bodyLG(color: AppColors.textOnDark),
+        bodyMedium: AppTypography.bodyMD(color: AppColors.textOnDark),
+        bodySmall: AppTypography.bodySM(color: AppColors.textMuted),
+        labelLarge: AppTypography.labelLG(color: AppColors.textOnDark),
+        labelMedium: AppTypography.labelMD(color: AppColors.textOnDark),
+        labelSmall: AppTypography.labelSM(color: AppColors.textMuted),
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: AppColors.darkBase,
         elevation: 0,
@@ -145,6 +156,29 @@ class AppTheme {
         centerTitle: true,
         iconTheme: const IconThemeData(color: AppColors.textOnDark, size: 22),
         titleTextStyle: AppTypography.headlineMD(color: AppColors.textOnDark),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.darkCard,
+        hintStyle: AppTypography.bodyMD(color: AppColors.textMuted),
+        labelStyle: AppTypography.labelMD(color: AppColors.goldAccent),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.darkBorder, width: 1),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.darkBorder, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primaryGold, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.error, width: 1),
+        ),
       ),
     );
   }

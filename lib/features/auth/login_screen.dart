@@ -4,12 +4,14 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
 import '../../core/services/auth_provider.dart';
+import '../../core/services/order_provider.dart';
+import '../../core/services/product_provider.dart';
 import '../../core/services/storage_service.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 
-/// Screen 3: log_in_biometric_vault_access
-/// Dark luxury biometric login screen with Place Vendôme credentials
+/// Screen: Login
+/// Standard credentials authentication with biometric quick-access
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -49,17 +51,18 @@ class _LoginScreenState extends State<LoginScreen> {
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please provide your VIP email address.'),
+          content: Text('Please enter your email address.'),
           backgroundColor: AppColors.error,
         ),
       );
       return;
     }
 
-    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+    final emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+    if (!emailRegex.hasMatch(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter a valid email address format.'),
+          content: Text('Please enter a valid email address.'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -69,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please provide your encrypted vault password.'),
+          content: Text('Please enter your password.'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -78,76 +81,42 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isSubmitting = true);
     final auth = Provider.of<AuthProvider>(context, listen: false);
+
     final success = await auth.login(
       email: email,
       password: password,
       rememberMe: _rememberMe,
     );
+
     if (!mounted) return;
     setState(() => _isSubmitting = false);
 
     if (success) {
+      // Fetch products on dashboard, categories, orders, and profile from APIs
+      final productProvider = Provider.of<ProductProvider>(context, listen: false);
+      final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+      productProvider.fetchCatalog();
+      orderProvider.fetchOrders();
+      auth.refreshProfile();
+
       context.go('/home');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(auth.errorMessage ?? 'Authentication failed.'),
+          content: Text(auth.errorMessage ?? 'Invalid email or password.'),
           backgroundColor: AppColors.error,
         ),
       );
     }
   }
 
-  void _simulateBiometricAuth() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColors.darkSurface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+  void _showBiometricComingSoon() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Fingerprint login is coming soon.'),
+        backgroundColor: AppColors.darkBase,
+        duration: Duration(seconds: 2),
       ),
-      builder: (context) {
-        return Container(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.darkCard,
-                  border: Border.all(color: AppColors.primaryGold, width: 2),
-                  boxShadow: const [AppColors.goldGlow],
-                ),
-                child: const Icon(
-                  Icons.fingerprint,
-                  size: 54,
-                  color: AppColors.primaryGold,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Biometric Vault Scanner',
-                style: AppTypography.headlineMD(color: AppColors.textOnDark),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Touch sensor or look directly at the front camera to unlock your encrypted 3D vault.',
-                textAlign: TextAlign.center,
-                style: AppTypography.bodySM(color: AppColors.textMuted),
-              ),
-              const SizedBox(height: 28),
-              AppButton.primary(
-                text: 'AUTHENTICATE WITH BIOMETRICS',
-                onPressed: () {
-                  Navigator.pop(context);
-                  context.go('/home');
-                },
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 
@@ -166,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         title: Text(
-          'VAULT ACCESS',
+          'LOG IN',
           style: AppTypography.labelLG(
             color: AppColors.textOnDark,
           ).copyWith(letterSpacing: 2.5),
@@ -179,7 +148,6 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 12),
-              // Vault Shield Icon
               Center(
                 child: Container(
                   width: 72,
@@ -194,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     boxShadow: const [AppColors.goldGlow],
                   ),
                   child: const Icon(
-                    Icons.lock_person_outlined,
+                    Icons.lock_outline,
                     size: 34,
                     color: AppColors.primaryGold,
                   ),
@@ -203,39 +171,43 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 24),
               Center(
                 child: Text(
-                  'Enter your credentials or authenticate with stored biometrics.',
+                  'Welcome back. Log in to your account.',
                   textAlign: TextAlign.center,
                   style: AppTypography.bodyMD(color: AppColors.textMuted),
                 ),
               ),
               const SizedBox(height: 36),
-              // Email / ID Field
+
+              // Email Field
               AppTextField(
-                label: 'Collector Email / Vault ID',
-                hintText: 'client@domain.com',
+                label: 'Email',
+                hintText: 'you@example.com',
                 controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
                 isDark: true,
                 prefixIcon: const Icon(
-                  Icons.shield_outlined,
+                  Icons.mail_outline,
                   size: 20,
                   color: AppColors.primaryGold,
                 ),
               ),
               const SizedBox(height: 18),
+
               // Password Field
               AppTextField(
-                label: 'Master Access Password',
+                label: 'Password',
                 hintText: '••••••••••••',
                 controller: _passwordController,
                 isPassword: true,
                 isDark: true,
                 prefixIcon: const Icon(
-                  Icons.key_outlined,
+                  Icons.lock_outline,
                   size: 20,
                   color: AppColors.primaryGold,
                 ),
               ),
               const SizedBox(height: 14),
+
               // Remember Me & Forgot Password
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -255,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Remember Token',
+                        'Remember Me',
                         style: AppTypography.bodySM(color: AppColors.textMuted),
                       ),
                     ],
@@ -265,7 +237,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Text(
-                        'Forgot Access Code?',
+                        'Forgot Password?',
                         style: AppTypography.labelMD(
                           color: AppColors.primaryGold,
                         ),
@@ -275,12 +247,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               const SizedBox(height: 32),
+
               // Actions: Login & Biometric Auth
               Row(
                 children: [
                   Expanded(
                     child: AppButton.primary(
-                      text: _isSubmitting ? 'AUTHENTICATING...' : 'Login',
+                      text: _isSubmitting ? 'LOGGING IN...' : 'LOG IN',
                       onPressed: _isSubmitting ? null : _handleLogin,
                     ),
                   ),
@@ -288,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: _simulateBiometricAuth,
+                      onTap: _showBiometricComingSoon,
                       borderRadius: BorderRadius.circular(30),
                       child: Container(
                         width: 54,
@@ -313,6 +286,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
               const SizedBox(height: 40),
+
               // Register Link
               Center(
                 child: InkWell(
@@ -321,11 +295,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     padding: const EdgeInsets.all(8),
                     child: RichText(
                       text: TextSpan(
-                        text: "Don't have an Atelier Identity? ",
+                        text: "Don't have an account? ",
                         style: AppTypography.bodyMD(color: AppColors.textMuted),
                         children: [
                           TextSpan(
-                            text: 'Request Membership',
+                            text: 'Sign Up',
                             style: AppTypography.labelLG(
                               color: AppColors.primaryGold,
                             ),

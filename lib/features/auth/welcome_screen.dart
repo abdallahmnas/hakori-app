@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/services/storage_service.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/badge_chip.dart';
 
@@ -20,31 +22,31 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
   final List<OnboardingSlideData> _slides = [
     OnboardingSlideData(
-      badge: 'PARIS VENDÔME ATELIER',
-      title: 'HAUTE JOAILLERIE\nMEETS STREET LUXURY',
+      badge: '18K & 24K SOLID GOLD',
+      title: 'SOLID GOLD &\nVVS DIAMONDS',
       description:
-          'Bespoke 18K solid gold & VVS natural diamond dental artistry handcrafted with Place Vendôme prestige.',
+          'Bespoke handcrafted gold necklaces, rings, and fine jewelry studded with certified brilliant-cut diamonds.',
       tags: ['18K & 24K Certified Gold', 'VVS1 Natural Diamonds'],
       bgImage:
           'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1200&auto=format&fit=crop',
-      illustrationType: IllustrationType.diamondGrillz,
+      illustrationType: IllustrationType.goldJewelry,
     ),
     OnboardingSlideData(
-      badge: 'SUB-MILLIMETER ACCURACY',
-      title: '3D INTRAORAL SCAN\n& AR LIVE FITTING',
+      badge: '925 STERLING SILVER',
+      title: 'STERLING SILVER\n& SOLID PLATINUM',
       description:
-          'Experience live augmented reality smile simulations and 0.05mm dental margin accuracy for a flawless fit.',
-      tags: ['0.05mm Margin Fit', 'Real-Time AR Camera'],
+          'Artisanal 925 sterling silver and solid platinum chains, rings, and fine jewelry finished with brilliant luster.',
+      tags: ['925 Sterling Silver', 'Pure Solid Platinum'],
       bgImage:
-          'https://images.unsplash.com/photo-1600003014755-ba31aa59c4b6?q=80&w=1200&auto=format&fit=crop',
-      illustrationType: IllustrationType.arScanner,
+          'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?q=80&w=1200&auto=format&fit=crop',
+      illustrationType: IllustrationType.silverJewelry,
     ),
     OnboardingSlideData(
-      badge: '256-BIT VAULT ESCROW',
-      title: 'ARMORED ESCROW\n& VIP CONCIERGE',
+      badge: 'CERTIFIED AUTHENTICITY',
+      title: 'AUTHENTICATED JEWELRY\n& PRIVATE CONCIERGE',
       description:
-          'Global insured transit with armored courier delivery and private 1-on-1 consultations with our Master Jewelers.',
-      tags: ['Armored Courier Escrow', '1-on-1 Master Jeweler'],
+          'Every piece is hallmarked, securely insured in transit, and accompanied by authentic gemological certification.',
+      tags: ['Insured Global Delivery', 'Gemological Certificate'],
       bgImage:
           'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?q=80&w=1200&auto=format&fit=crop',
       illustrationType: IllustrationType.vaultSecurity,
@@ -57,6 +59,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     super.dispose();
   }
 
+  void _dismissOnboarding() {
+    try {
+      Provider.of<StorageService>(context, listen: false).setOnboardingCompleted(true);
+    } catch (_) {}
+  }
+
   void _nextPage() {
     if (_currentPage < _slides.length - 1) {
       _pageController.nextPage(
@@ -64,6 +72,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         curve: Curves.easeInOutCubic,
       );
     } else {
+      _dismissOnboarding();
       context.push('/signup');
     }
   }
@@ -149,11 +158,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       if (_currentPage < _slides.length - 1)
                         TextButton(
                           onPressed: () {
-                            _pageController.animateToPage(
-                              _slides.length - 1,
-                              duration: const Duration(milliseconds: 350),
-                              curve: Curves.easeInOut,
-                            );
+                            _dismissOnboarding();
+                            context.push('/login');
                           },
                           child: Text(
                             'SKIP',
@@ -277,9 +283,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ),
                         const SizedBox(height: 8),
                         TextButton(
-                          onPressed: () => context.push('/login'),
+                          onPressed: () {
+                            _dismissOnboarding();
+                            context.push('/login');
+                          },
                           child: Text(
-                            'VIP VAULT ACCESS / LOG IN',
+                            'ALREADY HAVE AN ACCOUNT? LOG IN',
                             style: AppTypography.labelSM(color: AppColors.primaryGold).copyWith(
                               letterSpacing: 1.2,
                             ),
@@ -287,9 +296,12 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         ),
                       ] else ...[
                         AppButton.primary(
-                          text: 'ENTER THE ATELIER',
+                          text: 'CREATE AN ACCOUNT',
                           height: 50,
-                          onPressed: () => context.push('/signup'),
+                          onPressed: () {
+                            _dismissOnboarding();
+                            context.push('/signup');
+                          },
                           suffixIcon: const Icon(Icons.arrow_forward, size: 18, color: AppColors.textOnGold),
                         ),
                         const SizedBox(height: 10),
@@ -299,15 +311,21 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                               child: AppButton.dark(
                                 text: 'LOG IN',
                                 height: 46,
-                                onPressed: () => context.push('/login'),
+                                onPressed: () {
+                                  _dismissOnboarding();
+                                  context.push('/login');
+                                },
                               ),
                             ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: AppButton.ghost(
-                                text: 'EXPLORE GUEST',
+                                text: 'EXPLORE AS GUEST',
                                 height: 46,
-                                onPressed: () => context.go('/home'),
+                                onPressed: () {
+                                  _dismissOnboarding();
+                                  context.go('/home');
+                                },
                               ),
                             ),
                           ],
@@ -327,10 +345,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   // Illustration Widget Builder
   Widget _buildIllustration(IllustrationType type) {
     switch (type) {
-      case IllustrationType.diamondGrillz:
-        return const _GrillzIllustration();
-      case IllustrationType.arScanner:
-        return const _ScannerIllustration();
+      case IllustrationType.goldJewelry:
+        return const _GoldJewelryIllustration();
+      case IllustrationType.silverJewelry:
+        return const _SilverJewelryIllustration();
       case IllustrationType.vaultSecurity:
         return const _VaultIllustration();
     }
@@ -338,8 +356,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 }
 
 enum IllustrationType {
-  diamondGrillz,
-  arScanner,
+  goldJewelry,
+  silverJewelry,
   vaultSecurity,
 }
 
@@ -361,9 +379,9 @@ class OnboardingSlideData {
   });
 }
 
-// Custom Luxury Illustration: 18K Diamond Grillz & Haute Artistry
-class _GrillzIllustration extends StatelessWidget {
-  const _GrillzIllustration();
+// Custom Luxury Illustration: 18K Solid Gold & VVS Certified Diamonds
+class _GoldJewelryIllustration extends StatelessWidget {
+  const _GoldJewelryIllustration();
 
   @override
   Widget build(BuildContext context) {
@@ -373,11 +391,11 @@ class _GrillzIllustration extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: AppColors.darkCard,
-        border: Border.all(color: AppColors.primaryGold.withAlpha(160), width: 1.5),
+        border: Border.all(color: AppColors.primaryGold.withAlpha(180), width: 1.5),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x33D4AF37),
-            blurRadius: 32,
+            color: Color(0x44D4AF37),
+            blurRadius: 36,
             spreadRadius: 4,
           ),
         ],
@@ -385,7 +403,7 @@ class _GrillzIllustration extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Radial Concentric Rings
+          // Radial Concentric Gold Rings
           Container(
             width: 138,
             height: 138,
@@ -402,44 +420,29 @@ class _GrillzIllustration extends StatelessWidget {
               border: Border.all(color: const Color(0x22D4AF37), width: 1),
             ),
           ),
-          // Dental Arch & Gold Diamonds Center Piece
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  6,
-                  (i) => Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 2.5),
-                    width: 15,
-                    height: 28,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: i.isEven
-                            ? [const Color(0xFFFFF3CD), AppColors.primaryGold]
-                            : [const Color(0xFFFFFFFF), const Color(0xFFD4AF37)],
-                      ),
-                      borderRadius: BorderRadius.circular(4),
-                      boxShadow: const [
-                        BoxShadow(color: Color(0x44D4AF37), blurRadius: 6),
-                      ],
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.auto_awesome,
-                        size: 9,
-                        color: i.isEven ? AppColors.darkBase : const Color(0xFFD4AF37),
-                      ),
-                    ),
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const RadialGradient(
+                    colors: [Color(0x33D4AF37), Colors.transparent],
+                  ),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.diamond,
+                    size: 38,
+                    color: AppColors.primaryGold,
                   ),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: const Color(0x2BD4AF37),
                   borderRadius: BorderRadius.circular(10),
@@ -452,7 +455,12 @@ class _GrillzIllustration extends StatelessWidget {
                     SizedBox(width: 4),
                     Text(
                       '18K SOLID GOLD',
-                      style: TextStyle(color: AppColors.primaryGold, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+                      style: TextStyle(
+                        color: AppColors.primaryGold,
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
                     ),
                   ],
                 ),
@@ -465,9 +473,9 @@ class _GrillzIllustration extends StatelessWidget {
   }
 }
 
-// Custom Luxury Illustration: 3D Intraoral Scanner & Holographic AR
-class _ScannerIllustration extends StatelessWidget {
-  const _ScannerIllustration();
+// Custom Luxury Illustration: 925 Sterling Silver & Solid Platinum
+class _SilverJewelryIllustration extends StatelessWidget {
+  const _SilverJewelryIllustration();
 
   @override
   Widget build(BuildContext context) {
@@ -477,11 +485,11 @@ class _ScannerIllustration extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: AppColors.darkCard,
-        border: Border.all(color: AppColors.primaryGold.withAlpha(160), width: 1.5),
+        border: Border.all(color: const Color(0xFFCBD5E1), width: 1.5),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x3310B981),
-            blurRadius: 32,
+            color: Color(0x3394A3B8),
+            blurRadius: 36,
             spreadRadius: 4,
           ),
         ],
@@ -489,45 +497,69 @@ class _ScannerIllustration extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // 3D Matrix Grid Circle
+          // Radial Concentric Silver Rings
           Container(
             width: 138,
             height: 138,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: const Color(0x3310B981), width: 1),
+              border: Border.all(color: const Color(0x33CBD5E1), width: 1),
             ),
           ),
-          // AR Targeting Reticle
-          const Icon(Icons.view_in_ar, size: 52, color: AppColors.primaryGold),
-          Positioned(
-            top: 36,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: const Color(0x2B10B981),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0x6610B981), width: 0.8),
-              ),
-              child: const Text(
-                '0.05mm TOLERANCE',
-                style: TextStyle(color: AppColors.emeraldGreen, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 0.8),
-              ),
+          Container(
+            width: 108,
+            height: 108,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0x22CBD5E1), width: 1),
             ),
           ),
-          Positioned(
-            bottom: 30,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.center_focus_strong, size: 14, color: AppColors.primaryGold),
-                SizedBox(width: 4),
-                Text(
-                  'AR LIVE SMILE FIT',
-                  style: TextStyle(color: AppColors.textOnDark, fontSize: 8, fontWeight: FontWeight.w600, letterSpacing: 1.0),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 58,
+                height: 58,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [Color(0x33E2E8F0), Colors.transparent],
+                  ),
                 ),
-              ],
-            ),
+                child: const Center(
+                  child: Icon(
+                    Icons.military_tech_outlined,
+                    size: 38,
+                    color: Color(0xFFE2E8F0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: const Color(0x20E2E8F0),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0x66E2E8F0), width: 0.8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.auto_awesome, size: 10, color: Color(0xFFE2E8F0)),
+                    SizedBox(width: 4),
+                    Text(
+                      '925 SILVER',
+                      style: TextStyle(
+                        color: Color(0xFFE2E8F0),
+                        fontSize: 8,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -582,15 +614,15 @@ class _VaultIllustration extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: const Color(0x24D4AF37),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppColors.outlineGold, width: 0.8),
                 ),
                 child: const Text(
-                  'ARMORED TRANSIT ESCROW',
-                  style: TextStyle(color: AppColors.primaryGold, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 0.8),
+                  'CERTIFIED VAULT',
+                  style: TextStyle(color: AppColors.primaryGold, fontSize: 8, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                 ),
               ),
             ],

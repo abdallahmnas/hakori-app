@@ -17,14 +17,7 @@ class ProductProvider extends ChangeNotifier {
   ProductStateStatus _status = ProductStateStatus.initial;
   List<Product> _products = [];
   List<Category> _categories = [];
-  List<String> _categoryFilters = [
-    'ALL',
-    'DIAMOND PAVÉ',
-    'SOLID GOLD',
-    'OPEN FACE',
-    'FANGS & CAPS',
-    'OPAL & GEMS',
-  ];
+  List<String> _categoryFilters = ['ALL'];
   String _selectedCategory = 'ALL';
   String _searchQuery = '';
   String? _errorMessage;
@@ -45,12 +38,9 @@ class ProductProvider extends ChangeNotifier {
     var list = _products;
     if (_selectedCategory != 'ALL') {
       list = list.where((p) {
-        if (_selectedCategory == 'DIAMOND PAVÉ') return p.category.toLowerCase().contains('diamond');
-        if (_selectedCategory == 'SOLID GOLD') return p.category.toLowerCase().contains('solid') || p.category.toLowerCase().contains('gold');
-        if (_selectedCategory == 'OPEN FACE') return p.category.toLowerCase().contains('open');
-        if (_selectedCategory == 'FANGS & CAPS') return p.category.toLowerCase().contains('fang') || p.category.toLowerCase().contains('cap');
-        if (_selectedCategory == 'OPAL & GEMS') return p.category.toLowerCase().contains('opal') || p.category.toLowerCase().contains('gem') || p.category.toLowerCase().contains('emerald');
-        return p.category.toLowerCase().contains(_selectedCategory.toLowerCase());
+        final catLower = p.category.toLowerCase();
+        final selLower = _selectedCategory.toLowerCase();
+        return catLower == selLower || catLower.contains(selLower);
       }).toList();
     }
 
@@ -80,10 +70,17 @@ class ProductProvider extends ChangeNotifier {
 
       _products = fetchedProducts;
       _categories = fetchedCategories;
-      if (fetchedPills.isNotEmpty) {
-        final pills = ['ALL', ...fetchedPills.where((c) => c != 'ALL')];
-        _categoryFilters = pills;
+      final Set<String> pillsSet = {'ALL'};
+      for (final p in fetchedPills) {
+        if (p.trim().isNotEmpty && p.toUpperCase() != 'ALL') pillsSet.add(p.trim());
       }
+      for (final c in fetchedCategories) {
+        if (c.name.trim().isNotEmpty && c.name.toUpperCase() != 'ALL') pillsSet.add(c.name.trim());
+      }
+      for (final prod in fetchedProducts) {
+        if (prod.category.trim().isNotEmpty && prod.category.toUpperCase() != 'ALL') pillsSet.add(prod.category.trim());
+      }
+      _categoryFilters = pillsSet.toList();
 
       _status = ProductStateStatus.loaded;
       _errorMessage = null;

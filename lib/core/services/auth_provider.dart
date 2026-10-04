@@ -30,6 +30,8 @@ class AuthProvider extends ChangeNotifier {
 
   // Pending signup details for step 3
   String? _pendingFullName;
+  String? _pendingFirstName;
+  String? _pendingLastName;
   String? _pendingPhone;
   String? _pendingPassword;
 
@@ -40,14 +42,26 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _status == AuthStatus.loading;
   User? get currentUser => _currentUser;
   String? get errorMessage => _errorMessage;
-  String? get signupSessionToken => _signupSessionToken;
-  String? get signupVerificationToken => _signupVerificationToken;
+  String? get signupSessionToken => _signupSessionToken ?? _storageService.getSignupSessionToken();
+  String? get signupVerificationToken => _signupVerificationToken ?? _storageService.getSignupVerificationToken();
   String? get resetSessionToken => _resetSessionToken;
   String? get resetToken => _resetToken;
-  String? get lastEmail => _lastEmail;
+  String? get lastEmail => _lastEmail ?? _storageService.getSignupEmail();
   String? get pendingFullName => _pendingFullName;
+  String? get pendingFirstName => _pendingFirstName;
+  String? get pendingLastName => _pendingLastName;
   String? get pendingPhone => _pendingPhone;
   String? get pendingPassword => _pendingPassword;
+
+  void setPendingStep1({
+    required String email,
+    required String phone,
+    required String password,
+  }) {
+    _lastEmail = email.trim();
+    _pendingPhone = phone.trim();
+    _pendingPassword = password;
+  }
 
   void setPendingRegistration({
     required String fullName,
@@ -165,7 +179,18 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       final data = await _authService.signupInit(email);
-      _signupSessionToken = data['sessionToken']?.toString();
+      final token = data['token']?.toString() ??
+          data['sessionToken']?.toString() ??
+          data['data']?['token']?.toString() ??
+          data['data']?['sessionToken']?.toString();
+
+      _signupSessionToken = token;
+      if (token != null && token.isNotEmpty) {
+        await _storageService.saveSignupSession(
+          email: _lastEmail!,
+          sessionToken: token,
+        );
+      }
       _status = AuthStatus.unauthenticated;
       _errorMessage = null;
       notifyListeners();
@@ -185,7 +210,14 @@ class AuthProvider extends ChangeNotifier {
 
   /// Signup Step 2: Verify OTP
   Future<bool> verifySignupOtp(String otp) async {
-    if (_lastEmail == null || _signupSessionToken == null) {
+    final email = _lastEmail ?? _storageService.getSignupEmail();
+    final sessionToken =
+        _signupSessionToken ?? _storageService.getSignupSessionToken();
+
+    if (email == null ||
+        sessionToken == null ||
+        email.isEmpty ||
+        sessionToken.isEmpty) {
       _errorMessage = 'Session expired. Please restart registration.';
       _status = AuthStatus.error;
       notifyListeners();
@@ -198,11 +230,19 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       final data = await _authService.signupVerify(
-        email: _lastEmail!,
-        sessionToken: _signupSessionToken!,
+        email: email,
+        sessionToken: sessionToken,
         otp: otp,
       );
-      _signupVerificationToken = data['verificationToken']?.toString();
+      final verifiedToken = data['token']?.toString() ??
+          data['verificationToken']?.toString() ??
+          data['completionToken']?.toString() ??
+          data['data']?['token']?.toString();
+
+      _signupVerificationToken = verifiedToken;
+      if (verifiedToken != null && verifiedToken.isNotEmpty) {
+        await _storageService.saveSignupVerificationToken(verifiedToken);
+      }
       _status = AuthStatus.unauthenticated;
       _errorMessage = null;
       notifyListeners();
@@ -222,18 +262,40 @@ class AuthProvider extends ChangeNotifier {
 
   /// Signup Step 3: Complete Profile & Enter App
   Future<bool> completeSignup({
-    required String password,
-    required String fullName,
+    String? firstName,
+    String? lastName,
+    String? fullName,
+    String? password,
     String? phone,
+    String? city,
+    String? country,
+    String? address,
     String? location,
     String tier = 'VIP Private Client',
   }) async {
-    if (_lastEmail == null || _signupVerificationToken == null) {
+    final email = _lastEmail ?? _storageService.getSignupEmail();
+    final verificationToken =
+        _signupVerificationToken ?? _storageService.getSignupVerificationToken();
+
+    if (email == null ||
+        verificationToken == null ||
+        email.isEmpty ||
+        verificationToken.isEmpty) {
       _errorMessage = 'Verification token missing. Please start again.';
       _status = AuthStatus.error;
       notifyListeners();
       return false;
     }
+
+    final pass = password ?? _pendingPassword ?? 'Hakori@2026';
+    final pPhone = phone ?? _pendingPhone;
+    final fName = firstName ?? _pendingFirstName;
+    final lName = lastName ?? _pendingLastName;
+    final fFullName = fullName ??
+        _pendingFullName ??
+        ((fName != null || lName != null)
+            ? '$fName $lName'.trim()
+            : 'Patron');
 
     _status = AuthStatus.loading;
     _errorMessage = null;
@@ -241,11 +303,16 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       final data = await _authService.signupComplete(
-        verificationToken: _signupVerificationToken!,
-        email: _lastEmail!,
-        password: password,
-        fullName: fullName,
-        phone: phone,
+        verificationToken: verificationToken,
+        email: email,
+        password: pass,
+        firstName: fName,
+        lastName: lName,
+        fullName: fFullName,
+        phone: pPhone,
+        city: city,
+        country: country,
+        address: address,
         location: location,
         tier: tier,
       );
@@ -256,6 +323,9 @@ class AuthProvider extends ChangeNotifier {
 
       await _storageService.saveToken(token);
       await _storageService.saveUser(user);
+      await _storageService.clearSignupFlow();
+      _signupSessionToken = null;
+      _signupVerificationToken = null;
 
       _currentUser = user;
       _status = AuthStatus.authenticated;
@@ -431,6 +501,9 @@ class AuthProvider extends ChangeNotifier {
       await _authService.logout();
     } catch (_) {}
     await _storageService.clearAuthSession();
+    await _storageService.clearSignupFlow();
+    _signupSessionToken = null;
+    _signupVerificationToken = null;
     _currentUser = null;
     _status = AuthStatus.unauthenticated;
     _errorMessage = null;

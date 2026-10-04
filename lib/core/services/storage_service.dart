@@ -9,6 +9,7 @@ class StorageService {
   static const String _keyUser = 'auth_user';
   static const String _keyCart = 'saved_cart';
   static const String _keySavedEmail = 'saved_email';
+  static const String _keyOnboardingCompleted = 'onboarding_completed';
 
   static StorageService? _instance;
   final SharedPreferences _prefs;
@@ -90,6 +91,40 @@ class StorageService {
 
   Future<bool> saveSavedEmail(String email) {
     return _prefs.setString(_keySavedEmail, email);
+  }
+
+  // --- Onboarding Status ---
+  bool isOnboardingCompleted() {
+    return _prefs.getBool(_keyOnboardingCompleted) ?? false;
+  }
+
+  Future<bool> setOnboardingCompleted([bool completed = true]) {
+    return _prefs.setBool(_keyOnboardingCompleted, completed);
+  }
+
+  // --- Signup Flow Persistence ---
+  static const String _keySignupEmail = 'signup_flow_email';
+  static const String _keySignupSessionToken = 'signup_session_token';
+  static const String _keySignupVerificationToken = 'signup_verification_token';
+
+  Future<void> saveSignupSession({required String email, required String sessionToken}) async {
+    await _prefs.setString(_keySignupEmail, email);
+    await _prefs.setString(_keySignupSessionToken, sessionToken);
+  }
+
+  String? getSignupEmail() => _prefs.getString(_keySignupEmail);
+  String? getSignupSessionToken() => _prefs.getString(_keySignupSessionToken);
+
+  Future<void> saveSignupVerificationToken(String token) async {
+    await _prefs.setString(_keySignupVerificationToken, token);
+  }
+
+  String? getSignupVerificationToken() => _prefs.getString(_keySignupVerificationToken);
+
+  Future<void> clearSignupFlow() async {
+    await _prefs.remove(_keySignupEmail);
+    await _prefs.remove(_keySignupSessionToken);
+    await _prefs.remove(_keySignupVerificationToken);
   }
 
   // Clear Entire Session

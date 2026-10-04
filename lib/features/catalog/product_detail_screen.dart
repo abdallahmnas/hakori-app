@@ -188,7 +188,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 const Icon(Icons.view_in_ar, size: 14, color: AppColors.primaryGold),
                                 const SizedBox(width: 6),
                                 Text(
-                                  '3D LIVE TRY-ON',
+                                  'LIVE TRY-ON',
                                   style: AppTypography.labelSM(color: AppColors.primaryGold),
                                 ),
                               ],
@@ -324,7 +324,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Free 3D Dental Impression Kit Included',
+                                    'Free Luxury Sizing Kit Included',
                                     style: AppTypography.labelMD(color: AppColors.onGoldContainer),
                                   ),
                                   const SizedBox(height: 2),

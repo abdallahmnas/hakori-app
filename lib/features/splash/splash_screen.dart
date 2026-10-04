@@ -7,6 +7,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/constants/app_typography.dart';
 import '../../core/services/auth_provider.dart';
 import '../../core/services/product_provider.dart';
+import '../../core/services/storage_service.dart';
 
 /// Animated Luxury Splash Screen with Hakori Al Madinah Logo and Gold Shimmer
 class SplashScreen extends StatefulWidget {
@@ -70,7 +71,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       if (isAuthenticated) {
         context.go('/home');
       } else {
-        context.go('/welcome');
+        final storage = Provider.of<StorageService>(context, listen: false);
+        if (storage.isOnboardingCompleted()) {
+          context.go('/login');
+        } else {
+          context.go('/welcome');
+        }
       }
     }
   }
@@ -148,18 +154,20 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   Text(
                     'HAKORI AL MADINAH',
                     textAlign: TextAlign.center,
-                    style: AppTypography.headlineXL(color: AppColors.textOnDark).copyWith(
-                      letterSpacing: 4.0,
+                    style: AppTypography.headlineLG(color: AppColors.textOnDark).copyWith(
+                      fontSize: 20,
+                      letterSpacing: 3.5,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   // Subtitle
                   Text(
                     'HAUTE JOAILLERIE & STREET LUXURY',
                     textAlign: TextAlign.center,
                     style: AppTypography.labelSM(color: AppColors.primaryGold).copyWith(
-                      letterSpacing: 2.5,
+                      fontSize: 9,
+                      letterSpacing: 2.0,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -167,7 +175,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                   Text(
                     'Place Vendôme • Bespoke Dental Artistry',
                     textAlign: TextAlign.center,
-                    style: AppTypography.bodySM(color: AppColors.textMuted),
+                    style: AppTypography.bodyXS(color: AppColors.textMuted).copyWith(
+                      fontSize: 11,
+                    ),
                   ),
                   const SizedBox(height: 48),
                   // Shimmer progress line
@@ -200,7 +210,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     const SizedBox(width: 6),
                     Text(
                       '18K SOLID GOLD • CERTIFIED VVS DIAMONDS',
-                      style: AppTypography.labelSM(color: AppColors.textMuted).copyWith(fontSize: 9),
+                      style: AppTypography.labelSM(color: AppColors.textMuted).copyWith(fontSize: 8.5),
                     ),
                   ],
                 ),
