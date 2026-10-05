@@ -39,8 +39,23 @@ The **Hakori Almadina Backend API** is an enterprise RESTful service supporting 
   ```json
   {
     "success": true,
-    "data": { ... },
-    "message": "Operation completed successfully"
+    "message": "Operation completed successfully",
+    "data": { ... }
+  }
+  ```
+- **Pagination Standard**: **0-indexed pagination** (`currentPage` begins at `0` for the first page).
+  Standard paginated response envelope:
+  ```json
+  {
+    "success": true,
+    "message": "Items fetched",
+    "pagination": {
+      "currentPage": 0,
+      "totalPages": 3,
+      "totalItems": 30,
+      "itemsPerPage": 10
+    },
+    "data": [ ... ]
   }
   ```
 - **CORS**: Enabled for cross-origin requests from the client mobile application and web portals.
@@ -81,7 +96,7 @@ When an error occurs, the server responds with a corresponding HTTP status code 
 
 **Summary:** Step 1: Initiate Patron Signup
 
-Generates OTP and sends verification email. Returns transient encrypted session token without persisting to database.
+Generates OTP and sends verification email. Returns transient encrypted session token without persisting to database. (In development, default OTP is `123456`).
 
 - **Method:** `POST`
 - **Endpoint:** `/auth/signup/init`
@@ -106,13 +121,24 @@ Generates OTP and sends verification email. Returns transient encrypted session 
 
 **Status Code:** `200` — OTP dispatched and session token returned
 
+```json
+{
+  "success": true,
+  "message": "OTP sent successfully",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InBhdHJvbkBtYXlmYWlyLmNvLnVrIiwib3RwIjoiMTIzNDU2Iiwic3RlcCI6ImluaXQiLCJpYXQiOjE3OTExNjQzNTgsImV4cCI6MTc5MTE2NTI1OH0.cKKy7O1mCpBRilwXrziqc7HznHj6nTqEWDxQDdRUzpI",
+    "debugOtp": "123456"
+  }
+}
+```
+
 ---
 
 ### POST `/auth/signup/verify`
 
 **Summary:** Step 2: Verify Signup OTP
 
-Validates 6-character OTP with transient session token and returns verified completion token.
+Validates 6-character OTP with transient session token and returns verified completion token. The session token can be passed either in the `Authorization` header (`Bearer <session_token>`) OR in the request body as `token`. In development, default OTP is `123456`.
 
 - **Method:** `POST`
 - **Endpoint:** `/auth/signup/verify`
@@ -122,7 +148,7 @@ Validates 6-character OTP with transient session token and returns verified comp
 
 | Name | In | Type | Required | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `Authorization` | `header` | `string` | **Yes** | Bearer <session_token> |
+| `Authorization` | `header` | `string` | No | `Bearer <session_token>` (optional if token is passed in body) |
 
 #### Request Body
 
@@ -130,12 +156,14 @@ Validates 6-character OTP with transient session token and returns verified comp
 
 | Field | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| `otp` | `string` | **Yes** | Example: `123456` |
+| `otp` | `string` | **Yes** | Example: `123456` (6-digit code) |
+| `token` | `string` | No | Session token from `/signup/init` (optional if passed via Authorization header) |
 
 **Example Request Payload:**
 ```json
 {
-  "otp": "123456"
+  "otp": "123456",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
@@ -143,13 +171,23 @@ Validates 6-character OTP with transient session token and returns verified comp
 
 **Status Code:** `200` — OTP verified. Profile completion token granted.
 
+```json
+{
+  "success": true,
+  "message": "OTP verified successfully",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
 ---
 
 ### POST `/auth/signup/complete`
 
 **Summary:** Step 3: Complete Profile & Register in Database
 
-Accepts completion token and profile details. Atomically persists new user to database and sends welcome email.
+Accepts completion token and profile details. Atomically persists new user to database and sends welcome email. The token can be passed in the `Authorization` header (`Bearer <completion_token>`) OR in the request body as `token`.
 
 - **Method:** `POST`
 - **Endpoint:** `/auth/signup/complete`
@@ -159,7 +197,7 @@ Accepts completion token and profile details. Atomically persists new user to da
 
 | Name | In | Type | Required | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `Authorization` | `header` | `string` | **Yes** | Bearer <completion_token> |
+| `Authorization` | `header` | `string` | No | `Bearer <completion_token>` (optional if token is passed in body) |
 
 #### Request Body
 
@@ -167,6 +205,7 @@ Accepts completion token and profile details. Atomically persists new user to da
 
 | Field | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
+| `token` | `string` | No | Completion token from `/signup/verify` (optional if passed via Authorization header) |
 | `firstName` | `string` | **Yes** | Example: `Julian` |
 | `lastName` | `string` | **Yes** | Example: `Vance` |
 | `password` | `string (password)` | **Yes** | Example: `SecurePassword123!` |
@@ -178,6 +217,7 @@ Accepts completion token and profile details. Atomically persists new user to da
 **Example Request Payload:**
 ```json
 {
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "firstName": "Julian",
   "lastName": "Vance",
   "password": "SecurePassword123!",
@@ -191,6 +231,26 @@ Accepts completion token and profile details. Atomically persists new user to da
 #### Responses
 
 **Status Code:** `201` — Patron created successfully with auth token
+
+```json
+{
+  "success": true,
+  "message": "Patron registered successfully",
+  "data": {
+    "user": {
+      "id": "u1a2b3c4-d5e6-7890-abcd-ef1234567890",
+      "email": "patron@mayfair.co.uk",
+      "fullName": "Julian Vance",
+      "role": "user",
+      "phone": "+44 20 7946 0992",
+      "location": "14 Mayfair Square, London, United Kingdom",
+      "tier": "Tier I Private Patron",
+      "standing": "ACTIVE"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
 
 ---
 
@@ -417,6 +477,8 @@ Updates patron dossier, delivery address, Cloudinary avatar, and mobile/web FCM 
 
 **Summary:** Public Catalog Listing
 
+Returns paginated products matching filters. Uses 0-based pagination (`currentPage` defaults to 0).
+
 - **Method:** `GET`
 - **Endpoint:** `/products`
 - **Authentication:** 🌐 **Public** (No auth token required)
@@ -425,21 +487,65 @@ Updates patron dossier, delivery address, Cloudinary avatar, and mobile/web FCM 
 
 | Name | In | Type | Required | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `category` | `query` | `string` | No | - |
-| `search` | `query` | `string` | No | - |
-| `inStock` | `query` | `boolean` | No | - |
-| `page` | `query` | `integer` | No | - |
-| `pageSize` | `query` | `integer` | No | - |
+| `currentPage` | `query` | `integer` | No | 0-based page index (default: `0`) |
+| `itemsPerPage` | `query` | `integer` | No | Number of items per page (default: `10`) |
+| `page` | `query` | `integer` | No | Alias for `currentPage` (0-based) |
+| `pageSize` | `query` | `integer` | No | Alias for `itemsPerPage` |
+| `category` | `query` | `string` | No | Filter by category slug or name (e.g. `necklace`) |
+| `search` | `query` | `string` | No | Search query across title, description, SKU |
+| `inStock` | `query` | `boolean` | No | Filter by in-stock availability |
 
 #### Responses
 
 **Status Code:** `200` — Filtered products with pagination
+
+```json
+{
+  "success": true,
+  "message": "Products fetched",
+  "pagination": {
+    "currentPage": 0,
+    "totalPages": 1,
+    "totalItems": 1,
+    "itemsPerPage": 10
+  },
+  "data": [
+    {
+      "id": "245eaddc-97d8-461b-95e9-6366056fc71d",
+      "name": "leshi",
+      "sku": "vvv",
+      "category": "necklace",
+      "price": 46,
+      "costPrice": 22,
+      "castingPrice": 46,
+      "stock": 67,
+      "inventory": 67,
+      "description": "cccc",
+      "imageUrl": "https://res.cloudinary.com/idnv3blu/image/upload/v1791032186/hakori_products/hi92xxahnmx9wtw4uago.jpg",
+      "image": "https://res.cloudinary.com/idnv3blu/image/upload/v1791032186/hakori_products/hi92xxahnmx9wtw4uago.jpg",
+      "images": [
+        "https://res.cloudinary.com/idnv3blu/image/upload/v1791032186/hakori_products/hi92xxahnmx9wtw4uago.jpg"
+      ],
+      "material": "18K Solid Yellow Gold",
+      "placement": "Fine Product",
+      "rating": 5,
+      "inStock": true,
+      "lowStock": false,
+      "status": "Active",
+      "createdAt": "2026-10-03T12:56:50.445Z",
+      "updatedAt": "2026-10-03T12:56:50.445Z"
+    }
+  ]
+}
+```
 
 ---
 
 ### GET `/products/categories`
 
 **Summary:** Public Product Categories
+
+Returns a unique list of category names present in the active catalog.
 
 - **Method:** `GET`
 - **Endpoint:** `/products/categories`
@@ -448,6 +554,16 @@ Updates patron dossier, delivery address, Cloudinary avatar, and mobile/web FCM 
 #### Responses
 
 **Status Code:** `200` — List of product categories
+
+```json
+{
+  "success": true,
+  "message": "Product categories fetched successfully",
+  "data": [
+    "necklace"
+  ]
+}
+```
 
 ---
 
@@ -463,11 +579,43 @@ Updates patron dossier, delivery address, Cloudinary avatar, and mobile/web FCM 
 
 | Name | In | Type | Required | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `id` | `path` | `string` | **Yes** | - |
+| `id` | `path` | `string` | **Yes** | Product UUID (e.g. `245eaddc-97d8-461b-95e9-6366056fc71d`) |
 
 #### Responses
 
 **Status Code:** `200` — Product record
+
+```json
+{
+  "success": true,
+  "message": "Product fetched successfully",
+  "data": {
+    "id": "245eaddc-97d8-461b-95e9-6366056fc71d",
+    "name": "leshi",
+    "sku": "vvv",
+    "category": "necklace",
+    "price": 46,
+    "costPrice": 22,
+    "castingPrice": 46,
+    "stock": 67,
+    "inventory": 67,
+    "description": "cccc",
+    "imageUrl": "https://res.cloudinary.com/idnv3blu/image/upload/v1791032186/hakori_products/hi92xxahnmx9wtw4uago.jpg",
+    "image": "https://res.cloudinary.com/idnv3blu/image/upload/v1791032186/hakori_products/hi92xxahnmx9wtw4uago.jpg",
+    "images": [
+      "https://res.cloudinary.com/idnv3blu/image/upload/v1791032186/hakori_products/hi92xxahnmx9wtw4uago.jpg"
+    ],
+    "material": "18K Solid Yellow Gold",
+    "placement": "Fine Product",
+    "rating": 5,
+    "inStock": true,
+    "lowStock": false,
+    "status": "Active",
+    "createdAt": "2026-10-03T12:56:50.445Z",
+    "updatedAt": "2026-10-03T12:56:50.445Z"
+  }
+}
+```
 
 ---
 
@@ -478,6 +626,8 @@ Updates patron dossier, delivery address, Cloudinary avatar, and mobile/web FCM 
 
 **Summary:** List Public Collections & Taxonomy
 
+Returns active collections with 0-based pagination (`currentPage` defaults to 0).
+
 - **Method:** `GET`
 - **Endpoint:** `/categories`
 - **Authentication:** 🌐 **Public** (No auth token required)
@@ -486,11 +636,47 @@ Updates patron dossier, delivery address, Cloudinary avatar, and mobile/web FCM 
 
 | Name | In | Type | Required | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `subCategoryType` | `query` | `enum: metal | gemological | anatomical | collection` | No | - |
+| `currentPage` | `query` | `integer` | No | 0-based page index (default: `0`) |
+| `itemsPerPage` | `query` | `integer` | No | Number of items per page (default: `10`) |
+| `subCategoryType` | `query` | `enum: metal \| gemological \| anatomical \| collection` | No | Filter by category type |
+| `search` | `query` | `string` | No | Search by name or description |
 
 #### Responses
 
-**Status Code:** `200` — Active collections
+**Status Code:** `200` — Active collections with pagination
+
+```json
+{
+  "success": true,
+  "message": "Categories fetched",
+  "pagination": {
+    "currentPage": 0,
+    "totalPages": 1,
+    "totalItems": 1,
+    "itemsPerPage": 10
+  },
+  "data": [
+    {
+      "id": "CAT-1791032155603",
+      "name": "necklace",
+      "tier": "Tier I Collection",
+      "nodeCount": 1,
+      "productsCount": 1,
+      "productCount": 1,
+      "avgCommission": 4500,
+      "slug": "neck",
+      "description": "lace",
+      "bannerImage": null,
+      "priority": 1,
+      "visibility": "ACTIVE",
+      "subCategoryType": "metal",
+      "zoneCode": null,
+      "createdAt": "2026-10-03T12:55:55.616Z",
+      "updatedAt": "2026-10-03T12:55:55.616Z"
+    }
+  ]
+}
+```
 
 ---
 
@@ -506,11 +692,36 @@ Updates patron dossier, delivery address, Cloudinary avatar, and mobile/web FCM 
 
 | Name | In | Type | Required | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| `id` | `path` | `string` | **Yes** | - |
+| `id` | `path` | `string` | **Yes** | Category UUID or Slug (e.g. `CAT-1791032155603` or `neck`) |
 
 #### Responses
 
 **Status Code:** `200` — Collection details
+
+```json
+{
+  "success": true,
+  "message": "Category fetched successfully",
+  "data": {
+    "id": "CAT-1791032155603",
+    "name": "necklace",
+    "tier": "Tier I Collection",
+    "nodeCount": 1,
+    "productsCount": 1,
+    "productCount": 1,
+    "avgCommission": 4500,
+    "slug": "neck",
+    "description": "lace",
+    "bannerImage": null,
+    "priority": 1,
+    "visibility": "ACTIVE",
+    "subCategoryType": "metal",
+    "zoneCode": null,
+    "createdAt": "2026-10-03T12:55:55.616Z",
+    "updatedAt": "2026-10-03T12:55:55.616Z"
+  }
+}
+```
 
 ---
 
@@ -533,11 +744,11 @@ Initializes bespoke order, generates Flutterwave payment checkout session URL, c
 
 | Field | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| `client` | `object` | No | - |
-| `specimen` | `object` | No | - |
+| `client` | `object` | No | Client information (`name`, `email`, `phone`) |
+| `specimen` | `object` | No | Bespoke design specimen details |
 | `total` | `number` | No | Example: `24500` |
 | `currency` | `string` | No | Example: `USD` |
-| `shippingAddress` | `string` | No | - |
+| `shippingAddress` | `string` | No | Delivery destination |
 
 **Example Request Payload:**
 ```json
@@ -556,7 +767,7 @@ Initializes bespoke order, generates Flutterwave payment checkout session URL, c
   },
   "total": 24500,
   "currency": "USD",
-  "shippingAddress": "string"
+  "shippingAddress": "14 Mayfair Square, London"
 }
 ```
 
@@ -564,19 +775,92 @@ Initializes bespoke order, generates Flutterwave payment checkout session URL, c
 
 **Status Code:** `201` — Commission created. Returns `paymentUrl` and `flwRef`.
 
+```json
+{
+  "success": true,
+  "message": "Order created successfully",
+  "data": {
+    "order": {
+      "id": "AUR-98214",
+      "orderStatus": "PROCESSING",
+      "paymentStatus": "PENDING",
+      "total": 24500,
+      "currency": "USD",
+      "pipelineStage": 1,
+      "paymentUrl": "https://checkout.flutterwave.com/v3/hosted/pay/flw_xyz",
+      "flwRef": "FLW-AUR-98214-12345"
+    },
+    "paymentUrl": "https://checkout.flutterwave.com/v3/hosted/pay/flw_xyz",
+    "flwRef": "FLW-AUR-98214-12345"
+  }
+}
+```
+
 ---
 
 ### GET `/orders/my-orders`
 
 **Summary:** Get Patron Order History
 
+Returns patron order commissions with 0-based pagination (`currentPage` defaults to 0).
+
 - **Method:** `GET`
 - **Endpoint:** `/orders/my-orders`
 - **Authentication:** 🔒 **Required** (`BearerAuth` JWT)
 
+#### Parameters
+
+| Name | In | Type | Required | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `currentPage` | `query` | `integer` | No | 0-based page index (default: `0`) |
+| `itemsPerPage` | `query` | `integer` | No | Number of items per page (default: `10`) |
+
 #### Responses
 
-**Status Code:** `200` — List of commissions for active patron
+**Status Code:** `200` — List of commissions for active patron with pagination
+
+```json
+{
+  "success": true,
+  "message": "Orders fetched",
+  "pagination": {
+    "currentPage": 0,
+    "totalPages": 1,
+    "totalItems": 1,
+    "itemsPerPage": 10
+  },
+  "data": [
+    {
+      "id": "AUR-98214",
+      "date": "2026-10-02T10:00:00.000Z",
+      "userId": "usr_12345",
+      "client": {
+        "name": "Lord Sterling",
+        "email": "sterling@mayfair.co.uk",
+        "phone": "+44 20 7946 0992",
+        "avatarInitials": "LS",
+        "tier": "Tier I VIP",
+        "address": "14 Mayfair Square, London"
+      },
+      "specimen": {
+        "title": "18K Gold Deep Cut (Top 8)",
+        "specDetails": "18K Solid Yellow • VVS1 Pavé Inlay",
+        "caratOrPurity": "18K Yellow Gold",
+        "subType": "Haute Series",
+        "qty": 1
+      },
+      "total": 24500,
+      "paymentStatus": "PAID",
+      "orderStatus": "PROCESSING",
+      "pipelineStage": 1,
+      "paymentUrl": "https://checkout.flutterwave.com/v3/hosted/pay/flw_xyz",
+      "flwRef": "FLW-AUR-98214-12345",
+      "trackingNumber": "HK-SEC-9920194-VAULT",
+      "starred": false
+    }
+  ]
+}
+```
 
 ---
 

@@ -41,6 +41,7 @@ class AuthService {
       ),
       data: {
         'otp': otp.trim(),
+        'token': sessionToken,
         'email': email.trim(),
         'sessionToken': sessionToken,
       },
@@ -92,6 +93,7 @@ class AuthService {
         },
       ),
       data: {
+        'token': verificationToken,
         'verificationToken': verificationToken,
         'email': email.trim(),
         'password': password,

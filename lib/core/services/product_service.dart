@@ -9,17 +9,19 @@ class ProductService {
 
   ProductService(this._client);
 
-  /// Get Public Catalog Listing from API
+  /// Get Public Catalog Listing from API (0-based pagination)
   Future<List<Product>> getProducts({
     String? category,
     String? search,
     bool? inStock,
-    int page = 1,
+    int page = 0,
     int pageSize = 20,
   }) async {
     try {
       final query = <String, dynamic>{
+        'currentPage': page,
         'page': page,
+        'itemsPerPage': pageSize,
         'pageSize': pageSize,
         if (category != null && category.isNotEmpty && category != 'ALL') 'category': category,
         if (search != null && search.isNotEmpty) 'search': search,
@@ -31,14 +33,21 @@ class ProductService {
         queryParameters: query,
       );
 
-      final data = response.data['data'];
+      final respData = response.data;
       List items = [];
-      if (data is List) {
-        items = data;
-      } else if (data is Map && data['products'] is List) {
-        items = data['products'] as List;
-      } else if (data is Map && data['items'] is List) {
-        items = data['items'] as List;
+      if (respData is List) {
+        items = respData;
+      } else if (respData is Map) {
+        final data = respData['data'];
+        if (data is List) {
+          items = data;
+        } else if (data is Map && data['products'] is List) {
+          items = data['products'] as List;
+        } else if (data is Map && data['items'] is List) {
+          items = data['items'] as List;
+        } else if (respData['products'] is List) {
+          items = respData['products'] as List;
+        }
       }
 
       if (items.isNotEmpty) {
@@ -56,7 +65,13 @@ class ProductService {
   Future<List<String>> getProductCategories() async {
     try {
       final response = await _client.get(ApiConstants.productCategories);
-      final data = response.data['data'];
+      final respData = response.data;
+      dynamic data;
+      if (respData is Map && respData['data'] != null) {
+        data = respData['data'];
+      } else if (respData is List) {
+        data = respData;
+      }
       if (data is List && data.isNotEmpty) {
         return data.map((e) => e.toString()).toList();
       }
@@ -67,21 +82,55 @@ class ProductService {
   /// Get Product Details by ID from API
   Future<Product> getProductById(String id) async {
     final response = await _client.get(ApiConstants.productDetail(id));
-    final data = response.data['data'] as Map<String, dynamic>? ?? {};
-    final prodMap = data['product'] as Map<String, dynamic>? ?? data;
+    final respData = response.data;
+    Map<String, dynamic> prodMap = {};
+    if (respData is Map) {
+      final data = respData['data'];
+      if (data is Map<String, dynamic>) {
+        prodMap = data['product'] as Map<String, dynamic>? ?? data;
+      } else {
+        prodMap = Map<String, dynamic>.from(respData);
+      }
+    }
     return Product.fromJson(prodMap);
   }
 
-  /// List Public Collections & Taxonomy from API
-  Future<List<Category>> getCategories() async {
+  /// List Public Collections & Taxonomy from API (0-based pagination)
+  Future<List<Category>> getCategories({
+    int page = 0,
+    int pageSize = 20,
+    String? subCategoryType,
+  }) async {
     try {
-      final response = await _client.get(ApiConstants.categories);
-      final data = response.data['data'];
+      final query = <String, dynamic>{
+        'currentPage': page,
+        'page': page,
+        'itemsPerPage': pageSize,
+        'pageSize': pageSize,
+        if (subCategoryType != null && subCategoryType.isNotEmpty)
+          'subCategoryType': subCategoryType,
+      };
+
+      final response = await _client.get(
+        ApiConstants.categories,
+        queryParameters: query,
+      );
+
+      final respData = response.data;
       List items = [];
-      if (data is List) {
-        items = data;
-      } else if (data is Map && data['categories'] is List) {
-        items = data['categories'] as List;
+      if (respData is List) {
+        items = respData;
+      } else if (respData is Map) {
+        final data = respData['data'];
+        if (data is List) {
+          items = data;
+        } else if (data is Map && data['categories'] is List) {
+          items = data['categories'] as List;
+        } else if (data is Map && data['items'] is List) {
+          items = data['items'] as List;
+        } else if (respData['categories'] is List) {
+          items = respData['categories'] as List;
+        }
       }
 
       if (items.isNotEmpty) {

@@ -152,11 +152,11 @@ class CommissionOrder {
       ];
     }
 
-    final statusStr = json['status']?.toString() ?? 'Processing';
+    final statusStr = json['orderStatus']?.toString() ?? json['status']?.toString() ?? 'PROCESSING';
 
     return CommissionOrder(
       id: json['id']?.toString() ?? '',
-      orderNumber: json['orderNumber']?.toString() ?? json['commissionNumber']?.toString() ?? '#HK-${DateTime.now().year}-0001',
+      orderNumber: json['orderNumber']?.toString() ?? json['commissionNumber']?.toString() ?? (json['id'] != null ? '#${json['id']}' : '#HK-${DateTime.now().year}-0001'),
       date: json['date']?.toString() ?? json['createdAt']?.toString() ?? 'Oct 02, 2026',
       status: statusStr,
       statusBadge: statusStr.toUpperCase(),

@@ -64,8 +64,8 @@ class ProductProvider extends ChangeNotifier {
     }
 
     try {
-      final fetchedProducts = await _productService.getProducts(pageSize: 50);
-      final fetchedCategories = await _productService.getCategories();
+      final fetchedProducts = await _productService.getProducts(page: 0, pageSize: 50);
+      final fetchedCategories = await _productService.getCategories(page: 0, pageSize: 50);
       final fetchedPills = await _productService.getProductCategories();
 
       _products = fetchedProducts;

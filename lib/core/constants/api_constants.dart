@@ -3,8 +3,12 @@ class ApiConstants {
   ApiConstants._();
 
   static const String baseUrl = 'https://hakori-service.onrender.com/api';
-  static const Duration connectTimeout = Duration(seconds: 25);
-  static const Duration receiveTimeout = Duration(seconds: 25);
+  static const Duration connectTimeout = Duration(seconds: 45);
+  static const Duration receiveTimeout = Duration(seconds: 45);
+
+  // Pagination standard: 0-indexed (page 0 is first page)
+  static const int defaultInitialPage = 0;
+  static const int defaultPageSize = 10;
 
   // Auth endpoints
   static const String signupInit = '/auth/signup/init';

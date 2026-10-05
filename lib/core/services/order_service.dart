@@ -39,16 +39,37 @@ class OrderService {
     return CommissionOrder.fromJson(merged);
   }
 
-  /// Get Patron Order History
-  Future<List<CommissionOrder>> getMyOrders() async {
+  /// Get Patron Order History (0-based pagination)
+  Future<List<CommissionOrder>> getMyOrders({
+    int page = 0,
+    int pageSize = 10,
+  }) async {
     try {
-      final response = await _client.get(ApiConstants.myOrders);
-      final data = response.data['data'];
+      final query = <String, dynamic>{
+        'currentPage': page,
+        'page': page,
+        'itemsPerPage': pageSize,
+        'pageSize': pageSize,
+      };
+      final response = await _client.get(
+        ApiConstants.myOrders,
+        queryParameters: query,
+      );
+      final respData = response.data;
       List items = [];
-      if (data is List) {
-        items = data;
-      } else if (data is Map && data['orders'] is List) {
-        items = data['orders'] as List;
+      if (respData is List) {
+        items = respData;
+      } else if (respData is Map) {
+        final data = respData['data'];
+        if (data is List) {
+          items = data;
+        } else if (data is Map && data['orders'] is List) {
+          items = data['orders'] as List;
+        } else if (data is Map && data['items'] is List) {
+          items = data['items'] as List;
+        } else if (respData['orders'] is List) {
+          items = respData['orders'] as List;
+        }
       }
 
       if (items.isNotEmpty) {

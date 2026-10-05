@@ -435,6 +435,104 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
+            // Curated Collections Showcase on Dashboard
+            if (productProvider.categories.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: SectionHeader(
+                          title: 'Curated Collections',
+                          subtitle: 'Place Vendôme disciplines & jewelry categories',
+                          actionText: 'ALL (${productProvider.categories.length})',
+                          onActionTap: () => context.push('/categories'),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 94,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          scrollDirection: Axis.horizontal,
+                          itemCount: productProvider.categories.length,
+                          separatorBuilder: (context, index) => const SizedBox(width: 10),
+                          itemBuilder: (context, index) {
+                            final cat = productProvider.categories[index];
+                            final isSelected = cat.name.toLowerCase() == selectedCategory.toLowerCase();
+                            return InkWell(
+                              onTap: () {
+                                if (isSelected) {
+                                  productProvider.setSelectedCategory('ALL');
+                                } else {
+                                  productProvider.setSelectedCategory(cat.name);
+                                }
+                              },
+                              borderRadius: BorderRadius.circular(14),
+                              child: Container(
+                                width: 140,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: isSelected ? AppColors.primaryGold : AppColors.outlineLight,
+                                    width: isSelected ? 1.5 : 1,
+                                  ),
+                                  boxShadow: const [AppColors.softCardShadow],
+                                  image: DecorationImage(
+                                    image: NetworkImage(
+                                      cat.imageUrl.isNotEmpty
+                                          ? cat.imageUrl
+                                          : 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1000&auto=format&fit=crop',
+                                    ),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(13),
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.black.withOpacity(0.15),
+                                        Colors.black.withOpacity(0.85),
+                                      ],
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.all(8),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        cat.name.toUpperCase(),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppTypography.labelSM(color: AppColors.textOnDark).copyWith(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      Text(
+                                        '${cat.pieceCount} PIECES',
+                                        style: AppTypography.bodyXS(color: AppColors.primaryGold).copyWith(fontSize: 8.5),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
             // Horizontal Category Filter Pills
             SliverToBoxAdapter(
               child: Padding(

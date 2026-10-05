@@ -73,17 +73,22 @@ class Product {
   factory Product.fromJson(Map<String, dynamic> json) {
     final rawImages = json['images'];
     List<String> parsedImages = [];
-    if (rawImages is List) {
+    if (rawImages is List && rawImages.isNotEmpty) {
       parsedImages = rawImages.map((e) => e.toString()).toList();
-    } else if (json['imageUrl'] != null) {
+    } else if (json['imageUrl'] != null && json['imageUrl'].toString().isNotEmpty) {
       parsedImages = [json['imageUrl'].toString()];
+    } else if (json['image'] != null && json['image'].toString().isNotEmpty) {
+      parsedImages = [json['image'].toString()];
     }
 
     final rawPrice = json['price'] ?? json['priceUsd'] ?? 0;
     final double parsedPrice = (rawPrice is num) ? rawPrice.toDouble() : double.tryParse(rawPrice.toString()) ?? 0.0;
 
-    final rawStock = json['stockQuantity'];
+    final rawStock = json['stock'] ?? json['inventory'] ?? json['stockQuantity'];
     final int parsedStock = (rawStock is num) ? rawStock.toInt() : (json['inStock'] == false ? 0 : 10);
+
+    final rawInStock = json['inStock'];
+    final bool parsedInStock = (rawInStock is bool) ? rawInStock : (parsedStock > 0);
 
     return Product(
       id: json['id']?.toString() ?? '',
@@ -94,14 +99,14 @@ class Product {
       currency: json['currency']?.toString() ?? 'USD',
       rating: (json['rating'] as num?)?.toDouble() ?? 4.95,
       reviewCount: (json['reviewCount'] as num?)?.toInt() ?? 48,
-      purity: json['purity']?.toString() ?? '18K Yellow Gold',
+      purity: json['purity']?.toString() ?? json['material']?.toString() ?? '18K Yellow Gold',
       diamondClarity: json['diamondClarity']?.toString() ?? 'VVS1 Natural',
       images: parsedImages,
       description: json['description']?.toString() ?? '',
-      inStock: json['inStock'] as bool? ?? (parsedStock > 0),
+      inStock: parsedInStock,
       stockQuantity: parsedStock,
       sku: json['sku']?.toString() ?? '',
-      archType: json['archType']?.toString() ?? 'Top 6 Arch',
+      archType: json['archType']?.toString() ?? json['placement']?.toString() ?? 'Top 6 Arch',
       metalOptions: (json['metalOptions'] as List?)?.map((e) => e.toString()).toList() ??
           const ['18K Yellow Gold', '18K White Gold', '18K Rose Gold', '950 Platinum'],
       stoneOptions: (json['stoneOptions'] as List?)?.map((e) => e.toString()).toList() ??
