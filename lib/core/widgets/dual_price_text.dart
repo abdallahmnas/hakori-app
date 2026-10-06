@@ -31,16 +31,16 @@ class DualPriceText extends StatelessWidget {
     String secondaryText = '';
     if (showSecondary) {
       if (currencyProvider.selectedCurrency.code == 'USD') {
-        final ngnAmount = (priceNgn ?? (priceUsd * 1550)).toStringAsFixed(0).replaceAllMapped(
+        final ngnAmount = (priceNgn ?? (priceUsd * 1550))
+            .toStringAsFixed(0)
+            .replaceAllMapped(
               RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
               (Match m) => '${m[1]},',
             );
         secondaryText = '₦$ngnAmount';
       } else {
-        final usdAmount = '\$${priceUsd.toStringAsFixed(0).replaceAllMapped(
-              RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-              (Match m) => '${m[1]},',
-            )}';
+        final usdAmount =
+            '\$${priceUsd.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}';
         secondaryText = '$usdAmount USD';
       }
     }

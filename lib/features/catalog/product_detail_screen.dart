@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
 import '../../core/models/product.dart';
-import '../../core/services/mock_data_service.dart';
 import '../../core/services/cart_provider.dart';
 import '../../core/services/wishlist_provider.dart';
 import '../../core/services/product_provider.dart';
@@ -13,8 +12,10 @@ import '../../core/widgets/app_button.dart';
 import '../../core/widgets/badge_chip.dart';
 import '../../core/widgets/dual_price_text.dart';
 
-/// Screen 10: product_detail_diamond_cut_grill
-/// Luxury Product Detail Screen with gallery carousel, bespoke selector matrix, and AR try-on trigger
+/// Screen 10: ProductDetailScreen
+/// Luxury Product Detail Screen reflecting exact API attributes:
+/// name, sku, category, price, costPrice, castingPrice, stock, inventory,
+/// description, images, material, placement, rating, inStock, lowStock, status
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
 
@@ -29,9 +30,9 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int _currentImageIndex = 0;
-  String _selectedMetal = '18K Yellow Gold';
-  String _selectedStone = 'VVS1 Natural Diamonds';
-  String _selectedArch = 'Top 6 Arch';
+  String? _selectedMetal;
+  String? _selectedStone;
+  String? _selectedArch;
   bool _includeImpressionKit = true;
 
   Product? _product;
@@ -50,6 +51,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       if (mounted) {
         setState(() {
           _product = existing;
+          _selectedMetal = existing.metalOptions.isNotEmpty ? existing.metalOptions.first : existing.material;
+          _selectedStone = existing.stoneOptions.isNotEmpty ? existing.stoneOptions.first : 'Bespoke Finishing';
+          _selectedArch = existing.placement;
           _isLoading = false;
         });
       }
@@ -62,18 +66,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       if (mounted) {
         setState(() {
           _product = fetched;
+          _selectedMetal = fetched.metalOptions.isNotEmpty ? fetched.metalOptions.first : fetched.material;
+          _selectedStone = fetched.stoneOptions.isNotEmpty ? fetched.stoneOptions.first : 'Bespoke Finishing';
+          _selectedArch = fetched.placement;
           _isLoading = false;
         });
       }
     } catch (_) {
       if (mounted) {
         setState(() {
-          _product = MockDataService.products.firstWhere(
-            (p) => p.id == widget.productId,
-            orElse: () => MockDataService.products[0],
-          );
           _isLoading = false;
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to load product details.'), backgroundColor: AppColors.error),
+        );
       }
     }
   }
@@ -147,27 +153,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         },
                       ),
                       // Carousel Indicator Dots
-                      Positioned(
-                        bottom: 16,
-                        left: 0,
-                        right: 0,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(images.length, (index) {
-                            final isActive = index == _currentImageIndex;
-                            return Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 3),
-                              width: isActive ? 20 : 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: isActive ? AppColors.primaryGold : Colors.white.withOpacity(0.6),
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                            );
-                          }),
+                      if (images.length > 1)
+                        Positioned(
+                          bottom: 16,
+                          left: 0,
+                          right: 0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(images.length, (index) {
+                              final isActive = index == _currentImageIndex;
+                              return Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 3),
+                                width: isActive ? 20 : 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  color: isActive ? AppColors.primaryGold : Colors.white.withValues(alpha: 0.6),
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
+                              );
+                            }),
+                          ),
                         ),
-                      ),
-                      // Floating 3D/AR Try On Chip
+                      // Live Try-on Tag
                       Positioned(
                         bottom: 14,
                         right: 16,
@@ -177,7 +184,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: AppColors.darkBase.withOpacity(0.85),
+                              color: AppColors.darkBase.withValues(alpha: 0.85),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(color: AppColors.primaryGold, width: 1),
                               boxShadow: const [AppColors.goldGlow],
@@ -208,13 +215,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Purity & Rating Row
+                      // Material Badge, Category & Rating Row
                       Row(
                         children: [
-                          AppBadgeChip.purity(label: product.purity),
-                          const SizedBox(width: 8),
+                          if (product.material.isNotEmpty) ...[
+                            AppBadgeChip.purity(label: product.material),
+                            const SizedBox(width: 8),
+                          ],
                           AppBadgeChip(
-                            label: product.diamondClarity,
+                            label: product.category.toUpperCase(),
                             variant: BadgeChipVariant.darkTag,
                           ),
                           const Spacer(),
@@ -244,74 +253,102 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       const Divider(),
                       const SizedBox(height: 18),
 
-                      // Precious Metal Selector
+                      // Product Specifications Grid
                       Text(
-                        '1. Select Precious Metal',
+                        'Piece Specifications',
                         style: AppTypography.labelLG(color: AppColors.textPrimary),
                       ),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: product.metalOptions.map((metal) {
-                          final isSelected = metal == _selectedMetal;
-                          return AppBadgeChip(
-                            label: metal,
-                            variant: BadgeChipVariant.outline,
-                            isSelected: isSelected,
-                            onTap: () => setState(() => _selectedMetal = metal),
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Gemstone & Clarity Selector
-                      Text(
-                        '2. Gemstone Setting & Clarity',
-                        style: AppTypography.labelLG(color: AppColors.textPrimary),
-                      ),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: product.stoneOptions.map((stone) {
-                          final isSelected = stone == _selectedStone;
-                          return AppBadgeChip(
-                            label: stone,
-                            variant: BadgeChipVariant.outline,
-                            isSelected: isSelected,
-                            onTap: () => setState(() => _selectedStone = stone),
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Arch Positioning
-                      Text(
-                        '3. Arch & Tooth Placement',
-                        style: AppTypography.labelLG(color: AppColors.textPrimary),
-                      ),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: ['Top 6 Arch', 'Bottom 6 Arch', 'Full 16 Master Arch', 'Canine Duo'].map((arch) {
-                          final isSelected = arch == _selectedArch;
-                          return AppBadgeChip(
-                            label: arch,
-                            variant: BadgeChipVariant.outline,
-                            isSelected: isSelected,
-                            onTap: () => setState(() => _selectedArch = arch),
-                          );
-                        }).toList(),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Complimentary 3D Impression Kit Box
+                      const SizedBox(height: 12),
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppColors.goldContainer.withOpacity(0.4),
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: AppColors.outlineLight),
+                        ),
+                        child: Column(
+                          children: [
+                            if (product.sku.isNotEmpty) ...[
+                              _buildSpecRow('SKU', product.sku),
+                              const Divider(height: 18),
+                            ],
+                            _buildSpecRow('Category', product.category),
+                            const Divider(height: 18),
+                            _buildSpecRow('Material / Purity', product.material),
+                            const Divider(height: 18),
+                            _buildSpecRow('Placement / Type', product.placement),
+                            const Divider(height: 18),
+                            _buildSpecRow(
+                              'Availability',
+                              product.inStock
+                                  ? (product.lowStock
+                                      ? 'Low Stock (${product.stock} available)'
+                                      : 'In Stock (${product.stock} available)')
+                                  : 'Out of Stock',
+                              valueColor: product.inStock
+                                  ? (product.lowStock ? AppColors.rubyRed : AppColors.success)
+                                  : AppColors.textMuted,
+                            ),
+                            if (product.status.isNotEmpty) ...[
+                              const Divider(height: 18),
+                              _buildSpecRow('Status', product.status),
+                            ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Precious Metal Selector (only if options provided by API)
+                      if (product.metalOptions.isNotEmpty) ...[
+                        Text(
+                          'Precious Metal Option',
+                          style: AppTypography.labelLG(color: AppColors.textPrimary),
+                        ),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: product.metalOptions.map((metal) {
+                            final isSelected = metal == _selectedMetal;
+                            return AppBadgeChip(
+                              label: metal,
+                              variant: BadgeChipVariant.outline,
+                              isSelected: isSelected,
+                              onTap: () => setState(() => _selectedMetal = metal),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+
+                      // Stone Options (only if options provided by API)
+                      if (product.stoneOptions.isNotEmpty) ...[
+                        Text(
+                          'Gemstone & Setting Options',
+                          style: AppTypography.labelLG(color: AppColors.textPrimary),
+                        ),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: product.stoneOptions.map((stone) {
+                            final isSelected = stone == _selectedStone;
+                            return AppBadgeChip(
+                              label: stone,
+                              variant: BadgeChipVariant.outline,
+                              isSelected: isSelected,
+                              onTap: () => setState(() => _selectedStone = stone),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+
+                      // Sizing Kit Option
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.goldContainer.withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: AppColors.outlineGold),
                         ),
@@ -337,7 +374,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ),
                             Switch(
                               value: _includeImpressionKit,
-                              activeColor: AppColors.primaryGold,
+                              activeThumbColor: AppColors.primaryGold,
                               onChanged: (val) => setState(() => _includeImpressionKit = val),
                             ),
                           ],
@@ -346,16 +383,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       const SizedBox(height: 24),
 
                       // Description
-                      Text(
-                        'Atelier Craftsmanship Notes',
-                        style: AppTypography.headlineMD(color: AppColors.textPrimary),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        product.description,
-                        style: AppTypography.bodyMD(color: AppColors.textSecondary).copyWith(height: 1.6),
-                      ),
-                      const SizedBox(height: 20),
+                      if (product.description.isNotEmpty) ...[
+                        Text(
+                          'Atelier Craftsmanship Notes',
+                          style: AppTypography.headlineMD(color: AppColors.textPrimary),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          product.description,
+                          style: AppTypography.bodyMD(color: AppColors.textSecondary).copyWith(height: 1.6),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
 
                       // Security Badges
                       Container(
@@ -419,26 +458,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     // Add to Cart Button
                     Expanded(
                       child: AppButton.primary(
-                        text: 'ADD TO CART',
-                        onPressed: () {
-                          cartProvider.addToCart(
-                            product,
-                            metal: _selectedMetal,
-                            stone: _selectedStone,
-                            arch: _selectedArch,
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Added ${product.name} to Cart'),
-                              action: SnackBarAction(
-                                label: 'VIEW CART',
-                                textColor: AppColors.primaryGold,
-                                onPressed: () => context.push('/cart'),
-                              ),
-                              backgroundColor: AppColors.darkBase,
-                            ),
-                          );
-                        },
+                        text: product.inStock ? 'ADD TO CART' : 'OUT OF STOCK',
+                        onPressed: product.inStock
+                            ? () {
+                                cartProvider.addToCart(
+                                  product,
+                                  metal: _selectedMetal ?? product.material,
+                                  stone: _selectedStone ?? 'Standard Setting',
+                                  arch: _selectedArch ?? product.placement,
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Added ${product.name} to Cart'),
+                                    action: SnackBarAction(
+                                      label: 'VIEW CART',
+                                      textColor: AppColors.primaryGold,
+                                      onPressed: () => context.push('/cart'),
+                                    ),
+                                    backgroundColor: AppColors.darkBase,
+                                  ),
+                                );
+                              }
+                            : null,
                         suffixIcon: const Icon(Icons.shopping_cart_outlined, color: AppColors.textOnGold, size: 18),
                       ),
                     ),
@@ -449,6 +490,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSpecRow(String label, String value, {Color? valueColor}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: AppTypography.bodySM(color: AppColors.textSecondary),
+        ),
+        Text(
+          value,
+          style: AppTypography.labelMD(color: valueColor ?? AppColors.textPrimary),
+        ),
+      ],
     );
   }
 

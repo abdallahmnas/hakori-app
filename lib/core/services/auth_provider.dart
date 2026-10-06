@@ -91,6 +91,8 @@ class AuthProvider extends ChangeNotifier {
     // Pre-populate with cached user for immediate rendering
     if (cachedUser != null) {
       _currentUser = cachedUser;
+      _status = AuthStatus.authenticated;
+      notifyListeners();
     }
 
     try {

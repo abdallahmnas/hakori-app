@@ -18,13 +18,14 @@ class MyOrdersScreen extends StatefulWidget {
   State<MyOrdersScreen> createState() => _MyOrdersScreenState();
 }
 
-class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProviderStateMixin {
+class _MyOrdersScreenState extends State<MyOrdersScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<OrderProvider>(context, listen: false).fetchOrders();
     });
@@ -44,10 +45,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const LuxuryAppBar(
-        title: 'COMMISSIONS',
-        showBack: false,
-      ),
+      appBar: const LuxuryAppBar(title: 'COMMISSIONS', showBack: false),
       body: Column(
         children: [
           // Tab Bar
@@ -63,7 +61,6 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
               tabs: [
                 Tab(text: 'ACTIVE (${activeOrders.length})'),
                 Tab(text: 'COMPLETED (${completedOrders.length})'),
-                const Tab(text: 'SAVED QUOTES (2)'),
               ],
             ),
           ),
@@ -77,11 +74,15 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                 controller: _tabController,
                 children: [
                   // Active Orders Tab
-                  _buildOrderList(activeOrders, 'No active commissions currently in atelier production.'),
+                  _buildOrderList(
+                    activeOrders,
+                    'No active commissions currently in atelier production.',
+                  ),
                   // Completed Orders Tab
-                  _buildOrderList(completedOrders, 'No completed or delivered commissions yet.'),
-                  // Saved Quotes Tab
-                  _buildQuotesList(),
+                  _buildOrderList(
+                    completedOrders,
+                    'No completed or delivered commissions yet.',
+                  ),
                 ],
               ),
             ),
@@ -92,6 +93,16 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
   }
 
   Widget _buildOrderList(List<CommissionOrder> orders, String emptyMsg) {
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+
+    if (orderProvider.isLoading && orders.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+        ),
+      );
+    }
+
     if (orders.isEmpty) {
       return Center(
         child: Padding(
@@ -99,7 +110,11 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.inventory_2_outlined, size: 48, color: AppColors.textMuted),
+              const Icon(
+                Icons.inventory_2_outlined,
+                size: 48,
+                color: AppColors.textMuted,
+              ),
               const SizedBox(height: 12),
               Text(
                 'No Commissions Found',
@@ -144,10 +159,9 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                     flex: 5,
                     child: Text(
                       order.commissionNumber,
-                      style: AppTypography.labelMD(color: AppColors.textPrimary).copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
+                      style: AppTypography.labelMD(
+                        color: AppColors.textPrimary,
+                      ).copyWith(fontWeight: FontWeight.bold, fontSize: 12),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -156,7 +170,9 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                     flex: 6,
                     child: AppBadgeChip(
                       label: order.status.toUpperCase(),
-                      variant: order.status.toLowerCase().contains('delivered') || order.status.toLowerCase().contains('settled')
+                      variant:
+                          order.status.toLowerCase().contains('delivered') ||
+                              order.status.toLowerCase().contains('settled')
                           ? BadgeChipVariant.statusSage
                           : BadgeChipVariant.statusGold,
                     ),
@@ -177,8 +193,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
-                      firstItem?.imageUrl ??
-                          'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1000&auto=format&fit=crop',
+                      order.specimenImage,
                       width: 58,
                       height: 58,
                       fit: BoxFit.cover,
@@ -186,7 +201,11 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                         width: 58,
                         height: 58,
                         color: AppColors.surfaceContainerLow,
-                        child: const Icon(Icons.diamond, color: AppColors.primaryGold, size: 22),
+                        child: const Icon(
+                          Icons.diamond,
+                          color: AppColors.primaryGold,
+                          size: 22,
+                        ),
                       ),
                     ),
                   ),
@@ -196,22 +215,29 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          firstItem?.name ?? 'Bespoke Atelier Piece',
+                          order.specimenTitle,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.headlineSM(color: AppColors.textPrimary).copyWith(fontSize: 13),
+                          style: AppTypography.headlineSM(
+                            color: AppColors.textPrimary,
+                          ).copyWith(fontSize: 13),
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          firstItem?.purity ?? '18K Yellow Gold',
-                          style: AppTypography.bodyXS(color: AppColors.textSecondary).copyWith(fontSize: 11),
+                          firstItem?.purity ?? (order.specimen?['caratOrPurity']?.toString() ?? '18K Solid Gold'),
+                          style: AppTypography.bodyXS(
+                            color: AppColors.textSecondary,
+                          ).copyWith(fontSize: 11),
                         ),
                         const SizedBox(height: 4),
                         DualPriceText(
                           priceUsd: order.totalUsd,
                           priceNgn: order.totalNgn,
-                          primaryStyle: AppTypography.priceDisplay().copyWith(fontSize: 14),
-                          secondaryStyle: AppTypography.priceSecondary().copyWith(fontSize: 10),
+                          primaryStyle: AppTypography.priceDisplay().copyWith(
+                            fontSize: 14,
+                          ),
+                          secondaryStyle: AppTypography.priceSecondary()
+                              .copyWith(fontSize: 10),
                         ),
                       ],
                     ),
@@ -236,12 +262,18 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.radar, size: 15, color: AppColors.primaryGold),
+                          const Icon(
+                            Icons.radar,
+                            size: 15,
+                            color: AppColors.primaryGold,
+                          ),
                           const SizedBox(width: 6),
                           Flexible(
                             child: Text(
                               'VIEW LIVE TRANSIT & PRODUCTION TRACKER',
-                              style: AppTypography.labelSM(color: AppColors.textPrimary).copyWith(fontSize: 9),
+                              style: AppTypography.labelSM(
+                                color: AppColors.textPrimary,
+                              ).copyWith(fontSize: 9),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -256,31 +288,6 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> with SingleTickerProvid
           ),
         );
       },
-    );
-  }
-
-  Widget _buildQuotesList() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.bookmark_border, size: 44, color: AppColors.primaryGold),
-            const SizedBox(height: 10),
-            Text(
-              '2 Saved Bespoke CAD Quotes',
-              style: AppTypography.headlineMD(color: AppColors.textPrimary).copyWith(fontSize: 16),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Quotes remain locked against gold spot volatility for 72 hours.',
-              textAlign: TextAlign.center,
-              style: AppTypography.bodySM(color: AppColors.textSecondary),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -10,6 +10,7 @@ import '../../core/widgets/app_bar_luxury.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/product_card.dart';
+import '../../core/widgets/product_skeleton.dart';
 import '../../core/widgets/section_header.dart';
 import '../../core/widgets/badge_chip.dart';
 import '../catalog/catalog_filter_drawer.dart';
@@ -30,7 +31,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final productProvider = Provider.of<ProductProvider>(context, listen: false);
+      final productProvider = Provider.of<ProductProvider>(
+        context,
+        listen: false,
+      );
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final orderProvider = Provider.of<OrderProvider>(context, listen: false);
 
@@ -97,12 +101,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 16),
                     Text(
                       'Log In to Hakori',
-                      style: AppTypography.headlineMD(color: AppColors.textPrimary),
+                      style: AppTypography.headlineMD(
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       'Access your bespoke commissions, orders, and private catalog.',
-                      style: AppTypography.bodySM(color: AppColors.textSecondary),
+                      style: AppTypography.bodySM(
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     AppTextField(
@@ -110,7 +118,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       hintText: 'you@example.com',
                       controller: emailCtrl,
                       keyboardType: TextInputType.emailAddress,
-                      prefixIcon: const Icon(Icons.mail_outline, size: 20, color: AppColors.primaryGold),
+                      prefixIcon: const Icon(
+                        Icons.mail_outline,
+                        size: 20,
+                        color: AppColors.primaryGold,
+                      ),
                     ),
                     const SizedBox(height: 14),
                     AppTextField(
@@ -118,7 +130,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       hintText: '••••••••',
                       controller: passCtrl,
                       isPassword: true,
-                      prefixIcon: const Icon(Icons.lock_outline, size: 20, color: AppColors.primaryGold),
+                      prefixIcon: const Icon(
+                        Icons.lock_outline,
+                        size: 20,
+                        color: AppColors.primaryGold,
+                      ),
                     ),
                     const SizedBox(height: 22),
                     AppButton.primary(
@@ -131,21 +147,37 @@ class _HomeScreenState extends State<HomeScreen> {
                               if (email.isEmpty || pass.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Please enter both email and password.'),
+                                    content: Text(
+                                      'Please enter both email and password.',
+                                    ),
                                     backgroundColor: AppColors.error,
                                   ),
                                 );
                                 return;
                               }
                               setSheetState(() => isLoggingIn = true);
-                              final auth = Provider.of<AuthProvider>(context, listen: false);
-                              final ok = await auth.login(email: email, password: pass);
+                              final auth = Provider.of<AuthProvider>(
+                                context,
+                                listen: false,
+                              );
+                              final ok = await auth.login(
+                                email: email,
+                                password: pass,
+                              );
                               if (!mounted) return;
                               setSheetState(() => isLoggingIn = false);
 
                               if (ok) {
-                                final productProvider = Provider.of<ProductProvider>(context, listen: false);
-                                final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+                                final productProvider =
+                                    Provider.of<ProductProvider>(
+                                      context,
+                                      listen: false,
+                                    );
+                                final orderProvider =
+                                    Provider.of<OrderProvider>(
+                                      context,
+                                      listen: false,
+                                    );
                                 productProvider.fetchCatalog();
                                 orderProvider.fetchOrders();
                                 auth.refreshProfile();
@@ -156,7 +188,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('Welcome back! Logged in successfully.'),
+                                      content: Text(
+                                        'Welcome back! Logged in successfully.',
+                                      ),
                                       backgroundColor: AppColors.darkBase,
                                     ),
                                   );
@@ -165,7 +199,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text(auth.errorMessage ?? 'Login failed. Please check credentials.'),
+                                      content: Text(
+                                        auth.errorMessage ??
+                                            'Login failed. Please check credentials.',
+                                      ),
                                       backgroundColor: AppColors.error,
                                     ),
                                   );
@@ -182,7 +219,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                         child: Text(
                           "Don't have an account? Sign Up",
-                          style: AppTypography.labelSM(color: AppColors.primaryGold),
+                          style: AppTypography.labelSM(
+                            color: AppColors.primaryGold,
+                          ),
                         ),
                       ),
                     ),
@@ -211,8 +250,14 @@ class _HomeScreenState extends State<HomeScreen> {
         color: AppColors.primaryGold,
         backgroundColor: AppColors.darkBase,
         onRefresh: () async {
-          final authProvider = Provider.of<AuthProvider>(context, listen: false);
-          final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+          final authProvider = Provider.of<AuthProvider>(
+            context,
+            listen: false,
+          );
+          final orderProvider = Provider.of<OrderProvider>(
+            context,
+            listen: false,
+          );
           await Future.wait([
             productProvider.fetchCatalog(),
             if (authProvider.isAuthenticated) ...[
@@ -240,7 +285,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         child: TextField(
                           controller: _searchController,
-                          onChanged: (val) => productProvider.setSearchQuery(val),
+                          onChanged: (val) =>
+                              productProvider.setSearchQuery(val),
                           style: AppTypography.bodyMD(),
                           decoration: InputDecoration(
                             hintText: 'Search fine jewelry, gold, diamonds...',
@@ -301,11 +347,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.darkCard,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: AppColors.primaryGold.withAlpha(140), width: 1),
+                      border: Border.all(
+                        color: AppColors.primaryGold.withAlpha(140),
+                        width: 1,
+                      ),
                       boxShadow: const [AppColors.goldGlow],
                     ),
                     child: Row(
@@ -315,9 +367,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           decoration: BoxDecoration(
                             color: AppColors.surface,
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.primaryGold, width: 1),
+                            border: Border.all(
+                              color: AppColors.primaryGold,
+                              width: 1,
+                            ),
                           ),
-                          child: const Icon(Icons.lock_outline, size: 16, color: AppColors.primaryGold),
+                          child: const Icon(
+                            Icons.lock_outline,
+                            size: 16,
+                            color: AppColors.primaryGold,
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -326,11 +385,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Text(
                                 'Browsing as Guest',
-                                style: AppTypography.labelMD(color: AppColors.textOnDark),
+                                style: AppTypography.labelMD(
+                                  color: AppColors.textOnDark,
+                                ),
                               ),
                               Text(
                                 'Log in to view orders, profile, and private pieces.',
-                                style: AppTypography.bodyXS(color: AppColors.surfaceContainerHigh),
+                                style: AppTypography.bodyXS(
+                                  color: AppColors.surfaceContainerHigh,
+                                ),
                               ),
                             ],
                           ),
@@ -372,8 +435,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.4),
-                          Colors.black.withOpacity(0.92),
+                          Colors.black.withValues(alpha: 0.4),
+                          Colors.black.withValues(alpha: 0.92),
                         ],
                       ),
                     ),
@@ -413,7 +476,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               borderRadius: 18,
                               onPressed: () {
                                 if (displayedProducts.isNotEmpty) {
-                                  context.push('/product/${displayedProducts.first.id}');
+                                  context.push(
+                                    '/product/${displayedProducts.first.id}',
+                                  );
                                 } else {
                                   context.push('/categories');
                                 }
@@ -436,102 +501,114 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
             // Curated Collections Showcase on Dashboard
-            if (productProvider.categories.isNotEmpty)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: SectionHeader(
-                          title: 'Curated Collections',
-                          subtitle: 'Place Vendôme disciplines & jewelry categories',
-                          actionText: 'ALL (${productProvider.categories.length})',
-                          onActionTap: () => context.push('/categories'),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        height: 94,
-                        child: ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          scrollDirection: Axis.horizontal,
-                          itemCount: productProvider.categories.length,
-                          separatorBuilder: (context, index) => const SizedBox(width: 10),
-                          itemBuilder: (context, index) {
-                            final cat = productProvider.categories[index];
-                            final isSelected = cat.name.toLowerCase() == selectedCategory.toLowerCase();
-                            return InkWell(
-                              onTap: () {
-                                if (isSelected) {
-                                  productProvider.setSelectedCategory('ALL');
-                                } else {
-                                  productProvider.setSelectedCategory(cat.name);
-                                }
-                              },
-                              borderRadius: BorderRadius.circular(14),
-                              child: Container(
-                                width: 140,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(
-                                    color: isSelected ? AppColors.primaryGold : AppColors.outlineLight,
-                                    width: isSelected ? 1.5 : 1,
-                                  ),
-                                  boxShadow: const [AppColors.softCardShadow],
-                                  image: DecorationImage(
-                                    image: NetworkImage(
-                                      cat.imageUrl.isNotEmpty
-                                          ? cat.imageUrl
-                                          : 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1000&auto=format&fit=crop',
-                                    ),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(13),
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.black.withOpacity(0.15),
-                                        Colors.black.withOpacity(0.85),
-                                      ],
-                                    ),
-                                  ),
-                                  padding: const EdgeInsets.all(8),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        cat.name.toUpperCase(),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: AppTypography.labelSM(color: AppColors.textOnDark).copyWith(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                      Text(
-                                        '${cat.pieceCount} PIECES',
-                                        style: AppTypography.bodyXS(color: AppColors.primaryGold).copyWith(fontSize: 8.5),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            // if (productProvider.categories.isNotEmpty)
+            //   SliverToBoxAdapter(
+            //     child: Padding(
+            //       padding: const EdgeInsets.only(top: 18),
+            //       child: Column(
+            //         crossAxisAlignment: CrossAxisAlignment.start,
+            //         children: [
+            //           Padding(
+            //             padding: const EdgeInsets.symmetric(horizontal: 16),
+            //             child: SectionHeader(
+            //               title: 'Curated Collections',
+            //               subtitle: 'Jewelry categories',
+            //               actionText:
+            //                   'ALL (${productProvider.categories.length})',
+            //               onActionTap: () => context.push('/categories'),
+            //             ),
+            //           ),
+            //           const SizedBox(height: 8),
+            //           SizedBox(
+            //             height: 94,
+            //             child: ListView.separated(
+            //               padding: const EdgeInsets.symmetric(horizontal: 16),
+            //               scrollDirection: Axis.horizontal,
+            //               itemCount: productProvider.categories.length,
+            //               separatorBuilder: (context, index) =>
+            //                   const SizedBox(width: 10),
+            //               itemBuilder: (context, index) {
+            //                 final cat = productProvider.categories[index];
+            //                 final isSelected =
+            //                     cat.name.toLowerCase() ==
+            //                     selectedCategory.toLowerCase();
+            //                 return InkWell(
+            //                   onTap: () {
+            //                     if (isSelected) {
+            //                       productProvider.setSelectedCategory('ALL');
+            //                     } else {
+            //                       productProvider.setSelectedCategory(cat.name);
+            //                     }
+            //                   },
+            //                   borderRadius: BorderRadius.circular(14),
+            //                   child: Container(
+            //                     width: 140,
+            //                     decoration: BoxDecoration(
+            //                       borderRadius: BorderRadius.circular(14),
+            //                       border: Border.all(
+            //                         color: isSelected
+            //                             ? AppColors.primaryGold
+            //                             : AppColors.outlineLight,
+            //                         width: isSelected ? 1.5 : 1,
+            //                       ),
+            //                       boxShadow: const [AppColors.softCardShadow],
+            //                       image: DecorationImage(
+            //                         image: NetworkImage(
+            //                           cat.imageUrl.isNotEmpty
+            //                               ? cat.imageUrl
+            //                               : 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1000&auto=format&fit=crop',
+            //                         ),
+            //                         fit: BoxFit.cover,
+            //                       ),
+            //                     ),
+            //                     child: Container(
+            //                       decoration: BoxDecoration(
+            //                         borderRadius: BorderRadius.circular(13),
+            //                         gradient: LinearGradient(
+            //                           begin: Alignment.topCenter,
+            //                           end: Alignment.bottomCenter,
+            //                           colors: [
+            //                             Colors.black.withOpacity(0.15),
+            //                             Colors.black.withOpacity(0.85),
+            //                           ],
+            //                         ),
+            //                       ),
+            //                       padding: const EdgeInsets.all(8),
+            //                       child: Column(
+            //                         crossAxisAlignment:
+            //                             CrossAxisAlignment.start,
+            //                         mainAxisAlignment: MainAxisAlignment.end,
+            //                         children: [
+            //                           Text(
+            //                             cat.name.toUpperCase(),
+            //                             maxLines: 1,
+            //                             overflow: TextOverflow.ellipsis,
+            //                             style:
+            //                                 AppTypography.labelSM(
+            //                                   color: AppColors.textOnDark,
+            //                                 ).copyWith(
+            //                                   fontSize: 10,
+            //                                   fontWeight: FontWeight.w700,
+            //                                 ),
+            //                           ),
+            //                           Text(
+            //                             '${cat.pieceCount} PIECES',
+            //                             style: AppTypography.bodyXS(
+            //                               color: AppColors.primaryGold,
+            //                             ).copyWith(fontSize: 8.5),
+            //                           ),
+            //                         ],
+            //                       ),
+            //                     ),
+            //                   ),
+            //                 );
+            //               },
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
 
             // Horizontal Category Filter Pills
             SliverToBoxAdapter(
@@ -591,44 +668,46 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
                 child: SectionHeader(
-                  title: 'Atelier Vault Highlights',
-                  subtitle: 'Single-origin 18K solid gold & certified gemstones',
+                  title: 'Products',
+                  subtitle: 'High Quality Jewellery',
                   actionText: 'ALL (${displayedProducts.length})',
                   onActionTap: () => context.push('/categories'),
                 ),
               ),
             ),
 
-            // Loading / Empty / Grid State
-            if (productProvider.isLoading && displayedProducts.isEmpty)
-              const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 48),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
-                    ),
-                  ),
-                ),
-              )
+            // Loading (skeleton shimmer) / Empty / Grid State
+            if (productProvider.isLoading)
+              const SliverProductGridSkeleton(itemCount: 6)
             else if (displayedProducts.isEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 48,
+                    horizontal: 24,
+                  ),
                   child: Center(
                     child: Column(
                       children: [
-                        const Icon(Icons.search_off, size: 48, color: AppColors.textMuted),
+                        const Icon(
+                          Icons.search_off,
+                          size: 48,
+                          color: AppColors.textMuted,
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           'No Atelier Pieces Found',
-                          style: AppTypography.headlineSM(color: AppColors.textPrimary),
+                          style: AppTypography.headlineSM(
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           'No items matched your search query or selected discipline.',
                           textAlign: TextAlign.center,
-                          style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                          style: AppTypography.bodyXS(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         AppButton.outline(
@@ -655,7 +734,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisCount: 2,
                     mainAxisSpacing: 14,
                     crossAxisSpacing: 12,
-                    childAspectRatio: 0.52,
+                    childAspectRatio: 0.72,
                   ),
                   delegate: SliverChildBuilderDelegate((context, index) {
                     final product = displayedProducts[index];

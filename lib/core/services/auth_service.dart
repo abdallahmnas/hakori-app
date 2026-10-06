@@ -34,11 +34,7 @@ class AuthService {
   }) async {
     final response = await _client.post(
       ApiConstants.signupVerify,
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $sessionToken',
-        },
-      ),
+      options: Options(headers: {'Authorization': 'Bearer $sessionToken'}),
       data: {
         'otp': otp.trim(),
         'token': sessionToken,
@@ -72,26 +68,27 @@ class AuthService {
     String? location,
     String tier = 'VIP Private Client',
   }) async {
-    final effectiveFirstName = firstName ??
+    final effectiveFirstName =
+        firstName ??
         (fullName != null ? fullName.trim().split(' ').first : 'Patron');
-    final effectiveLastName = lastName ??
+    final effectiveLastName =
+        lastName ??
         (fullName != null && fullName.trim().contains(' ')
             ? fullName.trim().split(' ').sublist(1).join(' ')
             : '');
     final effectiveFullName =
         fullName ?? '$effectiveFirstName $effectiveLastName'.trim();
-    final effectiveLocation = location ??
-        [address, city, country]
-            .where((e) => e != null && e.trim().isNotEmpty)
-            .join(', ');
+    final effectiveLocation =
+        location ??
+        [
+          address,
+          city,
+          country,
+        ].where((e) => e != null && e.trim().isNotEmpty).join(', ');
 
     final response = await _client.post(
       ApiConstants.signupComplete,
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $verificationToken',
-        },
-      ),
+      options: Options(headers: {'Authorization': 'Bearer $verificationToken'}),
       data: {
         'token': verificationToken,
         'verificationToken': verificationToken,
@@ -126,12 +123,12 @@ class AuthService {
   }) async {
     final response = await _client.post(
       ApiConstants.login,
-      data: {
-        'email': email.trim(),
-        'password': password,
-      },
+      data: {'email': email.trim(), 'password': password},
     );
-    final data = response.data['data'] as Map<String, dynamic>? ?? response.data as Map<String, dynamic>? ?? {};
+    final data =
+        response.data['data'] as Map<String, dynamic>? ??
+        response.data as Map<String, dynamic>? ??
+        {};
     return data;
   }
 
@@ -141,8 +138,12 @@ class AuthService {
       ApiConstants.forgotPassword,
       data: {'email': email.trim()},
     );
-    final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : {};
-    final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
+    final map = response.data is Map<String, dynamic>
+        ? response.data as Map<String, dynamic>
+        : {};
+    final data = map['data'] is Map<String, dynamic>
+        ? map['data'] as Map<String, dynamic>
+        : map;
     return data['token']?.toString() ?? data['sessionToken']?.toString() ?? '';
   }
 
@@ -160,8 +161,12 @@ class AuthService {
         'otp': otp.trim(),
       },
     );
-    final map = response.data is Map<String, dynamic> ? response.data as Map<String, dynamic> : {};
-    final data = map['data'] is Map<String, dynamic> ? map['data'] as Map<String, dynamic> : map;
+    final map = response.data is Map<String, dynamic>
+        ? response.data as Map<String, dynamic>
+        : {};
+    final data = map['data'] is Map<String, dynamic>
+        ? map['data'] as Map<String, dynamic>
+        : map;
     return data['token']?.toString() ?? data['resetToken']?.toString() ?? '';
   }
 
@@ -183,10 +188,12 @@ class AuthService {
 
   /// Get Active Authenticated User
   Future<User> getMe() async {
-    final response = await _client.get(ApiConstants.authMe);
-    final data = response.data['data'] as Map<String, dynamic>? ?? {};
-    final userMap = data['user'] as Map<String, dynamic>? ?? data;
-    return User.fromJson(userMap);
+    try {
+      final response = await _client.get(ApiConstants.authMe);
+      return _parseUserResponse(response.data);
+    } catch (_) {
+      return getProfile();
+    }
   }
 
   /// Logout Active User
@@ -200,10 +207,17 @@ class AuthService {
 
   /// Get Patron Profile & Dynamic Metrics
   Future<User> getProfile() async {
-    final response = await _client.get(ApiConstants.userProfile);
-    final data = response.data['data'] as Map<String, dynamic>? ?? {};
-    final userMap = data['user'] as Map<String, dynamic>? ?? data;
-    return User.fromJson(userMap);
+    try {
+      final response = await _client.get(ApiConstants.userProfile);
+      return _parseUserResponse(response.data);
+    } catch (_) {
+      try {
+        final fallback = await _client.get(ApiConstants.authMe);
+        return _parseUserResponse(fallback.data);
+      } catch (e) {
+        rethrow;
+      }
+    }
   }
 
   /// Update Patron Profile & FCM Token
@@ -220,18 +234,35 @@ class AuthService {
     final response = await _client.put(
       ApiConstants.userProfile,
       data: {
-        if (firstName != null) 'firstName': firstName,
-        if (lastName != null) 'lastName': lastName,
-        if (phone != null) 'phone': phone,
-        if (address != null) 'address': address,
-        if (city != null) 'city': city,
-        if (country != null) 'country': country,
-        if (fcmToken != null) 'fcmToken': fcmToken,
-        if (avatarUrl != null) 'avatarUrl': avatarUrl,
+        'firstName': ?firstName,
+        'lastName': ?lastName,
+        'phone': ?phone,
+        'address': ?address,
+        'city': ?city,
+        'country': ?country,
+        'fcmToken': ?fcmToken,
+        'avatarUrl': ?avatarUrl,
       },
     );
-    final data = response.data['data'] as Map<String, dynamic>? ?? {};
-    final userMap = data['user'] as Map<String, dynamic>? ?? data;
-    return User.fromJson(userMap);
+    return _parseUserResponse(response.data);
+  }
+
+  User _parseUserResponse(dynamic raw) {
+    if (raw is Map<String, dynamic>) {
+      final dataField = raw['data'];
+      if (dataField is Map<String, dynamic>) {
+        final userField = dataField['user'];
+        if (userField is Map<String, dynamic>) {
+          return User.fromJson(userField);
+        }
+        return User.fromJson(dataField);
+      }
+      final userField = raw['user'];
+      if (userField is Map<String, dynamic>) {
+        return User.fromJson(userField);
+      }
+      return User.fromJson(raw);
+    }
+    return const User(id: '', email: '', fullName: '');
   }
 }

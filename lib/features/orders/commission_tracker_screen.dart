@@ -3,14 +3,15 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
-import '../../core/services/mock_data_service.dart';
+import '../../core/models/order.dart';
 import '../../core/services/order_provider.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/badge_chip.dart';
+import '../../core/widgets/dual_price_text.dart';
 
 /// Screen 17: commission_details_live_transit_tracker
 /// Live GPS & Stage-by-Stage Production Telemetry for bespoke high-jewelry commissions
-class CommissionTrackerScreen extends StatelessWidget {
+class CommissionTrackerScreen extends StatefulWidget {
   final String orderId;
 
   const CommissionTrackerScreen({
@@ -19,15 +20,97 @@ class CommissionTrackerScreen extends StatelessWidget {
   });
 
   @override
+  State<CommissionTrackerScreen> createState() => _CommissionTrackerScreenState();
+}
+
+class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
+  CommissionOrder? _order;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadOrder());
+  }
+
+  Future<void> _loadOrder() async {
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+    final order = await orderProvider.getOrderById(widget.orderId);
+    if (mounted) {
+      setState(() {
+        _order = order;
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final orderProvider = Provider.of<OrderProvider>(context);
-    final match = orderProvider.orders.where((o) => o.id == orderId);
-    final order = match.isNotEmpty
-        ? match.first
-        : (orderProvider.lastCreatedOrder ?? MockDataService.orders.firstWhere(
-            (o) => o.id == orderId,
-            orElse: () => MockDataService.orders[0],
-          ));
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+            onPressed: () => Navigator.of(context).maybePop(),
+          ),
+          title: Text(
+            'COMMISSION TRACKER',
+            style: AppTypography.labelLG(color: AppColors.textPrimary).copyWith(letterSpacing: 2),
+          ),
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+          ),
+        ),
+      );
+    }
+
+    if (_order == null) {
+      return Scaffold(
+        backgroundColor: AppColors.background,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+            onPressed: () => Navigator.of(context).maybePop(),
+          ),
+          title: Text(
+            'NOT FOUND',
+            style: AppTypography.labelLG(color: AppColors.textPrimary).copyWith(letterSpacing: 2),
+          ),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.search_off_outlined, size: 48, color: AppColors.textMuted),
+                const SizedBox(height: 16),
+                Text(
+                  'Commission Record Not Found',
+                  style: AppTypography.headlineSM(color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'No active atelier commission was located with this identification reference.',
+                  textAlign: TextAlign.center,
+                  style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 24),
+                AppButton.outline(
+                  text: 'RETURN TO COMMISSIONS',
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final order = _order!;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -57,7 +140,6 @@ class CommissionTrackerScreen extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  // Map Grid Lines visual
                   Positioned.fill(
                     child: Opacity(
                       opacity: 0.2,
@@ -170,59 +252,53 @@ class CommissionTrackerScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
 
-            // Step-by-Step Production Log
-            Text(
-              'Live Atelier Production Log',
-              style: AppTypography.headlineMD(color: AppColors.textPrimary),
-            ),
-            const SizedBox(height: 14),
-
+            // Commission Specimen Details Card
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: AppColors.surface,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.outlineLight),
+                boxShadow: const [AppColors.softCardShadow],
               ),
               child: Column(
-                children: order.trackingSteps.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final step = entry.value;
-                  final isLast = index == order.trackingSteps.length - 1;
-
-                  return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'COMMISSION SPECIMEN',
+                        style: AppTypography.labelSM(color: AppColors.primaryGold).copyWith(letterSpacing: 1.5),
+                      ),
+                      if (order.paymentStatus != null)
+                        AppBadgeChip(
+                          label: order.paymentStatus!.toUpperCase(),
+                          variant: order.paymentStatus!.toUpperCase() == 'PAID' ||
+                                  order.paymentStatus!.toUpperCase() == 'SETTLED'
+                              ? BadgeChipVariant.statusSage
+                              : BadgeChipVariant.statusGold,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        children: [
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: step.isCompleted
-                                  ? AppColors.primaryGold
-                                  : (step.isCurrent ? AppColors.darkBase : AppColors.surfaceContainerHigh),
-                              border: Border.all(
-                                color: step.isCurrent || step.isCompleted
-                                    ? AppColors.primaryGold
-                                    : AppColors.outline,
-                              ),
-                            ),
-                            child: step.isCompleted
-                                ? const Icon(Icons.check, size: 12, color: Colors.black)
-                                : (step.isCurrent
-                                    ? const Center(
-                                        child: Icon(Icons.circle, size: 6, color: AppColors.primaryGold))
-                                    : null),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          order.specimenImage,
+                          width: 72,
+                          height: 72,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            width: 72,
+                            height: 72,
+                            color: AppColors.surfaceContainerLow,
+                            child: const Icon(Icons.diamond, color: AppColors.primaryGold, size: 28),
                           ),
-                          if (!isLast)
-                            Container(
-                              width: 2,
-                              height: 48,
-                              color: step.isCompleted ? AppColors.primaryGold : AppColors.outlineLight,
-                            ),
-                        ],
+                        ),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -230,33 +306,130 @@ class CommissionTrackerScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              step.title,
-                              style: AppTypography.labelMD(
-                                color: step.isCurrent
-                                    ? AppColors.primaryGold
-                                    : (step.isCompleted ? AppColors.textPrimary : AppColors.textMuted),
-                              ),
+                              order.specimenTitle,
+                              style: AppTypography.headlineSM(color: AppColors.textPrimary),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 4),
                             Text(
-                              step.description,
+                              order.specimen?['specDetails']?.toString() ??
+                                  order.specimen?['caratOrPurity']?.toString() ??
+                                  (order.items.isNotEmpty ? order.items.first.material : '18K Solid Gold'),
                               style: AppTypography.bodyXS(color: AppColors.textSecondary),
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              step.timestamp,
-                              style: AppTypography.bodyXS(color: AppColors.textMuted).copyWith(fontSize: 10),
+                            if (order.specimen?['subType'] != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                'Discipline: ${order.specimen!['subType']}',
+                                style: AppTypography.bodyXS(color: AppColors.textMuted).copyWith(fontSize: 10),
+                              ),
+                            ],
+                            const SizedBox(height: 6),
+                            DualPriceText(
+                              priceUsd: order.totalUsd,
+                              priceNgn: order.totalNgn,
+                              primaryStyle: AppTypography.priceDisplay().copyWith(fontSize: 16),
+                              secondaryStyle: AppTypography.priceSecondary().copyWith(fontSize: 11),
                             ),
-                            const SizedBox(height: 12),
                           ],
                         ),
                       ),
                     ],
-                  );
-                }).toList(),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 24),
+
+            // Step-by-Step Production Log
+            if (order.trackingSteps.isNotEmpty) ...[
+              Text(
+                'Live Atelier Production Log',
+                style: AppTypography.headlineMD(color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.outlineLight),
+                ),
+                child: Column(
+                  children: order.trackingSteps.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final step = entry.value;
+                    final isLast = index == order.trackingSteps.length - 1;
+
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(
+                          children: [
+                            Container(
+                              width: 20,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: step.isCompleted
+                                    ? AppColors.primaryGold
+                                    : (step.isCurrent ? AppColors.darkBase : AppColors.surfaceContainerHigh),
+                                border: Border.all(
+                                  color: step.isCurrent || step.isCompleted
+                                      ? AppColors.primaryGold
+                                      : AppColors.outline,
+                                ),
+                              ),
+                              child: step.isCompleted
+                                  ? const Icon(Icons.check, size: 12, color: Colors.black)
+                                  : (step.isCurrent
+                                      ? const Center(
+                                          child: Icon(Icons.circle, size: 6, color: AppColors.primaryGold))
+                                      : null),
+                            ),
+                            if (!isLast)
+                              Container(
+                                width: 2,
+                                height: 48,
+                                color: step.isCompleted ? AppColors.primaryGold : AppColors.outlineLight,
+                              ),
+                          ],
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                step.title,
+                                style: AppTypography.labelMD(
+                                  color: step.isCurrent
+                                      ? AppColors.primaryGold
+                                      : (step.isCompleted ? AppColors.textPrimary : AppColors.textMuted),
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                step.description,
+                                style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                step.timestamp,
+                                style: AppTypography.bodyXS(color: AppColors.textMuted).copyWith(fontSize: 10),
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
 
             // Delivery Address Card
             Container(

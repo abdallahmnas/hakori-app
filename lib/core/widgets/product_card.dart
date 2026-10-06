@@ -13,11 +13,7 @@ class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback? onTap;
 
-  const ProductCard({
-    super.key,
-    required this.product,
-    this.onTap,
-  });
+  const ProductCard({super.key, required this.product, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +39,11 @@ class ProductCard extends StatelessWidget {
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(11),
+                  ),
                   child: AspectRatio(
-                    aspectRatio: 1 / 0.92,
+                    aspectRatio: 1 / 0.75,
                     child: Container(
                       color: AppColors.surfaceContainerLow,
                       child: Image.network(
@@ -68,7 +66,9 @@ class ProductCard extends StatelessWidget {
                   top: 6,
                   left: 6,
                   child: AppBadgeChip.purity(
-                    label: product.purity.contains('24K') ? '24K Gold' : '18K Gold',
+                    label: product.purity.contains('24K')
+                        ? '24K Gold'
+                        : '18K Gold',
                   ),
                 ),
                 // Wishlist Heart Button
@@ -76,7 +76,7 @@ class ProductCard extends StatelessWidget {
                   top: 6,
                   right: 6,
                   child: Material(
-                    color: Colors.white.withOpacity(0.85),
+                    color: Colors.white.withValues(alpha: 0.85),
                     shape: const CircleBorder(),
                     child: InkWell(
                       customBorder: const CircleBorder(),
@@ -85,7 +85,9 @@ class ProductCard extends StatelessWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              isFav ? 'Removed from Vault Wishlist' : 'Saved to Vault Wishlist',
+                              isFav
+                                  ? 'Removed from Vault Wishlist'
+                                  : 'Saved to Vault Wishlist',
                               style: AppTypography.bodySM(color: Colors.white),
                             ),
                             duration: const Duration(seconds: 1),
@@ -98,7 +100,9 @@ class ProductCard extends StatelessWidget {
                         child: Icon(
                           isFav ? Icons.favorite : Icons.favorite_border,
                           size: 15,
-                          color: isFav ? AppColors.rubyRed : AppColors.textPrimary,
+                          color: isFav
+                              ? AppColors.rubyRed
+                              : AppColors.textPrimary,
                         ),
                       ),
                     ),
@@ -108,7 +112,7 @@ class ProductCard extends StatelessWidget {
             ),
             // Details Section
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
+              padding: const EdgeInsets.fromLTRB(8, 6, 8, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -116,46 +120,58 @@ class ProductCard extends StatelessWidget {
                   // Rating & Reviews
                   Row(
                     children: [
-                      const Icon(Icons.star, size: 12, color: AppColors.primaryGold),
+                      const Icon(
+                        Icons.star,
+                        size: 12,
+                        color: AppColors.primaryGold,
+                      ),
                       const SizedBox(width: 2),
                       Text(
                         '${product.rating} (${product.reviewCount})',
-                        style: AppTypography.bodyXS(color: AppColors.textSecondary).copyWith(fontSize: 10),
+                        style: AppTypography.bodyXS(
+                          color: AppColors.textSecondary,
+                        ).copyWith(fontSize: 10),
                       ),
                       const Spacer(),
                       if (product.isBestSeller)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 1,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.darkBase,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             'VIP PICK',
-                            style: AppTypography.labelSM(color: AppColors.primaryGold).copyWith(fontSize: 7),
+                            style: AppTypography.labelSM(
+                              color: AppColors.primaryGold,
+                            ).copyWith(fontSize: 7),
                           ),
                         ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   // Title
                   Text(
                     product.name,
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.headlineSM(color: AppColors.textPrimary).copyWith(
-                      fontSize: 13,
-                      height: 1.25,
-                    ),
+                    style: AppTypography.headlineSM(
+                      color: AppColors.textPrimary,
+                    ).copyWith(fontSize: 12, height: 1.25),
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 1),
                   Text(
                     product.archType,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTypography.bodyXS(color: AppColors.textMuted).copyWith(fontSize: 10),
+                    style: AppTypography.bodyXS(
+                      color: AppColors.textMuted,
+                    ).copyWith(fontSize: 9),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 4),
                   // Dual Price & Quick Cart Button
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -166,8 +182,12 @@ class ProductCard extends StatelessWidget {
                           priceUsd: product.priceUsd,
                           priceNgn: product.priceNgn,
                           isVertical: true,
-                          primaryStyle: AppTypography.priceDisplay().copyWith(fontSize: 15),
-                          secondaryStyle: AppTypography.priceSecondary().copyWith(fontSize: 10),
+                          showSecondary: false,
+                          primaryStyle: AppTypography.priceDisplay().copyWith(
+                            fontSize: 15,
+                          ),
+                          secondaryStyle: AppTypography.priceSecondary()
+                              .copyWith(fontSize: 10),
                         ),
                       ),
                       Material(
@@ -181,7 +201,9 @@ class ProductCard extends StatelessWidget {
                               SnackBar(
                                 content: Text(
                                   'Added "${product.name}" to Cart',
-                                  style: AppTypography.bodySM(color: Colors.white),
+                                  style: AppTypography.bodySM(
+                                    color: Colors.white,
+                                  ),
                                 ),
                                 duration: const Duration(seconds: 1),
                                 backgroundColor: AppColors.darkBase,

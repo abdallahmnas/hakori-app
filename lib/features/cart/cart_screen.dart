@@ -38,7 +38,9 @@ class _CartScreenState extends State<CartScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            success ? 'VIP Code Applied: 10% Privilege' : 'Invalid Code. Try "HAKORI2026"',
+            success
+                ? 'VIP Code Applied: 10% Privilege'
+                : 'Invalid Code. Try "HAKORI2026"',
           ),
           backgroundColor: success ? AppColors.darkBase : AppColors.error,
         ),
@@ -55,9 +57,15 @@ class _CartScreenState extends State<CartScreen> {
 
     final clientUser = auth.currentUser;
     final client = {
-      'name': clientUser?.fullName.isNotEmpty == true ? clientUser!.fullName : 'Lord Alexander Wright',
-      'email': clientUser?.email.isNotEmpty == true ? clientUser!.email : 'patron@aurumatelier.com',
-      'phone': clientUser?.phone?.isNotEmpty == true ? clientUser!.phone : '+234 801 234 5678',
+      'name': clientUser?.fullName.isNotEmpty == true
+          ? clientUser!.fullName
+          : 'Lord Alexander Wright',
+      'email': clientUser?.email.isNotEmpty == true
+          ? clientUser!.email
+          : 'patron@aurumatelier.com',
+      'phone': clientUser?.phone?.isNotEmpty == true
+          ? clientUser!.phone
+          : '+234 801 234 5678',
     };
 
     final firstItem = cart.items.first;
@@ -76,7 +84,7 @@ class _CartScreenState extends State<CartScreen> {
       specimen: specimen,
       total: cart.totalUsd,
       currency: 'USD',
-      shippingAddress: clientUser?.location ?? 'Victoria Island Penthouse 4B, Lagos, Nigeria',
+      shippingAddress: clientUser?.location ?? '',
     );
 
     if (!mounted) return;
@@ -88,7 +96,9 @@ class _CartScreenState extends State<CartScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(orderProvider.errorMessage ?? 'Checkout failed. Please try again.'),
+          content: Text(
+            orderProvider.errorMessage ?? 'Checkout failed. Please try again.',
+          ),
           backgroundColor: AppColors.error,
         ),
       );
@@ -133,17 +143,20 @@ class _CartScreenState extends State<CartScreen> {
                   Expanded(
                     child: Text(
                       'Currency: ${currencyProvider.selectedCurrency.code} (${currencyProvider.selectedCurrency.name})',
-                      style: AppTypography.labelSM(color: AppColors.onGoldContainer).copyWith(fontSize: 11),
+                      style: AppTypography.labelSM(
+                        color: AppColors.onGoldContainer,
+                      ).copyWith(fontSize: 11),
                     ),
                   ),
                   InkWell(
                     onTap: () => context.push('/fx-ledger'),
                     child: Text(
                       'CHANGE',
-                      style: AppTypography.labelSM(color: AppColors.primaryGold).copyWith(
-                        fontSize: 11,
-                        decoration: TextDecoration.underline,
-                      ),
+                      style: AppTypography.labelSM(color: AppColors.primaryGold)
+                          .copyWith(
+                            fontSize: 11,
+                            decoration: TextDecoration.underline,
+                          ),
                     ),
                   ),
                 ],
@@ -155,195 +168,227 @@ class _CartScreenState extends State<CartScreen> {
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final item = cart.items[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.outlineLight),
-                      boxShadow: const [AppColors.softCardShadow],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Thumbnail
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                item.product.imageUrl,
-                                width: 64,
-                                height: 64,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => Container(
-                                  width: 64,
-                                  height: 64,
-                                  color: AppColors.surfaceContainerLow,
-                                  child: const Icon(Icons.diamond, color: AppColors.primaryGold, size: 24),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            // Title & Specs
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.product.name,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.headlineSM(color: AppColors.textPrimary).copyWith(fontSize: 14),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    '${item.selectedMetal} • ${item.selectedStone}',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.bodyXS(color: AppColors.textSecondary),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  DualPriceText(
-                                    priceUsd: item.totalPriceUsd,
-                                    priceNgn: item.totalPriceNgn,
-                                    primaryStyle: AppTypography.priceDisplay().copyWith(fontSize: 15),
-                                    secondaryStyle: AppTypography.priceSecondary().copyWith(fontSize: 10),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            // Remove Button
-                            IconButton(
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
-                              icon: const Icon(Icons.close, size: 16, color: AppColors.textMuted),
-                              onPressed: () => cart.removeItem(item.id),
-                            ),
-                          ],
-                        ),
-                        const Divider(height: 16),
-                        // Impression Kit Checkbox & Quantity Stepper
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Flexible(
-                              child: InkWell(
-                                onTap: () => cart.toggleImpressionKit(item.id),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(
-                                      width: 18,
-                                      height: 18,
-                                      child: Checkbox(
-                                        value: item.impressionKitIncluded,
-                                        activeColor: AppColors.primaryGold,
-                                        checkColor: AppColors.textOnGold,
-                                        onChanged: (val) => cart.toggleImpressionKit(item.id),
-                                      ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final item = cart.items[index];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.outlineLight),
+                    boxShadow: const [AppColors.softCardShadow],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Thumbnail
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              item.product.imageUrl,
+                              width: 64,
+                              height: 64,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Container(
+                                    width: 64,
+                                    height: 64,
+                                    color: AppColors.surfaceContainerLow,
+                                    child: const Icon(
+                                      Icons.diamond,
+                                      color: AppColors.primaryGold,
+                                      size: 24,
                                     ),
-                                    const SizedBox(width: 6),
-                                    Flexible(
-                                      child: Text(
-                                        'Impression Kit (FREE)',
-                                        style: AppTypography.bodyXS(color: AppColors.textPrimary).copyWith(fontSize: 11),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                  ),
                             ),
-                            const SizedBox(width: 8),
-                            // Quantity Stepper
-                            Container(
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceContainerLow,
-                                borderRadius: BorderRadius.circular(15),
-                                border: Border.all(color: AppColors.outlineLight),
-                              ),
+                          ),
+                          const SizedBox(width: 12),
+                          // Title & Specs
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.product.name,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.headlineSM(
+                                    color: AppColors.textPrimary,
+                                  ).copyWith(fontSize: 14),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${item.selectedMetal} • ${item.selectedStone}',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTypography.bodyXS(
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                DualPriceText(
+                                  priceUsd: item.totalPriceUsd,
+                                  priceNgn: item.totalPriceNgn,
+                                  primaryStyle: AppTypography.priceDisplay()
+                                      .copyWith(fontSize: 15),
+                                  secondaryStyle: AppTypography.priceSecondary()
+                                      .copyWith(fontSize: 10),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Remove Button
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(
+                              minWidth: 28,
+                              minHeight: 28,
+                            ),
+                            icon: const Icon(
+                              Icons.close,
+                              size: 16,
+                              color: AppColors.textMuted,
+                            ),
+                            onPressed: () => cart.removeItem(item.id),
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 16),
+                      // Impression Kit Checkbox & Quantity Stepper
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            child: InkWell(
+                              onTap: () => cart.toggleImpressionKit(item.id),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  InkWell(
-                                    onTap: () => cart.updateQuantity(item.id, -1),
-                                    borderRadius: BorderRadius.circular(15),
-                                    child: const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 8),
-                                      child: Icon(Icons.remove, size: 12),
+                                  SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: Checkbox(
+                                      value: item.impressionKitIncluded,
+                                      activeColor: AppColors.primaryGold,
+                                      checkColor: AppColors.textOnGold,
+                                      onChanged: (val) =>
+                                          cart.toggleImpressionKit(item.id),
                                     ),
                                   ),
-                                  Text(
-                                    '${item.quantity}',
-                                    style: AppTypography.labelMD(color: AppColors.textPrimary).copyWith(fontSize: 12),
-                                  ),
-                                  InkWell(
-                                    onTap: () => cart.updateQuantity(item.id, 1),
-                                    borderRadius: BorderRadius.circular(15),
-                                    child: const Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 8),
-                                      child: Icon(Icons.add, size: 12),
+                                  const SizedBox(width: 6),
+                                  Flexible(
+                                    child: Text(
+                                      'Impression Kit (FREE)',
+                                      style: AppTypography.bodyXS(
+                                        color: AppColors.textPrimary,
+                                      ).copyWith(fontSize: 11),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                childCount: cart.items.length,
-              ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Quantity Stepper
+                          Container(
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceContainerLow,
+                              borderRadius: BorderRadius.circular(15),
+                              border: Border.all(color: AppColors.outlineLight),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                InkWell(
+                                  onTap: () => cart.updateQuantity(item.id, -1),
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: const Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    child: Icon(Icons.remove, size: 12),
+                                  ),
+                                ),
+                                Text(
+                                  '${item.quantity}',
+                                  style: AppTypography.labelMD(
+                                    color: AppColors.textPrimary,
+                                  ).copyWith(fontSize: 12),
+                                ),
+                                InkWell(
+                                  onTap: () => cart.updateQuantity(item.id, 1),
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: const Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    child: Icon(Icons.add, size: 12),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              }, childCount: cart.items.length),
             ),
           ),
 
           // Vault Courier Insurance Toggle
-          SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.outlineLight),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.shield_outlined, color: AppColors.primaryGold, size: 20),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Armored Vault Insurance (\$150.00)',
-                          style: AppTypography.labelMD(color: AppColors.textPrimary).copyWith(fontSize: 12),
-                        ),
-                        Text(
-                          '100% loss/damage guarantee during transit',
-                          style: AppTypography.bodyXS(color: AppColors.textSecondary).copyWith(fontSize: 10),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Switch(
-                    value: cart.vaultInsurance,
-                    activeColor: AppColors.primaryGold,
-                    onChanged: (val) => cart.toggleVaultInsurance(val),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // SliverToBoxAdapter(
+          //   child: Container(
+          //     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          //     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          //     decoration: BoxDecoration(
+          //       color: AppColors.surface,
+          //       borderRadius: BorderRadius.circular(12),
+          //       border: Border.all(color: AppColors.outlineLight),
+          //     ),
+          //     child: Row(
+          //       children: [
+          //         const Icon(
+          //           Icons.shield_outlined,
+          //           color: AppColors.primaryGold,
+          //           size: 20,
+          //         ),
+          //         const SizedBox(width: 10),
+          //         Expanded(
+          //           child: Column(
+          //             crossAxisAlignment: CrossAxisAlignment.start,
+          //             children: [
+          //               Text(
+          //                 'Armored Vault Insurance (\$150.00)',
+          //                 style: AppTypography.labelMD(
+          //                   color: AppColors.textPrimary,
+          //                 ).copyWith(fontSize: 12),
+          //               ),
+          //               Text(
+          //                 '100% loss/damage guarantee during transit',
+          //                 style: AppTypography.bodyXS(
+          //                   color: AppColors.textSecondary,
+          //                 ).copyWith(fontSize: 10),
+          //               ),
+          //             ],
+          //           ),
+          //         ),
+          //         Switch(
+          //           value: cart.vaultInsurance,
+          //           activeColor: AppColors.primaryGold,
+          //           onChanged: (val) => cart.toggleVaultInsurance(val),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
 
           // Promo Code Row
           SliverToBoxAdapter(
@@ -365,8 +410,13 @@ class _CartScreenState extends State<CartScreen> {
                         style: AppTypography.bodySM(),
                         decoration: InputDecoration(
                           hintText: 'Promo Code (HAKORI2026)',
-                          hintStyle: AppTypography.bodyXS(color: AppColors.textMuted),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          hintStyle: AppTypography.bodyXS(
+                            color: AppColors.textMuted,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
                         ),
                       ),
                     ),
@@ -396,11 +446,19 @@ class _CartScreenState extends State<CartScreen> {
               ),
               child: Column(
                 children: [
-                  _buildSummaryRow('Subtotal', currencyProvider.formatPrice(cart.subtotalUsd)),
+                  _buildSummaryRow(
+                    'Subtotal',
+                    currencyProvider.formatPrice(cart.subtotalUsd),
+                  ),
                   const SizedBox(height: 6),
                   _buildSummaryRow('Jewelry Sizing Kit', 'FREE'),
                   const SizedBox(height: 6),
-                  _buildSummaryRow('Vault Insurance', cart.vaultInsurance ? currencyProvider.formatPrice(cart.insuranceCostUsd) : 'Waived'),
+                  _buildSummaryRow(
+                    'Vault Insurance',
+                    cart.vaultInsurance
+                        ? currencyProvider.formatPrice(cart.insuranceCostUsd)
+                        : 'Waived',
+                  ),
                   if (cart.discountPercentage > 0) ...[
                     const SizedBox(height: 6),
                     _buildSummaryRow(
@@ -415,11 +473,15 @@ class _CartScreenState extends State<CartScreen> {
                     children: [
                       Text(
                         'Total',
-                        style: AppTypography.headlineSM(color: AppColors.textPrimary),
+                        style: AppTypography.headlineSM(
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       Text(
                         currencyProvider.formatPrice(cart.totalUsd),
-                        style: AppTypography.headlineMD(color: AppColors.primaryGold),
+                        style: AppTypography.headlineMD(
+                          color: AppColors.primaryGold,
+                        ),
                       ),
                     ],
                   ),
@@ -437,7 +499,11 @@ class _CartScreenState extends State<CartScreen> {
           color: AppColors.surface,
           border: Border(top: BorderSide(color: AppColors.outlineLight)),
           boxShadow: [
-            BoxShadow(color: Color(0x14000000), blurRadius: 16, offset: Offset(0, -4)),
+            BoxShadow(
+              color: Color(0x14000000),
+              blurRadius: 16,
+              offset: Offset(0, -4),
+            ),
           ],
         ),
         child: SafeArea(
@@ -445,24 +511,38 @@ class _CartScreenState extends State<CartScreen> {
             text: _isCheckingOut ? 'SECURING ESCROW...' : 'CHECKOUT',
             height: 50,
             onPressed: _isCheckingOut ? null : _handleCheckout,
-            suffixIcon: const Icon(Icons.arrow_forward, size: 16, color: AppColors.textOnGold),
+            suffixIcon: const Icon(
+              Icons.arrow_forward,
+              size: 16,
+              color: AppColors.textOnGold,
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {bool isHighlight = false}) {
+  Widget _buildSummaryRow(
+    String label,
+    String value, {
+    bool isHighlight = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
-          style: AppTypography.bodyXS(color: isHighlight ? AppColors.emeraldGreen : AppColors.textSecondary),
+          style: AppTypography.bodyXS(
+            color: isHighlight
+                ? AppColors.emeraldGreen
+                : AppColors.textSecondary,
+          ),
         ),
         Text(
           value,
-          style: AppTypography.labelSM(color: isHighlight ? AppColors.emeraldGreen : AppColors.textPrimary),
+          style: AppTypography.labelSM(
+            color: isHighlight ? AppColors.emeraldGreen : AppColors.textPrimary,
+          ),
         ),
       ],
     );

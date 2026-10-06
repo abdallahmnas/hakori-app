@@ -27,13 +27,15 @@ class OrderProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   CommissionOrder? get lastCreatedOrder => _lastCreatedOrder;
 
-  List<CommissionOrder> get activeOrders => _orders
-      .where((o) => o.status != 'Delivered' && o.status != 'Cancelled')
-      .toList();
+  List<CommissionOrder> get activeOrders => _orders.where((o) {
+        final s = o.status.trim().toLowerCase();
+        return s != 'delivered' && s != 'cancelled' && s != 'settled' && s != 'completed';
+      }).toList();
 
-  List<CommissionOrder> get completedOrders => _orders
-      .where((o) => o.status == 'Delivered' || o.status == 'Settled')
-      .toList();
+  List<CommissionOrder> get completedOrders => _orders.where((o) {
+        final s = o.status.trim().toLowerCase();
+        return s == 'delivered' || s == 'settled' || s == 'completed';
+      }).toList();
 
   Future<void> fetchOrders({bool silent = false}) async {
     if (!silent) {
@@ -93,6 +95,18 @@ class OrderProvider extends ChangeNotifier {
       _errorMessage = 'Could not place commission order.';
       _status = OrderStateStatus.error;
       notifyListeners();
+      return null;
+    }
+  }
+
+  Future<CommissionOrder?> getOrderById(String id) async {
+    final match = _orders.where((o) => o.id == id);
+    if (match.isNotEmpty) return match.first;
+    if (_lastCreatedOrder != null && _lastCreatedOrder!.id == id) return _lastCreatedOrder;
+    try {
+      final fetched = await _orderService.getOrderDetails(id);
+      return fetched;
+    } catch (_) {
       return null;
     }
   }

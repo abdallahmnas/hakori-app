@@ -17,7 +17,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
@@ -31,11 +32,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.65, curve: Curves.easeIn)),
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.65, curve: Curves.easeIn),
+      ),
     );
 
     _scaleAnimation = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.7, curve: Curves.easeOutCubic)),
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOutCubic),
+      ),
     );
 
     _controller.forward();
@@ -52,7 +59,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final productProvider = Provider.of<ProductProvider>(context, listen: false);
+      final productProvider = Provider.of<ProductProvider>(
+        context,
+        listen: false,
+      );
 
       final results = await Future.wait([
         authProvider.restoreSession(),
@@ -132,7 +142,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: AppColors.darkCard,
-                      border: Border.all(color: AppColors.primaryGold, width: 1.5),
+                      border: Border.all(
+                        color: AppColors.primaryGold,
+                        width: 1.5,
+                      ),
                       boxShadow: const [AppColors.goldGlow],
                     ),
                     child: Image.network(
@@ -141,45 +154,47 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       errorBuilder: (context, error, stackTrace) => Image.asset(
                         AppConstants.logoLocalPath,
                         fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) => const Icon(
-                          Icons.diamond,
-                          size: 40,
-                          color: AppColors.primaryGold,
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                              Icons.diamond,
+                              size: 40,
+                              color: AppColors.primaryGold,
+                            ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 28),
                   // App Title
                   Text(
-                    'HAKORI AL MADINAH',
+                    'HAKORI AL-MADINAH',
                     textAlign: TextAlign.center,
-                    style: AppTypography.headlineLG(color: AppColors.textOnDark).copyWith(
-                      fontSize: 20,
-                      letterSpacing: 3.5,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: AppTypography.headlineLG(color: AppColors.textOnDark)
+                        .copyWith(
+                          fontSize: 20,
+                          letterSpacing: 3.5,
+                          fontWeight: FontWeight.w700,
+                        ),
                   ),
                   const SizedBox(height: 8),
                   // Subtitle
-                  Text(
-                    'HAUTE JOAILLERIE & STREET LUXURY',
-                    textAlign: TextAlign.center,
-                    style: AppTypography.labelSM(color: AppColors.primaryGold).copyWith(
-                      fontSize: 9,
-                      letterSpacing: 2.0,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Place Vendôme • Bespoke Dental Artistry',
-                    textAlign: TextAlign.center,
-                    style: AppTypography.bodyXS(color: AppColors.textMuted).copyWith(
-                      fontSize: 11,
-                    ),
-                  ),
-                  const SizedBox(height: 48),
+                  // Text(
+                  //   'HAUTE JOAILLERIE & STREET LUXURY',
+                  //   textAlign: TextAlign.center,
+                  //   style: AppTypography.labelSM(color: AppColors.primaryGold).copyWith(
+                  //     fontSize: 9,
+                  //     letterSpacing: 2.0,
+                  //     fontWeight: FontWeight.w600,
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 6),
+                  // Text(
+                  //   'Place Vendôme • Bespoke Dental Artistry',
+                  //   textAlign: TextAlign.center,
+                  //   style: AppTypography.bodyXS(color: AppColors.textMuted).copyWith(
+                  //     fontSize: 11,
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 48),
                   // Shimmer progress line
                   SizedBox(
                     width: 140,
@@ -188,7 +203,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       child: const LinearProgressIndicator(
                         minHeight: 2,
                         backgroundColor: AppColors.darkBorder,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          AppColors.primaryGold,
+                        ),
                       ),
                     ),
                   ),
@@ -206,11 +223,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.verified_outlined, size: 14, color: AppColors.primaryGold),
+                    const Icon(
+                      Icons.verified_outlined,
+                      size: 14,
+                      color: AppColors.primaryGold,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       '18K SOLID GOLD • CERTIFIED VVS DIAMONDS',
-                      style: AppTypography.labelSM(color: AppColors.textMuted).copyWith(fontSize: 8.5),
+                      style: AppTypography.labelSM(
+                        color: AppColors.textMuted,
+                      ).copyWith(fontSize: 8.5),
                     ),
                   ],
                 ),

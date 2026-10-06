@@ -1,7 +1,7 @@
 import '../constants/api_constants.dart';
 import '../models/order.dart';
 import 'api_client.dart';
-import 'mock_data_service.dart';
+// removed mock data import
 
 /// Orders & Payments API Service matching API_DOCUMENTATION.md
 class OrderService {
@@ -77,9 +77,9 @@ class OrderService {
             .map((o) => CommissionOrder.fromJson(o as Map<String, dynamic>))
             .toList();
       }
-      return MockDataService.orders;
+      return [];
     } catch (_) {
-      return MockDataService.orders;
+      return [];
     }
   }
 
@@ -91,10 +91,7 @@ class OrderService {
       final orderMap = data['order'] as Map<String, dynamic>? ?? data;
       return CommissionOrder.fromJson(orderMap);
     } catch (_) {
-      return MockDataService.orders.firstWhere(
-        (o) => o.id == id,
-        orElse: () => MockDataService.orders[0],
-      );
+      throw ApiException(message: "Order details not found", isNetworkError: false);
     }
   }
 

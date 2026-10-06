@@ -49,10 +49,7 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
     if (!auth.isAuthenticated || user == null) {
       return Scaffold(
         backgroundColor: AppColors.background,
-        appBar: const LuxuryAppBar(
-          title: 'PROFILE',
-          showBack: false,
-        ),
+        appBar: const LuxuryAppBar(title: 'PROFILE', showBack: false),
         body: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
@@ -73,7 +70,10 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: AppColors.darkBase,
-                      border: Border.all(color: AppColors.primaryGold, width: 2),
+                      border: Border.all(
+                        color: AppColors.primaryGold,
+                        width: 2,
+                      ),
                       boxShadow: const [AppColors.goldGlow],
                     ),
                     child: const Icon(
@@ -85,7 +85,9 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                   const SizedBox(height: 20),
                   Text(
                     'Login to Continue',
-                    style: AppTypography.headlineMD(color: AppColors.textPrimary),
+                    style: AppTypography.headlineMD(
+                      color: AppColors.textPrimary,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
@@ -112,18 +114,25 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
       );
     }
 
-    final displayName = user.fullName.isNotEmpty ? user.fullName : 'Valued Patron';
+    final displayName = user.fullName.isNotEmpty
+        ? user.fullName
+        : ([user.firstName, user.lastName].where((s) => s != null && s.isNotEmpty).join(' ').isNotEmpty
+            ? [user.firstName, user.lastName].where((s) => s != null && s.isNotEmpty).join(' ')
+            : 'Valued Patron');
     final displayEmail = user.email;
-    final displayPhone = user.phone?.isNotEmpty == true ? user.phone! : 'No phone registered';
-    final displayAddress = user.location?.isNotEmpty == true ? user.location! : 'No delivery address saved';
-    final displayTier = (user.tier?.isNotEmpty == true ? user.tier! : 'VIP MEMBER').toUpperCase();
+    final displayPhone = user.phone?.isNotEmpty == true
+        ? user.phone!
+        : 'No phone registered';
+    final displayAddress = user.displayAddress.isNotEmpty
+        ? user.displayAddress
+        : 'No delivery address saved';
+    final displayTier =
+        (user.tier?.isNotEmpty == true ? user.tier! : 'VIP MEMBER')
+            .toUpperCase();
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const LuxuryAppBar(
-        title: 'PROFILE',
-        showBack: false,
-      ),
+      appBar: const LuxuryAppBar(title: 'PROFILE', showBack: false),
       body: RefreshIndicator(
         color: AppColors.primaryGold,
         backgroundColor: AppColors.darkBase,
@@ -156,14 +165,36 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: AppColors.darkBase,
-                                border: Border.all(color: AppColors.primaryGold, width: 2),
+                                border: Border.all(
+                                  color: AppColors.primaryGold,
+                                  width: 2,
+                                ),
                                 boxShadow: const [AppColors.goldGlow],
                               ),
-                              child: Center(
-                                child: Text(
-                                  _getInitials(displayName),
-                                  style: AppTypography.headlineMD(color: AppColors.primaryGold),
-                                ),
+                              child: ClipOval(
+                                child: (user.avatarUrl != null && user.avatarUrl!.isNotEmpty)
+                                    ? Image.network(
+                                        user.avatarUrl!,
+                                        width: 68,
+                                        height: 68,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => Center(
+                                          child: Text(
+                                            _getInitials(displayName),
+                                            style: AppTypography.headlineMD(
+                                              color: AppColors.primaryGold,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Center(
+                                        child: Text(
+                                          _getInitials(displayName),
+                                          style: AppTypography.headlineMD(
+                                            color: AppColors.primaryGold,
+                                          ),
+                                        ),
+                                      ),
                               ),
                             ),
                             Positioned(
@@ -177,7 +208,11 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                                     color: AppColors.primaryGold,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: const Icon(Icons.edit, size: 13, color: AppColors.textOnGold),
+                                  child: const Icon(
+                                    Icons.edit,
+                                    size: 13,
+                                    color: AppColors.textOnGold,
+                                  ),
                                 ),
                               ),
                             ),
@@ -195,14 +230,18 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                               const SizedBox(height: 6),
                               Text(
                                 displayName,
-                                style: AppTypography.headlineMD(color: AppColors.textPrimary),
+                                style: AppTypography.headlineMD(
+                                  color: AppColors.textPrimary,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 displayEmail,
-                                style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                                style: AppTypography.bodyXS(
+                                  color: AppColors.textSecondary,
+                                ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -216,12 +255,18 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        const Icon(Icons.phone_outlined, size: 15, color: AppColors.primaryGold),
+                        const Icon(
+                          Icons.phone_outlined,
+                          size: 15,
+                          color: AppColors.primaryGold,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             displayPhone,
-                            style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                            style: AppTypography.bodyXS(
+                              color: AppColors.textSecondary,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -231,12 +276,18 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.location_on_outlined, size: 15, color: AppColors.primaryGold),
+                        const Icon(
+                          Icons.location_on_outlined,
+                          size: 15,
+                          color: AppColors.primaryGold,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             displayAddress,
-                            style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                            style: AppTypography.bodyXS(
+                              color: AppColors.textSecondary,
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -253,7 +304,8 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                 _buildMenuItem(
                   icon: Icons.person_outline,
                   title: 'Profile Information',
-                  subtitle: 'Update your name, contact phone, and delivery address',
+                  subtitle:
+                      'Update your name, contact phone, and delivery address',
                   onTap: () => _showEditProfileSheet(user, auth),
                 ),
                 const Divider(height: 1, indent: 56),
@@ -282,7 +334,9 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Fingerprint biometric login is coming soon.'),
+                        content: Text(
+                          'Fingerprint biometric login is coming soon.',
+                        ),
                         backgroundColor: AppColors.darkBase,
                         duration: Duration(seconds: 2),
                       ),
@@ -297,14 +351,16 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                 _buildMenuItem(
                   icon: Icons.confirmation_number_outlined,
                   title: 'Create Support Ticket',
-                  subtitle: 'Inquire on orders, jewelry repairs, or custom commissions',
+                  subtitle:
+                      'Inquire on orders, jewelry repairs, or custom commissions',
                   onTap: () => _showCreateTicketSheet(user),
                 ),
                 const Divider(height: 1, indent: 56),
                 _buildMenuItem(
                   icon: Icons.support_agent_outlined,
                   title: 'Lookup Ticket & Reply',
-                  subtitle: 'View ticket status, staff replies, and response thread',
+                  subtitle:
+                      'View ticket status, staff replies, and response thread',
                   onTap: _showTicketLookupSheet,
                 ),
               ]),
@@ -325,11 +381,17 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.logout, size: 18, color: AppColors.rubyRed),
+                        const Icon(
+                          Icons.logout,
+                          size: 18,
+                          color: AppColors.rubyRed,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           'LOG OUT',
-                          style: AppTypography.labelMD(color: AppColors.rubyRed).copyWith(fontWeight: FontWeight.bold),
+                          style: AppTypography.labelMD(
+                            color: AppColors.rubyRed,
+                          ).copyWith(fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -370,9 +432,7 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
             border: Border.all(color: AppColors.outlineLight),
             boxShadow: const [AppColors.softCardShadow],
           ),
-          child: Column(
-            children: items,
-          ),
+          child: Column(children: items),
         ),
       ],
     );
@@ -407,7 +467,9 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                 children: [
                   Text(
                     title,
-                    style: AppTypography.headlineSM(color: AppColors.textPrimary).copyWith(fontSize: 14),
+                    style: AppTypography.headlineSM(
+                      color: AppColors.textPrimary,
+                    ).copyWith(fontSize: 14),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -421,7 +483,12 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                 ],
               ),
             ),
-            trailing ?? const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textMuted),
+            trailing ??
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14,
+                  color: AppColors.textMuted,
+                ),
           ],
         ),
       ),
@@ -431,13 +498,13 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
   // Edit Profile Bottom Sheet (Connected directly to AuthProvider.updateProfile)
   void _showEditProfileSheet(User user, AuthProvider auth) {
     final names = user.fullName.split(' ');
-    final initialFirst = names.isNotEmpty ? names.first : '';
-    final initialLast = names.length > 1 ? names.sublist(1).join(' ') : '';
+    final initialFirst = user.firstName ?? (names.isNotEmpty ? names.first : '');
+    final initialLast = user.lastName ?? (names.length > 1 ? names.sublist(1).join(' ') : '');
 
     final firstCtrl = TextEditingController(text: initialFirst);
     final lastCtrl = TextEditingController(text: initialLast);
     final phoneCtrl = TextEditingController(text: user.phone ?? '');
-    final addressCtrl = TextEditingController(text: user.location ?? '');
+    final addressCtrl = TextEditingController(text: user.address ?? user.location ?? '');
     bool isSaving = false;
 
     showModalBottomSheet(
@@ -471,9 +538,15 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('Profile Information', style: AppTypography.headlineMD(color: AppColors.textPrimary)),
+                Text(
+                  'Profile Information',
+                  style: AppTypography.headlineMD(color: AppColors.textPrimary),
+                ),
                 const SizedBox(height: 4),
-                Text('Update your personal details & shipping contact', style: AppTypography.bodyXS(color: AppColors.textSecondary)),
+                Text(
+                  'Update your personal details & shipping contact',
+                  style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                ),
                 const SizedBox(height: 20),
                 Row(
                   children: [
@@ -481,7 +554,11 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                       child: AppTextField(
                         label: 'FIRST NAME',
                         controller: firstCtrl,
-                        prefixIcon: const Icon(Icons.person_outline, size: 20, color: AppColors.primaryGold),
+                        prefixIcon: const Icon(
+                          Icons.person_outline,
+                          size: 20,
+                          color: AppColors.primaryGold,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -489,7 +566,11 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                       child: AppTextField(
                         label: 'LAST NAME',
                         controller: lastCtrl,
-                        prefixIcon: const Icon(Icons.person_outline, size: 20, color: AppColors.primaryGold),
+                        prefixIcon: const Icon(
+                          Icons.person_outline,
+                          size: 20,
+                          color: AppColors.primaryGold,
+                        ),
                       ),
                     ),
                   ],
@@ -499,20 +580,32 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                   label: 'EMAIL ADDRESS',
                   controller: TextEditingController(text: user.email),
                   enabled: false,
-                  prefixIcon: const Icon(Icons.email_outlined, size: 20, color: AppColors.primaryGold),
+                  prefixIcon: const Icon(
+                    Icons.email_outlined,
+                    size: 20,
+                    color: AppColors.primaryGold,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 AppTextField(
                   label: 'PHONE NUMBER',
                   controller: phoneCtrl,
                   keyboardType: TextInputType.phone,
-                  prefixIcon: const Icon(Icons.phone_outlined, size: 20, color: AppColors.primaryGold),
+                  prefixIcon: const Icon(
+                    Icons.phone_outlined,
+                    size: 20,
+                    color: AppColors.primaryGold,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 AppTextField(
                   label: 'PRIMARY DELIVERY ADDRESS',
                   controller: addressCtrl,
-                  prefixIcon: const Icon(Icons.location_on_outlined, size: 20, color: AppColors.primaryGold),
+                  prefixIcon: const Icon(
+                    Icons.location_on_outlined,
+                    size: 20,
+                    color: AppColors.primaryGold,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 AppButton.primary(
@@ -534,8 +627,15 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(ok ? 'Profile updated successfully.' : (auth.errorMessage ?? 'Failed to update profile.')),
-                                backgroundColor: ok ? AppColors.darkBase : AppColors.error,
+                                content: Text(
+                                  ok
+                                      ? 'Profile updated successfully.'
+                                      : (auth.errorMessage ??
+                                            'Failed to update profile.'),
+                                ),
+                                backgroundColor: ok
+                                    ? AppColors.darkBase
+                                    : AppColors.error,
                               ),
                             );
                           }
@@ -552,6 +652,9 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
   // Create Support Ticket Bottom Sheet (API-driven POST /tickets)
   void _showCreateTicketSheet(User user) {
     final ticketService = Provider.of<TicketService>(context, listen: false);
+    final nameCtrl = TextEditingController(text: user.fullName);
+    final emailCtrl = TextEditingController(text: user.email);
+    final phoneCtrl = TextEditingController(text: user.phone ?? '');
     final subjectCtrl = TextEditingController();
     final orderIdCtrl = TextEditingController();
     final messageCtrl = TextEditingController();
@@ -590,18 +693,67 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('Create Support Ticket', style: AppTypography.headlineMD(color: AppColors.textPrimary)),
+                Text(
+                  'Create Support Ticket',
+                  style: AppTypography.headlineMD(color: AppColors.textPrimary),
+                ),
                 const SizedBox(height: 4),
-                Text('Direct communication with Hakori concierge & support team', style: AppTypography.bodyXS(color: AppColors.textSecondary)),
+                Text(
+                  'Direct communication with Hakori concierge & support team',
+                  style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                ),
                 const SizedBox(height: 20),
                 AppTextField(
-                  label: 'SUBJECT',
-                  hintText: 'e.g. Order transit status or bespoke jewelry sizing',
-                  controller: subjectCtrl,
-                  prefixIcon: const Icon(Icons.title, size: 20, color: AppColors.primaryGold),
+                  label: 'CUSTOMER NAME',
+                  hintText: 'Lord Sterling',
+                  controller: nameCtrl,
+                  prefixIcon: const Icon(
+                    Icons.person_outline,
+                    size: 20,
+                    color: AppColors.primaryGold,
+                  ),
                 ),
                 const SizedBox(height: 14),
-                Text('CATEGORY', style: AppTypography.labelSM(color: AppColors.textSecondary)),
+                AppTextField(
+                  label: 'CUSTOMER EMAIL',
+                  hintText: 'sterling@mayfair.co.uk',
+                  controller: emailCtrl,
+                  keyboardType: TextInputType.emailAddress,
+                  prefixIcon: const Icon(
+                    Icons.email_outlined,
+                    size: 20,
+                    color: AppColors.primaryGold,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                AppTextField(
+                  label: 'CUSTOMER PHONE',
+                  hintText: '+44 20 7946 0992',
+                  controller: phoneCtrl,
+                  keyboardType: TextInputType.phone,
+                  prefixIcon: const Icon(
+                    Icons.phone_outlined,
+                    size: 20,
+                    color: AppColors.primaryGold,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                AppTextField(
+                  label: 'SUBJECT',
+                  hintText:
+                      'e.g. Impression kit delivery tracking',
+                  controller: subjectCtrl,
+                  prefixIcon: const Icon(
+                    Icons.title,
+                    size: 20,
+                    color: AppColors.primaryGold,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  'CATEGORY',
+                  style: AppTypography.labelSM(color: AppColors.textSecondary),
+                ),
                 const SizedBox(height: 6),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14),
@@ -615,20 +767,44 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                       isExpanded: true,
                       value: selectedCategory,
                       items: const [
-                        DropdownMenuItem(value: 'Order Inquiry', child: Text('Order Inquiry')),
-                        DropdownMenuItem(value: 'Custom Commission', child: Text('Custom Commission')),
-                        DropdownMenuItem(value: 'Sizing & Repair', child: Text('Sizing & Repair')),
-                        DropdownMenuItem(value: 'Payment & Billing', child: Text('Payment & Billing')),
-                        DropdownMenuItem(value: 'General Support', child: Text('General Support')),
+                        DropdownMenuItem(
+                          value: 'Order Inquiry',
+                          child: Text('Order Inquiry'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Bespoke Commission',
+                          child: Text('Bespoke Commission'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Fitting & Impression',
+                          child: Text('Fitting & Impression'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Payment & Bullion',
+                          child: Text('Payment & Bullion'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'Vault Care',
+                          child: Text('Vault Care'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'General',
+                          child: Text('General'),
+                        ),
                       ],
                       onChanged: (val) {
-                        if (val != null) setSheetState(() => selectedCategory = val);
+                        if (val != null) {
+                          setSheetState(() => selectedCategory = val);
+                        }
                       },
                     ),
                   ),
                 ),
                 const SizedBox(height: 14),
-                Text('PRIORITY', style: AppTypography.labelSM(color: AppColors.textSecondary)),
+                Text(
+                  'PRIORITY',
+                  style: AppTypography.labelSM(color: AppColors.textSecondary),
+                ),
                 const SizedBox(height: 6),
                 Row(
                   children: ['LOW', 'NORMAL', 'HIGH', 'URGENT'].map((p) {
@@ -638,12 +814,17 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                       child: ChoiceChip(
                         label: Text(
                           p,
-                          style: AppTypography.labelSM(color: isSel ? AppColors.darkBase : AppColors.textPrimary),
+                          style: AppTypography.labelSM(
+                            color: isSel
+                                ? AppColors.darkBase
+                                : AppColors.textPrimary,
+                          ),
                         ),
                         selected: isSel,
                         selectedColor: AppColors.primaryGold,
                         backgroundColor: AppColors.surface,
-                        onSelected: (_) => setSheetState(() => selectedPriority = p),
+                        onSelected: (_) =>
+                            setSheetState(() => selectedPriority = p),
                       ),
                     );
                   }).toList(),
@@ -651,17 +832,25 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                 const SizedBox(height: 14),
                 AppTextField(
                   label: 'ORDER ID (OPTIONAL)',
-                  hintText: 'e.g. ord_123',
+                  hintText: 'e.g. AUR-98214',
                   controller: orderIdCtrl,
-                  prefixIcon: const Icon(Icons.receipt_outlined, size: 20, color: AppColors.primaryGold),
+                  prefixIcon: const Icon(
+                    Icons.receipt_outlined,
+                    size: 20,
+                    color: AppColors.primaryGold,
+                  ),
                 ),
                 const SizedBox(height: 14),
                 AppTextField(
                   label: 'MESSAGE / DETAILS',
-                  hintText: 'Describe your request or issue in detail...',
+                  hintText: 'When will the 3D impression kit arrive in Mayfair?',
                   controller: messageCtrl,
                   maxLines: 4,
-                  prefixIcon: const Icon(Icons.chat_bubble_outline, size: 20, color: AppColors.primaryGold),
+                  prefixIcon: const Icon(
+                    Icons.chat_bubble_outline,
+                    size: 20,
+                    color: AppColors.primaryGold,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 AppButton.primary(
@@ -669,12 +858,17 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                   onPressed: isSubmitting
                       ? null
                       : () async {
+                          final custName = nameCtrl.text.trim();
+                          final custEmail = emailCtrl.text.trim();
+                          final custPhone = phoneCtrl.text.trim();
                           final subject = subjectCtrl.text.trim();
                           final message = messageCtrl.text.trim();
-                          if (subject.isEmpty || message.isEmpty) {
+                          if (custName.isEmpty || custEmail.isEmpty || subject.isEmpty || message.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content: Text('Please provide both a subject and a message.'),
+                                content: Text(
+                                  'Please provide name, email, subject, and message.',
+                                ),
                                 backgroundColor: AppColors.error,
                               ),
                             );
@@ -684,13 +878,15 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                           setSheetState(() => isSubmitting = true);
                           try {
                             final ticket = await ticketService.createTicket(
-                              customerName: user.fullName.isNotEmpty ? user.fullName : 'Valued Patron',
-                              customerEmail: user.email,
-                              customerPhone: user.phone,
+                              customerName: custName,
+                              customerEmail: custEmail,
+                              customerPhone: custPhone.isNotEmpty ? custPhone : null,
                               subject: subject,
                               category: selectedCategory,
                               priority: selectedPriority,
-                              orderId: orderIdCtrl.text.trim().isNotEmpty ? orderIdCtrl.text.trim() : null,
+                              orderId: orderIdCtrl.text.trim().isNotEmpty
+                                  ? orderIdCtrl.text.trim()
+                                  : null,
                               message: message,
                             );
 
@@ -703,36 +899,64 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                                 context: context,
                                 builder: (dialogCtx) => AlertDialog(
                                   backgroundColor: AppColors.surface,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
                                   title: Row(
                                     children: [
-                                      const Icon(Icons.check_circle, color: AppColors.primaryGold, size: 24),
+                                      const Icon(
+                                        Icons.check_circle,
+                                        color: AppColors.primaryGold,
+                                        size: 24,
+                                      ),
                                       const SizedBox(width: 8),
-                                      Text('Ticket Created', style: AppTypography.headlineMD(color: AppColors.textPrimary)),
+                                      Text(
+                                        'Ticket Created',
+                                        style: AppTypography.headlineMD(
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
                                     ],
                                   ),
                                   content: Column(
                                     mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         'Your support ticket has been submitted to the atelier concierge.',
-                                        style: AppTypography.bodyMD(color: AppColors.textSecondary),
+                                        style: AppTypography.bodyMD(
+                                          color: AppColors.textSecondary,
+                                        ),
                                       ),
                                       const SizedBox(height: 12),
                                       Container(
                                         padding: const EdgeInsets.all(12),
                                         decoration: BoxDecoration(
                                           color: AppColors.darkBase,
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                         child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text('Ticket #:', style: AppTypography.labelSM(color: AppColors.textOnDark)),
+                                            Text(
+                                              'Ticket #:',
+                                              style: AppTypography.labelSM(
+                                                color: AppColors.textOnDark,
+                                              ),
+                                            ),
                                             Text(
                                               ticket.ticketNumber,
-                                              style: AppTypography.labelMD(color: AppColors.primaryGold).copyWith(fontWeight: FontWeight.bold),
+                                              style:
+                                                  AppTypography.labelMD(
+                                                    color:
+                                                        AppColors.primaryGold,
+                                                  ).copyWith(
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
                                             ),
                                           ],
                                         ),
@@ -750,10 +974,12 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                             }
                           } catch (e) {
                             setSheetState(() => isSubmitting = false);
-                            if (context.mounted) {
+                            if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Failed to submit ticket: ${e.toString()}'),
+                                  content: Text(
+                                    'Failed to submit ticket: ${e.toString()}',
+                                  ),
                                   backgroundColor: AppColors.error,
                                 ),
                               );
@@ -809,9 +1035,15 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text('Support Ticket Lookup', style: AppTypography.headlineMD(color: AppColors.textPrimary)),
+                Text(
+                  'Support Ticket Lookup',
+                  style: AppTypography.headlineMD(color: AppColors.textPrimary),
+                ),
                 const SizedBox(height: 4),
-                Text('Enter ticket ID to check real-time status and responses', style: AppTypography.bodyXS(color: AppColors.textSecondary)),
+                Text(
+                  'Enter ticket ID to check real-time status and responses',
+                  style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -820,7 +1052,11 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                         label: 'TICKET ID',
                         hintText: 'Enter ticket ID',
                         controller: idCtrl,
-                        prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.primaryGold),
+                        prefixIcon: const Icon(
+                          Icons.search,
+                          size: 20,
+                          color: AppColors.primaryGold,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -837,7 +1073,9 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                                 if (tid.isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('Please enter a ticket ID.'),
+                                      content: Text(
+                                        'Please enter a ticket ID.',
+                                      ),
                                       backgroundColor: AppColors.error,
                                     ),
                                   );
@@ -845,7 +1083,8 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                                 }
                                 setSheetState(() => isLoading = true);
                                 try {
-                                  final result = await ticketService.getTicketDetails(tid);
+                                  final result = await ticketService
+                                      .getTicketDetails(tid);
                                   setSheetState(() {
                                     ticket = result;
                                     isLoading = false;
@@ -855,7 +1094,9 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                                   if (mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('Ticket not found: ${e.toString()}'),
+                                        content: Text(
+                                          'Ticket not found: ${e.toString()}',
+                                        ),
                                         backgroundColor: AppColors.error,
                                       ),
                                     );
@@ -883,11 +1124,14 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                           children: [
                             Text(
                               ticket!.ticketNumber,
-                              style: AppTypography.headlineSM(color: AppColors.primaryGold),
+                              style: AppTypography.headlineSM(
+                                color: AppColors.primaryGold,
+                              ),
                             ),
                             AppBadgeChip(
                               label: ticket!.status.toUpperCase(),
-                              variant: ticket!.status.toUpperCase() == 'RESOLVED'
+                              variant:
+                                  ticket!.status.toUpperCase() == 'RESOLVED'
                                   ? BadgeChipVariant.goldPurity
                                   : BadgeChipVariant.darkTag,
                             ),
@@ -896,67 +1140,98 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                         const SizedBox(height: 6),
                         Text(
                           ticket!.subject,
-                          style: AppTypography.headlineMD(color: AppColors.textPrimary).copyWith(fontSize: 16),
+                          style: AppTypography.headlineMD(
+                            color: AppColors.textPrimary,
+                          ).copyWith(fontSize: 16),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Category: ${ticket!.category} • Priority: ${ticket!.priority}',
-                          style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                          style: AppTypography.bodyXS(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                         const SizedBox(height: 12),
                         const Divider(height: 1),
                         const SizedBox(height: 12),
-                        Text('Original Inquiry:', style: AppTypography.labelSM(color: AppColors.textSecondary)),
+                        Text(
+                          'Original Inquiry:',
+                          style: AppTypography.labelSM(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                         const SizedBox(height: 4),
-                        Text(ticket!.message, style: AppTypography.bodySM(color: AppColors.textPrimary)),
+                        Text(
+                          ticket!.message,
+                          style: AppTypography.bodySM(
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
                         if (ticket!.responses.isNotEmpty) ...[
                           const SizedBox(height: 14),
-                          Text('Responses:', style: AppTypography.labelSM(color: AppColors.primaryGold)),
+                          Text(
+                            'Responses:',
+                            style: AppTypography.labelSM(
+                              color: AppColors.primaryGold,
+                            ),
+                          ),
                           const SizedBox(height: 8),
-                          ...ticket!.responses.map((resp) => Container(
-                                margin: const EdgeInsets.only(bottom: 8),
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: resp.sender == 'customer' ? AppColors.surface : AppColors.darkBase,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: resp.sender == 'customer'
-                                        ? AppColors.outlineLight
-                                        : AppColors.primaryGold.withAlpha(120),
-                                  ),
+                          ...ticket!.responses.map(
+                            (resp) => Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: resp.sender == 'customer'
+                                    ? AppColors.surface
+                                    : AppColors.darkBase,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: resp.sender == 'customer'
+                                      ? AppColors.outlineLight
+                                      : AppColors.primaryGold.withAlpha(120),
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          resp.senderName ?? (resp.sender == 'customer' ? 'You' : 'Concierge Staff'),
-                                          style: AppTypography.labelSM(
-                                            color: resp.sender == 'customer'
-                                                ? AppColors.textPrimary
-                                                : AppColors.primaryGold,
-                                          ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        resp.senderName ??
+                                            (resp.sender == 'customer'
+                                                ? 'You'
+                                                : 'Concierge Staff'),
+                                        style: AppTypography.labelSM(
+                                          color: resp.sender == 'customer'
+                                              ? AppColors.textPrimary
+                                              : AppColors.primaryGold,
                                         ),
-                                        Text(
-                                          resp.createdAt.length > 10 ? resp.createdAt.substring(0, 10) : resp.createdAt,
-                                          style: AppTypography.bodyXS(color: AppColors.textMuted),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      resp.message,
-                                      style: AppTypography.bodySM(
-                                        color: resp.sender == 'customer'
-                                            ? AppColors.textPrimary
-                                            : AppColors.textOnDark,
                                       ),
+                                      Text(
+                                        resp.createdAt.length > 10
+                                            ? resp.createdAt.substring(0, 10)
+                                            : resp.createdAt,
+                                        style: AppTypography.bodyXS(
+                                          color: AppColors.textMuted,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    resp.message,
+                                    style: AppTypography.bodySM(
+                                      color: resp.sender == 'customer'
+                                          ? AppColors.textPrimary
+                                          : AppColors.textOnDark,
                                     ),
-                                  ],
-                                ),
-                              )),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                         const SizedBox(height: 14),
                         AppTextField(
@@ -975,10 +1250,11 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                                   if (msg.isEmpty) return;
                                   setSheetState(() => isReplying = true);
                                   try {
-                                    final updated = await ticketService.replyToTicket(
-                                      id: ticket!.id,
-                                      message: msg,
-                                    );
+                                    final updated = await ticketService
+                                        .replyToTicket(
+                                          id: ticket!.id,
+                                          message: msg,
+                                        );
                                     replyCtrl.clear();
                                     setSheetState(() {
                                       ticket = updated;
@@ -987,9 +1263,13 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                                   } catch (e) {
                                     setSheetState(() => isReplying = false);
                                     if (mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         SnackBar(
-                                          content: Text('Failed to send reply: ${e.toString()}'),
+                                          content: Text(
+                                            'Failed to send reply: ${e.toString()}',
+                                          ),
                                           backgroundColor: AppColors.error,
                                         ),
                                       );
@@ -1045,35 +1325,54 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Change Password', style: AppTypography.headlineMD(color: AppColors.textPrimary)),
+              Text(
+                'Change Password',
+                style: AppTypography.headlineMD(color: AppColors.textPrimary),
+              ),
               const SizedBox(height: 4),
-              Text('Enter your current password and choose a new secure password', style: AppTypography.bodyXS(color: AppColors.textSecondary)),
+              Text(
+                'Enter your current password and choose a new secure password',
+                style: AppTypography.bodyXS(color: AppColors.textSecondary),
+              ),
               const SizedBox(height: 20),
               AppTextField(
                 label: 'CURRENT PASSWORD',
                 controller: currentPassCtrl,
                 isPassword: true,
-                prefixIcon: const Icon(Icons.lock_outline, size: 20, color: AppColors.primaryGold),
+                prefixIcon: const Icon(
+                  Icons.lock_outline,
+                  size: 20,
+                  color: AppColors.primaryGold,
+                ),
               ),
               const SizedBox(height: 14),
               AppTextField(
                 label: 'NEW PASSWORD',
                 controller: newPassCtrl,
                 isPassword: true,
-                prefixIcon: const Icon(Icons.key_outlined, size: 20, color: AppColors.primaryGold),
+                prefixIcon: const Icon(
+                  Icons.key_outlined,
+                  size: 20,
+                  color: AppColors.primaryGold,
+                ),
               ),
               const SizedBox(height: 14),
               AppTextField(
                 label: 'CONFIRM NEW PASSWORD',
                 controller: confirmPassCtrl,
                 isPassword: true,
-                prefixIcon: const Icon(Icons.check_circle_outline, size: 20, color: AppColors.primaryGold),
+                prefixIcon: const Icon(
+                  Icons.check_circle_outline,
+                  size: 20,
+                  color: AppColors.primaryGold,
+                ),
               ),
               const SizedBox(height: 24),
               AppButton.primary(
                 text: 'UPDATE PASSWORD',
                 onPressed: () {
-                  if (newPassCtrl.text.isEmpty || newPassCtrl.text != confirmPassCtrl.text) {
+                  if (newPassCtrl.text.isEmpty ||
+                      newPassCtrl.text != confirmPassCtrl.text) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Passwords do not match or are empty.'),
@@ -1125,13 +1424,20 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('Notification Settings', style: AppTypography.headlineMD(color: AppColors.textPrimary)),
+              Text(
+                'Notification Settings',
+                style: AppTypography.headlineMD(color: AppColors.textPrimary),
+              ),
               const SizedBox(height: 4),
-              Text('Choose the notifications you want to receive', style: AppTypography.bodyXS(color: AppColors.textSecondary)),
+              Text(
+                'Choose the notifications you want to receive',
+                style: AppTypography.bodyXS(color: AppColors.textSecondary),
+              ),
               const SizedBox(height: 20),
               _buildNotificationSwitch(
                 title: 'Order & Transit Tracking',
-                subtitle: 'Get real-time alerts on casting, stone setting & shipping',
+                subtitle:
+                    'Get real-time alerts on casting, stone setting & shipping',
                 value: _orderUpdates,
                 onChanged: (val) {
                   setModalState(() => _orderUpdates = val);
@@ -1141,7 +1447,8 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
               const Divider(height: 16),
               _buildNotificationSwitch(
                 title: 'Atelier Drops & New Pieces',
-                subtitle: 'Early access notifications for limited seasonal collections',
+                subtitle:
+                    'Early access notifications for limited seasonal collections',
                 value: _dropAlerts,
                 onChanged: (val) {
                   setModalState(() => _dropAlerts = val);
@@ -1192,9 +1499,17 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: AppTypography.headlineSM(color: AppColors.textPrimary).copyWith(fontSize: 14)),
+              Text(
+                title,
+                style: AppTypography.headlineSM(
+                  color: AppColors.textPrimary,
+                ).copyWith(fontSize: 14),
+              ),
               const SizedBox(height: 2),
-              Text(subtitle, style: AppTypography.bodyXS(color: AppColors.textSecondary)),
+              Text(
+                subtitle,
+                style: AppTypography.bodyXS(color: AppColors.textSecondary),
+              ),
             ],
           ),
         ),
@@ -1215,7 +1530,10 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: Text('Log Out', style: AppTypography.headlineMD(color: AppColors.textPrimary)),
+        title: Text(
+          'Log Out',
+          style: AppTypography.headlineMD(color: AppColors.textPrimary),
+        ),
         content: Text(
           'Are you sure you want to log out of your Hakori Al Madinah account?',
           style: AppTypography.bodyMD(color: AppColors.textSecondary),
@@ -1223,12 +1541,17 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('CANCEL', style: AppTypography.labelMD(color: AppColors.textSecondary)),
+            child: Text(
+              'CANCEL',
+              style: AppTypography.labelMD(color: AppColors.textSecondary),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.rubyRed,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
             onPressed: () async {
               Navigator.pop(ctx);
@@ -1238,7 +1561,10 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                 context.go('/welcome');
               }
             },
-            child: Text('LOG OUT', style: AppTypography.labelMD(color: Colors.white)),
+            child: Text(
+              'LOG OUT',
+              style: AppTypography.labelMD(color: Colors.white),
+            ),
           ),
         ],
       ),

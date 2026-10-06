@@ -10,7 +10,7 @@ class CartProvider extends ChangeNotifier {
 
   String _promoCode = '';
   double _discountPercentage = 0.0;
-  bool _vaultInsurance = true;
+  bool _vaultInsurance = false;
 
   CartProvider([this._storageService]) {
     _restoreFromStorage();
@@ -45,12 +45,16 @@ class CartProvider extends ChangeNotifier {
   bool get isEmpty => _items.isEmpty;
   int get itemCount => _items.fold(0, (sum, item) => sum + item.quantity);
 
-  double get subtotalUsd => _items.fold(0.0, (sum, item) => sum + item.totalPriceUsd);
-  double get subtotalNgn => _items.fold(0.0, (sum, item) => sum + item.totalPriceNgn);
+  double get subtotalUsd =>
+      _items.fold(0.0, (sum, item) => sum + item.totalPriceUsd);
+  double get subtotalNgn =>
+      _items.fold(0.0, (sum, item) => sum + item.totalPriceNgn);
   double get insuranceCostUsd => _vaultInsurance ? 150.0 : 0.0;
   double get insuranceCostNgn => _vaultInsurance ? 232500.0 : 0.0;
-  double get totalUsd => (subtotalUsd * (1 - _discountPercentage)) + insuranceCostUsd;
-  double get totalNgn => (subtotalNgn * (1 - _discountPercentage)) + insuranceCostNgn;
+  double get totalUsd =>
+      (subtotalUsd * (1 - _discountPercentage)) + insuranceCostUsd;
+  double get totalNgn =>
+      (subtotalNgn * (1 - _discountPercentage)) + insuranceCostNgn;
 
   void addToCart(
     Product product, {
@@ -59,7 +63,8 @@ class CartProvider extends ChangeNotifier {
     String arch = 'Top 6 Arch',
   }) {
     final existingIndex = _items.indexWhere(
-      (item) => item.product.id == product.id &&
+      (item) =>
+          item.product.id == product.id &&
           item.selectedMetal == metal &&
           item.selectedArch == arch,
     );
@@ -105,7 +110,8 @@ class CartProvider extends ChangeNotifier {
   void toggleImpressionKit(String itemId) {
     final index = _items.indexWhere((item) => item.id == itemId);
     if (index >= 0) {
-      _items[index].impressionKitIncluded = !_items[index].impressionKitIncluded;
+      _items[index].impressionKitIncluded =
+          !_items[index].impressionKitIncluded;
       _persistCart();
       notifyListeners();
     }
@@ -117,7 +123,8 @@ class CartProvider extends ChangeNotifier {
   }
 
   bool applyPromoCode(String code) {
-    if (code.toUpperCase() == 'HAKORI2026' || code.toUpperCase() == 'VIPVAULT') {
+    if (code.toUpperCase() == 'HAKORI2026' ||
+        code.toUpperCase() == 'VIPVAULT') {
       _promoCode = code.toUpperCase();
       _discountPercentage = 0.10; // 10% VIP Discount
       notifyListeners();

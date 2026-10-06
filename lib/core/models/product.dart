@@ -1,21 +1,51 @@
-/// Product Model supporting API_DOCUMENTATION.md and existing UI fields
+/// Product Model supporting API_DOCUMENTATION.md and active backend payload:
+/// {
+///   "id": "245eaddc-97d8-461b-95e9-6366056fc71d",
+///   "name": "leshi",
+///   "sku": "vvv",
+///   "category": "necklace",
+///   "price": 46,
+///   "costPrice": 22,
+///   "castingPrice": 46,
+///   "stock": 67,
+///   "description": "cccc",
+///   "imageUrl": "https://...",
+///   "images": ["https://..."],
+///   "material": "18K Solid Yellow Gold",
+///   "placement": "Fine Product",
+///   "rating": 5,
+///   "inStock": true,
+///   "status": "Active",
+///   "createdAt": "2026-10-03T12:56:50.445Z",
+///   "updatedAt": "2026-10-03T12:56:50.445Z",
+///   "inventory": 67,
+///   "image": "https://...",
+///   "lowStock": false
+/// }
 class Product {
   final String id;
   final String title;
   final String subtitle;
   final String category;
   final double price;
+  final double costPrice;
+  final double castingPrice;
   final String currency;
   final double rating;
   final int reviewCount;
-  final String purity;
+  final String material;
+  final String placement;
   final String diamondClarity;
   final List<String> images;
   final String description;
   final bool inStock;
-  final int stockQuantity;
+  final bool lowStock;
+  final int stock;
+  final int inventory;
   final String sku;
-  final String archType; // 'Top 6', 'Bottom 6', 'Full 16', 'Single Cap'
+  final String status;
+  final String createdAt;
+  final String updatedAt;
   final List<String> metalOptions;
   final List<String> stoneOptions;
   final bool isFeatured;
@@ -25,44 +55,61 @@ class Product {
     required this.id,
     String? title,
     String? name,
-    this.subtitle = 'Haute Joaillerie Dental Cap',
+    this.subtitle = 'Haute Joaillerie Atelier Piece',
     required this.category,
     double? price,
     double? priceUsd,
     double? priceNgn,
+    double? costPrice,
+    double? castingPrice,
     String? imageUrl,
     this.currency = 'USD',
-    this.rating = 4.95,
-    this.reviewCount = 48,
-    this.purity = '18K Yellow Gold',
+    this.rating = 5.0,
+    this.reviewCount = 1,
+    String? material,
+    String? purity,
+    String? placement,
+    String? archType,
     this.diamondClarity = 'VVS1 Natural',
     List<String>? images,
     List<String>? galleryImages,
     required this.description,
     this.inStock = true,
-    this.stockQuantity = 10,
+    this.lowStock = false,
+    int? stock,
+    int? inventory,
+    int? stockQuantity,
     this.sku = '',
-    this.archType = 'Top 6 Arch',
-    this.metalOptions = const [
-      '18K Yellow Gold',
-      '18K White Gold',
-      '18K Rose Gold',
-      '950 Platinum'
-    ],
-    this.stoneOptions = const [
-      'VVS1 Natural Diamonds',
-      'Flawless Moissanite',
-      'Emerald Inlay',
-      'Deep Cut Plain'
-    ],
+    this.status = 'Active',
+    this.createdAt = '',
+    this.updatedAt = '',
+    this.metalOptions = const [],
+    this.stoneOptions = const [],
     this.isFeatured = false,
     this.isBestSeller = false,
-  })  : title = title ?? name ?? 'Haute Piece',
+  })  : title = (name != null && name.isNotEmpty) ? name : (title ?? 'Bespoke Atelier Piece'),
         price = price ?? priceUsd ?? 0.0,
-        images = images ?? galleryImages ?? (imageUrl != null ? [imageUrl] : const []);
+        costPrice = costPrice ?? 0.0,
+        castingPrice = castingPrice ?? 0.0,
+        material = (material != null && material.isNotEmpty)
+            ? material
+            : (purity != null && purity.isNotEmpty ? purity : '18K Solid Yellow Gold'),
+        placement = (placement != null && placement.isNotEmpty)
+            ? placement
+            : (archType != null && archType.isNotEmpty ? archType : 'Fine Product'),
+        stock = stock ?? inventory ?? stockQuantity ?? 1,
+        inventory = inventory ?? stock ?? stockQuantity ?? 1,
+        images = (images != null && images.isNotEmpty)
+            ? images
+            : (galleryImages != null && galleryImages.isNotEmpty
+                ? galleryImages
+                : (imageUrl != null && imageUrl.isNotEmpty ? [imageUrl] : const []));
 
   // UI Backward Compatibility Getters
   String get name => title;
+  String get purity => material;
+  String get archType => placement;
+  int get stockQuantity => stock;
   double get priceUsd => price;
   double get priceNgn => price * 1550.0;
   String get imageUrl => images.isNotEmpty
@@ -84,33 +131,58 @@ class Product {
     final rawPrice = json['price'] ?? json['priceUsd'] ?? 0;
     final double parsedPrice = (rawPrice is num) ? rawPrice.toDouble() : double.tryParse(rawPrice.toString()) ?? 0.0;
 
+    final rawCostPrice = json['costPrice'] ?? 0;
+    final double parsedCostPrice = (rawCostPrice is num) ? rawCostPrice.toDouble() : double.tryParse(rawCostPrice.toString()) ?? 0.0;
+
+    final rawCastingPrice = json['castingPrice'] ?? 0;
+    final double parsedCastingPrice = (rawCastingPrice is num) ? rawCastingPrice.toDouble() : double.tryParse(rawCastingPrice.toString()) ?? 0.0;
+
     final rawStock = json['stock'] ?? json['inventory'] ?? json['stockQuantity'];
-    final int parsedStock = (rawStock is num) ? rawStock.toInt() : (json['inStock'] == false ? 0 : 10);
+    final int parsedStock = (rawStock is num) ? rawStock.toInt() : (int.tryParse(rawStock?.toString() ?? '') ?? 0);
 
     final rawInStock = json['inStock'];
     final bool parsedInStock = (rawInStock is bool) ? rawInStock : (parsedStock > 0);
 
+    final rawLowStock = json['lowStock'];
+    final bool parsedLowStock = (rawLowStock is bool) ? rawLowStock : false;
+
+    // Parse options only if explicitly provided in backend
+    List<String> parsedMetalOptions = [];
+    if (json['metalOptions'] is List && (json['metalOptions'] as List).isNotEmpty) {
+      parsedMetalOptions = (json['metalOptions'] as List).map((e) => e.toString()).toList();
+    }
+
+    List<String> parsedStoneOptions = [];
+    if (json['stoneOptions'] is List && (json['stoneOptions'] as List).isNotEmpty) {
+      parsedStoneOptions = (json['stoneOptions'] as List).map((e) => e.toString()).toList();
+    }
+
     return Product(
       id: json['id']?.toString() ?? '',
-      title: json['title']?.toString() ?? json['name']?.toString() ?? 'Haute Piece',
-      subtitle: json['subtitle']?.toString() ?? 'Haute Joaillerie Dental Cap',
-      category: json['category']?.toString() ?? 'Haute Joaillerie',
+      name: json['name']?.toString() ?? json['title']?.toString() ?? 'Bespoke Atelier Piece',
+      subtitle: json['subtitle']?.toString() ?? 'Haute Joaillerie Atelier Piece',
+      category: json['category']?.toString() ?? 'Jewelry',
       price: parsedPrice,
+      costPrice: parsedCostPrice,
+      castingPrice: parsedCastingPrice,
       currency: json['currency']?.toString() ?? 'USD',
-      rating: (json['rating'] as num?)?.toDouble() ?? 4.95,
-      reviewCount: (json['reviewCount'] as num?)?.toInt() ?? 48,
-      purity: json['purity']?.toString() ?? json['material']?.toString() ?? '18K Yellow Gold',
+      rating: (json['rating'] as num?)?.toDouble() ?? 5.0,
+      reviewCount: (json['reviewCount'] as num?)?.toInt() ?? 1,
+      material: json['material']?.toString() ?? json['purity']?.toString() ?? '18K Solid Yellow Gold',
+      placement: json['placement']?.toString() ?? json['archType']?.toString() ?? 'Fine Product',
       diamondClarity: json['diamondClarity']?.toString() ?? 'VVS1 Natural',
       images: parsedImages,
       description: json['description']?.toString() ?? '',
       inStock: parsedInStock,
-      stockQuantity: parsedStock,
+      lowStock: parsedLowStock,
+      stock: parsedStock,
+      inventory: parsedStock,
       sku: json['sku']?.toString() ?? '',
-      archType: json['archType']?.toString() ?? json['placement']?.toString() ?? 'Top 6 Arch',
-      metalOptions: (json['metalOptions'] as List?)?.map((e) => e.toString()).toList() ??
-          const ['18K Yellow Gold', '18K White Gold', '18K Rose Gold', '950 Platinum'],
-      stoneOptions: (json['stoneOptions'] as List?)?.map((e) => e.toString()).toList() ??
-          const ['VVS1 Natural Diamonds', 'Flawless Moissanite', 'Emerald Inlay', 'Deep Cut Plain'],
+      status: json['status']?.toString() ?? 'Active',
+      createdAt: json['createdAt']?.toString() ?? '',
+      updatedAt: json['updatedAt']?.toString() ?? '',
+      metalOptions: parsedMetalOptions,
+      stoneOptions: parsedStoneOptions,
       isFeatured: json['isFeatured'] as bool? ?? false,
       isBestSeller: json['isBestSeller'] as bool? ?? false,
     );
@@ -119,21 +191,29 @@ class Product {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'name': name,
       'title': title,
       'subtitle': subtitle,
       'category': category,
-      'price': price,
-      'currency': currency,
-      'rating': rating,
-      'reviewCount': reviewCount,
-      'purity': purity,
-      'diamondClarity': diamondClarity,
-      'images': images,
-      'description': description,
-      'inStock': inStock,
-      'stockQuantity': stockQuantity,
       'sku': sku,
-      'archType': archType,
+      'price': price,
+      'costPrice': costPrice,
+      'castingPrice': castingPrice,
+      'stock': stock,
+      'inventory': inventory,
+      'description': description,
+      'imageUrl': imageUrl,
+      'images': images,
+      'material': material,
+      'placement': placement,
+      'rating': rating,
+      'inStock': inStock,
+      'lowStock': lowStock,
+      'status': status,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'currency': currency,
+      'diamondClarity': diamondClarity,
       'metalOptions': metalOptions,
       'stoneOptions': stoneOptions,
       'isFeatured': isFeatured,

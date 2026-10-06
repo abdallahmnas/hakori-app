@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/services/product_provider.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/badge_chip.dart';
 
 /// Screen 9: catalog_advanced_filter_drawer
-/// Advanced Filter Bottom Sheet Modal with metal, gemstone, arch, price, and setting selectors
+/// Clean Filter Bottom Sheet Modal matching backend API capabilities:
+/// - Category (from API categories/pills)
+/// - In-Stock availability toggle
 class CatalogFilterDrawer extends StatefulWidget {
   const CatalogFilterDrawer({super.key});
 
@@ -14,46 +18,22 @@ class CatalogFilterDrawer extends StatefulWidget {
 }
 
 class _CatalogFilterDrawerState extends State<CatalogFilterDrawer> {
-  String _selectedMetal = '18K Yellow Gold';
-  String _selectedGem = 'VVS Natural Diamonds';
-  String _selectedArch = 'Top Arch (6-8)';
-  String _selectedSetting = 'Micro-Pavé';
-  RangeValues _priceRange = const RangeValues(1000, 15000);
+  late String _selectedCategory;
+  late bool _inStockOnly;
 
-  final List<String> _metals = [
-    '18K Yellow Gold',
-    '18K White Gold',
-    '18K Rose Gold',
-    '24K Pure Gold',
-    '950 Platinum',
-  ];
-
-  final List<String> _gemstones = [
-    'VVS Natural Diamonds',
-    'Flawless Moissanite',
-    'Colombian Emerald',
-    'Australian Opal',
-    'Deep Mirror Gold (No Gem)',
-  ];
-
-  final List<String> _arches = [
-    'Top Arch (6-8)',
-    'Bottom Arch (6-8)',
-    'Full 16 Master Arch',
-    'Single Canine Cap',
-    'Dual Fangs',
-  ];
-
-  final List<String> _settings = [
-    'Micro-Pavé',
-    'Channel Setting',
-    'Honeycomb Diamond',
-    'Architectural Open Face',
-    'Diamond Dust Stipple',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    final productProvider = Provider.of<ProductProvider>(context, listen: false);
+    _selectedCategory = productProvider.selectedCategory;
+    _inStockOnly = productProvider.inStockOnly;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final productProvider = Provider.of<ProductProvider>(context);
+    final categoryFilters = productProvider.categoryFilters;
+
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
@@ -88,17 +68,14 @@ class _CatalogFilterDrawerState extends State<CatalogFilterDrawer> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Filter Atelier Catalog',
+                    'Filter Catalog',
                     style: AppTypography.headlineMD(color: AppColors.textPrimary),
                   ),
                   TextButton(
                     onPressed: () {
                       setState(() {
-                        _selectedMetal = '18K Yellow Gold';
-                        _selectedGem = 'VVS Natural Diamonds';
-                        _selectedArch = 'Top Arch (6-8)';
-                        _selectedSetting = 'Micro-Pavé';
-                        _priceRange = const RangeValues(1000, 15000);
+                        _selectedCategory = 'ALL';
+                        _inStockOnly = false;
                       });
                     },
                     child: Text(
@@ -110,106 +87,67 @@ class _CatalogFilterDrawerState extends State<CatalogFilterDrawer> {
               ),
               const Divider(height: 24),
 
-              // Metal Purity Selector
-              _buildSectionTitle('Precious Metal & Purity'),
+              // Categories Selector from API
+              _buildSectionTitle('Category'),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                children: _metals.map((metal) {
-                  final isSelected = metal == _selectedMetal;
+                children: categoryFilters.map((category) {
+                  final isSelected = category.toLowerCase() == _selectedCategory.toLowerCase();
                   return AppBadgeChip(
-                    label: metal,
+                    label: category,
                     variant: BadgeChipVariant.outline,
                     isSelected: isSelected,
-                    onTap: () => setState(() => _selectedMetal = metal),
+                    onTap: () => setState(() => _selectedCategory = category),
                   );
                 }).toList(),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
-              // Gemstone Quality
-              _buildSectionTitle('Gemstone & Inlay Quality'),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _gemstones.map((gem) {
-                  final isSelected = gem == _selectedGem;
-                  return AppBadgeChip(
-                    label: gem,
-                    variant: BadgeChipVariant.outline,
-                    isSelected: isSelected,
-                    onTap: () => setState(() => _selectedGem = gem),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 20),
-
-              // Arch Position
-              _buildSectionTitle('Arch & Tooth Position'),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _arches.map((arch) {
-                  final isSelected = arch == _selectedArch;
-                  return AppBadgeChip(
-                    label: arch,
-                    variant: BadgeChipVariant.outline,
-                    isSelected: isSelected,
-                    onTap: () => setState(() => _selectedArch = arch),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 20),
-
-              // Price Range Slider
-              _buildSectionTitle('Price Range (USD)'),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '\$${_priceRange.start.toInt()}',
-                    style: AppTypography.labelMD(color: AppColors.primaryGold),
-                  ),
-                  Text(
-                    '\$${_priceRange.end.toInt()}+',
-                    style: AppTypography.labelMD(color: AppColors.primaryGold),
-                  ),
-                ],
-              ),
-              RangeSlider(
-                values: _priceRange,
-                min: 500,
-                max: 25000,
-                divisions: 49,
-                activeColor: AppColors.primaryGold,
-                inactiveColor: AppColors.outlineLight,
-                onChanged: (RangeValues values) {
-                  setState(() => _priceRange = values);
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Setting Style
-              _buildSectionTitle('Jewelry Setting Discipline'),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _settings.map((setting) {
-                  final isSelected = setting == _selectedSetting;
-                  return AppBadgeChip(
-                    label: setting,
-                    variant: BadgeChipVariant.outline,
-                    isSelected: isSelected,
-                    onTap: () => setState(() => _selectedSetting = setting),
-                  );
-                }).toList(),
+              // In Stock Availability
+              _buildSectionTitle('Availability'),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.outlineLight),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'In Stock Only',
+                          style: AppTypography.labelMD(color: AppColors.textPrimary),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Only display items ready for immediate dispatch',
+                          style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                    Switch(
+                      value: _inStockOnly,
+                      activeColor: AppColors.primaryGold,
+                      onChanged: (val) => setState(() => _inStockOnly = val),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 28),
 
               // Apply CTA
               AppButton.primary(
-                text: 'APPLY FILTERS (38 PIECES)',
-                onPressed: () => Navigator.pop(context),
+                text: 'APPLY FILTERS',
+                onPressed: () {
+                  productProvider.setSelectedCategory(_selectedCategory);
+                  productProvider.setInStockOnly(_inStockOnly);
+                  Navigator.pop(context);
+                },
               ),
             ],
           ),

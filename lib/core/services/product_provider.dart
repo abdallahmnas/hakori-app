@@ -20,6 +20,7 @@ class ProductProvider extends ChangeNotifier {
   List<String> _categoryFilters = ['ALL'];
   String _selectedCategory = 'ALL';
   String _searchQuery = '';
+  bool _inStockOnly = false;
   String? _errorMessage;
 
   ProductProvider(this._productService);
@@ -32,18 +33,13 @@ class ProductProvider extends ChangeNotifier {
   List<String> get categoryFilters => _categoryFilters;
   String get selectedCategory => _selectedCategory;
   String get searchQuery => _searchQuery;
+  bool get inStockOnly => _inStockOnly;
   String? get errorMessage => _errorMessage;
 
   List<Product> get _filteredProducts {
     var list = _products;
-    if (_selectedCategory != 'ALL') {
-      list = list.where((p) {
-        final catLower = p.category.toLowerCase();
-        final selLower = _selectedCategory.toLowerCase();
-        return catLower == selLower || catLower.contains(selLower);
-      }).toList();
-    }
-
+    // Server-side filtering is now used for category selection,
+    // so we only apply local search filtering here.
     if (_searchQuery.trim().isNotEmpty) {
       final q = _searchQuery.trim().toLowerCase();
       list = list.where((p) =>
@@ -64,12 +60,19 @@ class ProductProvider extends ChangeNotifier {
     }
 
     try {
-      final fetchedProducts = await _productService.getProducts(page: 0, pageSize: 50);
+      final categoryParam = (_selectedCategory == 'ALL') ? null : _selectedCategory;
+      final fetchedProducts = await _productService.getProducts(
+        page: 0,
+        pageSize: 50,
+        category: categoryParam,
+        inStock: _inStockOnly ? true : null,
+      );
       final fetchedCategories = await _productService.getCategories(page: 0, pageSize: 50);
       final fetchedPills = await _productService.getProductCategories();
 
       _products = fetchedProducts;
       _categories = fetchedCategories;
+      _selectedCategory = 'ALL';
       final Set<String> pillsSet = {'ALL'};
       for (final p in fetchedPills) {
         if (p.trim().isNotEmpty && p.toUpperCase() != 'ALL') pillsSet.add(p.trim());
@@ -92,14 +95,53 @@ class ProductProvider extends ChangeNotifier {
     }
   }
 
-  void setSelectedCategory(String category) {
+  /// Select a category and fetch products from API filtered by category.
+  /// When 'ALL' is selected, fetches all products without category filter.
+  /// When a category name is selected, passes it as the `category` query parameter.
+  Future<void> setSelectedCategory(String category) async {
     _selectedCategory = category;
+    _status = ProductStateStatus.loading;
+    _errorMessage = null;
     notifyListeners();
+
+    try {
+      final categoryParam = (category == 'ALL') ? null : category;
+      final fetchedProducts = await _productService.getProducts(
+        page: 0,
+        pageSize: 50,
+        category: categoryParam,
+        inStock: _inStockOnly ? true : null,
+      );
+      _products = fetchedProducts;
+      _status = ProductStateStatus.loaded;
+      _errorMessage = null;
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Could not load products for this category.';
+      _status = ProductStateStatus.error;
+      notifyListeners();
+    }
+  }
+
+  /// Select a category by its ID (from the categories list).
+  /// Finds the category name from the ID and calls setSelectedCategory.
+  Future<void> selectCategoryById(String categoryId) async {
+    final match = _categories.where((c) => c.id == categoryId);
+    if (match.isNotEmpty) {
+      await setSelectedCategory(match.first.name);
+    }
   }
 
   void setSearchQuery(String query) {
     _searchQuery = query;
     notifyListeners();
+  }
+
+  void setInStockOnly(bool value) {
+    if (_inStockOnly != value) {
+      _inStockOnly = value;
+      fetchCatalog(); // Re-fetch from API with new filter
+    }
   }
 
   Product? findProductById(String id) {
