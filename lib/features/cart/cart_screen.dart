@@ -68,9 +68,30 @@ class _CartScreenState extends State<CartScreen> {
           : '+234 801 234 5678',
     };
 
+    final orderItems = cart.items.map((item) {
+      final details = [
+        if (item.selectedMetal.isNotEmpty) item.selectedMetal,
+        if (item.selectedStone.isNotEmpty) item.selectedStone,
+        if (item.selectedArch.isNotEmpty) item.selectedArch,
+      ].join(' • ');
+
+      return {
+        'productId': item.product.id,
+        'title': item.product.title.isNotEmpty ? item.product.title : item.product.name,
+        'unitPrice': item.product.priceUsd > 0 ? item.product.priceUsd : item.product.price,
+        'quantity': item.quantity,
+        'specDetails': details.isNotEmpty
+            ? details
+            : (item.product.description.isNotEmpty
+                ? item.product.description
+                : '18K Solid Yellow • VVS1 Pavé Inlay'),
+      };
+    }).toList();
+
     final firstItem = cart.items.first;
     final specimen = {
-      'title': firstItem.product.name,
+      'productId': firstItem.product.id,
+      'title': firstItem.product.title.isNotEmpty ? firstItem.product.title : firstItem.product.name,
       'specDetails': '${firstItem.selectedMetal} • ${firstItem.selectedStone}',
       'caratOrPurity': firstItem.selectedMetal,
       'subType': firstItem.selectedArch,
@@ -79,12 +100,19 @@ class _CartScreenState extends State<CartScreen> {
 
     setState(() => _isCheckingOut = true);
 
+    final shipping = (clientUser?.address != null && clientUser!.address!.isNotEmpty)
+        ? clientUser.address!
+        : ((clientUser?.location != null && clientUser!.location!.isNotEmpty)
+            ? clientUser.location!
+            : 'Victoria Island Penthouse, Lagos');
+
     final order = await orderProvider.placeOrder(
       client: client,
+      items: orderItems,
       specimen: specimen,
       total: cart.totalUsd,
       currency: 'USD',
-      shippingAddress: clientUser?.location ?? '',
+      shippingAddress: shipping,
     );
 
     if (!mounted) return;
@@ -92,7 +120,14 @@ class _CartScreenState extends State<CartScreen> {
 
     if (order != null) {
       cart.clearCart();
-      context.push('/order-confirmation', extra: order);
+      if (order.paymentUrl != null && order.paymentUrl!.isNotEmpty) {
+        context.push('/payment-webview', extra: {
+          'url': order.paymentUrl!,
+          'order': order,
+        });
+      } else {
+        context.push('/order-confirmation', extra: order);
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -129,7 +164,7 @@ class _CartScreenState extends State<CartScreen> {
               margin: const EdgeInsets.fromLTRB(16, 10, 16, 10),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.goldContainer.withOpacity(0.35),
+                color: AppColors.goldContainer.withValues(alpha: 0.35),
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: AppColors.outlineGold),
               ),

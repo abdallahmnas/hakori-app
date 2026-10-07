@@ -19,10 +19,7 @@ import '../../core/widgets/dual_price_text.dart';
 class ProductDetailScreen extends StatefulWidget {
   final String productId;
 
-  const ProductDetailScreen({
-    super.key,
-    required this.productId,
-  });
+  const ProductDetailScreen({super.key, required this.productId});
 
   @override
   State<ProductDetailScreen> createState() => _ProductDetailScreenState();
@@ -45,14 +42,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Future<void> _loadProduct() async {
-    final productProvider = Provider.of<ProductProvider>(context, listen: false);
+    final productProvider = Provider.of<ProductProvider>(
+      context,
+      listen: false,
+    );
     final existing = productProvider.findProductById(widget.productId);
     if (existing != null) {
       if (mounted) {
         setState(() {
           _product = existing;
-          _selectedMetal = existing.metalOptions.isNotEmpty ? existing.metalOptions.first : existing.material;
-          _selectedStone = existing.stoneOptions.isNotEmpty ? existing.stoneOptions.first : 'Bespoke Finishing';
+          _selectedMetal = existing.metalOptions.isNotEmpty
+              ? existing.metalOptions.first
+              : existing.material;
+          _selectedStone = existing.stoneOptions.isNotEmpty
+              ? existing.stoneOptions.first
+              : 'Bespoke Finishing';
           _selectedArch = existing.placement;
           _isLoading = false;
         });
@@ -61,13 +65,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
 
     try {
-      final productService = Provider.of<ProductService>(context, listen: false);
+      final productService = Provider.of<ProductService>(
+        context,
+        listen: false,
+      );
       final fetched = await productService.getProductById(widget.productId);
       if (mounted) {
         setState(() {
           _product = fetched;
-          _selectedMetal = fetched.metalOptions.isNotEmpty ? fetched.metalOptions.first : fetched.material;
-          _selectedStone = fetched.stoneOptions.isNotEmpty ? fetched.stoneOptions.first : 'Bespoke Finishing';
+          _selectedMetal = fetched.metalOptions.isNotEmpty
+              ? fetched.metalOptions.first
+              : fetched.material;
+          _selectedStone = fetched.stoneOptions.isNotEmpty
+              ? fetched.stoneOptions.first
+              : 'Bespoke Finishing';
           _selectedArch = fetched.placement;
           _isLoading = false;
         });
@@ -78,7 +89,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to load product details.'), backgroundColor: AppColors.error),
+          const SnackBar(
+            content: Text('Failed to load product details.'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -101,7 +115,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     final wishlistProvider = Provider.of<WishlistProvider>(context);
     final cartProvider = Provider.of<CartProvider>(context, listen: false);
     final isFav = wishlistProvider.isFavorite(product.id);
-    final images = product.galleryImages.isNotEmpty ? product.galleryImages : [product.imageUrl];
+    final images = product.galleryImages.isNotEmpty
+        ? product.galleryImages
+        : [product.imageUrl];
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -124,13 +140,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       isFav ? Icons.favorite : Icons.favorite_border,
                       color: isFav ? AppColors.rubyRed : AppColors.textPrimary,
                     ),
-                    onPressed: () => wishlistProvider.toggleFavorite(product.id),
+                    onPressed: () => wishlistProvider.toggleFavorite(
+                      product.id,
+                      product: product,
+                    ),
                   ),
                   IconButton(
                     icon: const Icon(Icons.share_outlined),
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Bespoke vault link copied to clipboard')),
+                        const SnackBar(
+                          content: Text(
+                            'Bespoke vault link copied to clipboard',
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -140,15 +163,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     children: [
                       PageView.builder(
                         itemCount: images.length,
-                        onPageChanged: (index) => setState(() => _currentImageIndex = index),
+                        onPageChanged: (index) =>
+                            setState(() => _currentImageIndex = index),
                         itemBuilder: (context, index) {
                           return Image.network(
                             images[index],
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) => Container(
-                              color: AppColors.surfaceContainerLow,
-                              child: const Icon(Icons.diamond, size: 64, color: AppColors.primaryGold),
-                            ),
+                            errorBuilder: (context, error, stackTrace) =>
+                                Container(
+                                  color: AppColors.surfaceContainerLow,
+                                  child: const Icon(
+                                    Icons.diamond,
+                                    size: 64,
+                                    color: AppColors.primaryGold,
+                                  ),
+                                ),
                           );
                         },
                       ),
@@ -163,11 +192,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             children: List.generate(images.length, (index) {
                               final isActive = index == _currentImageIndex;
                               return Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 3),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 3,
+                                ),
                                 width: isActive ? 20 : 6,
                                 height: 6,
                                 decoration: BoxDecoration(
-                                  color: isActive ? AppColors.primaryGold : Colors.white.withValues(alpha: 0.6),
+                                  color: isActive
+                                      ? AppColors.primaryGold
+                                      : Colors.white.withValues(alpha: 0.6),
                                   borderRadius: BorderRadius.circular(3),
                                 ),
                               );
@@ -182,21 +215,33 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           onTap: () => context.push('/ar-fitting'),
                           borderRadius: BorderRadius.circular(20),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
                               color: AppColors.darkBase.withValues(alpha: 0.85),
                               borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: AppColors.primaryGold, width: 1),
+                              border: Border.all(
+                                color: AppColors.primaryGold,
+                                width: 1,
+                              ),
                               boxShadow: const [AppColors.goldGlow],
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.view_in_ar, size: 14, color: AppColors.primaryGold),
+                                const Icon(
+                                  Icons.view_in_ar,
+                                  size: 14,
+                                  color: AppColors.primaryGold,
+                                ),
                                 const SizedBox(width: 6),
                                 Text(
                                   'LIVE TRY-ON',
-                                  style: AppTypography.labelSM(color: AppColors.primaryGold),
+                                  style: AppTypography.labelSM(
+                                    color: AppColors.primaryGold,
+                                  ),
                                 ),
                               ],
                             ),
@@ -227,11 +272,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             variant: BadgeChipVariant.darkTag,
                           ),
                           const Spacer(),
-                          const Icon(Icons.star, size: 15, color: AppColors.primaryGold),
+                          const Icon(
+                            Icons.star,
+                            size: 15,
+                            color: AppColors.primaryGold,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             '${product.rating} (${product.reviewCount} verified)',
-                            style: AppTypography.labelSM(color: AppColors.textPrimary),
+                            style: AppTypography.labelSM(
+                              color: AppColors.textPrimary,
+                            ),
                           ),
                         ],
                       ),
@@ -240,7 +291,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       // Title
                       Text(
                         product.name,
-                        style: AppTypography.headlineXL(color: AppColors.textPrimary),
+                        style: AppTypography.headlineXL(
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       const SizedBox(height: 8),
 
@@ -256,7 +309,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       // Product Specifications Grid
                       Text(
                         'Piece Specifications',
-                        style: AppTypography.labelLG(color: AppColors.textPrimary),
+                        style: AppTypography.labelLG(
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       Container(
@@ -274,19 +329,27 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ],
                             _buildSpecRow('Category', product.category),
                             const Divider(height: 18),
-                            _buildSpecRow('Material / Purity', product.material),
+                            _buildSpecRow(
+                              'Material / Purity',
+                              product.material,
+                            ),
                             const Divider(height: 18),
-                            _buildSpecRow('Placement / Type', product.placement),
+                            _buildSpecRow(
+                              'Placement / Type',
+                              product.placement,
+                            ),
                             const Divider(height: 18),
                             _buildSpecRow(
                               'Availability',
                               product.inStock
                                   ? (product.lowStock
-                                      ? 'Low Stock (${product.stock} available)'
-                                      : 'In Stock (${product.stock} available)')
+                                        ? 'Low Stock (${product.stock} available)'
+                                        : 'In Stock (${product.stock} available)')
                                   : 'Out of Stock',
                               valueColor: product.inStock
-                                  ? (product.lowStock ? AppColors.rubyRed : AppColors.success)
+                                  ? (product.lowStock
+                                        ? AppColors.rubyRed
+                                        : AppColors.success)
                                   : AppColors.textMuted,
                             ),
                             if (product.status.isNotEmpty) ...[
@@ -302,7 +365,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       if (product.metalOptions.isNotEmpty) ...[
                         Text(
                           'Precious Metal Option',
-                          style: AppTypography.labelLG(color: AppColors.textPrimary),
+                          style: AppTypography.labelLG(
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                         const SizedBox(height: 10),
                         Wrap(
@@ -314,7 +379,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               label: metal,
                               variant: BadgeChipVariant.outline,
                               isSelected: isSelected,
-                              onTap: () => setState(() => _selectedMetal = metal),
+                              onTap: () =>
+                                  setState(() => _selectedMetal = metal),
                             );
                           }).toList(),
                         ),
@@ -325,7 +391,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       if (product.stoneOptions.isNotEmpty) ...[
                         Text(
                           'Gemstone & Setting Options',
-                          style: AppTypography.labelLG(color: AppColors.textPrimary),
+                          style: AppTypography.labelLG(
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                         const SizedBox(height: 10),
                         Wrap(
@@ -337,7 +405,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               label: stone,
                               variant: BadgeChipVariant.outline,
                               isSelected: isSelected,
-                              onTap: () => setState(() => _selectedStone = stone),
+                              onTap: () =>
+                                  setState(() => _selectedStone = stone),
                             );
                           }).toList(),
                         ),
@@ -354,7 +423,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.inventory_2_outlined, color: AppColors.primaryGold, size: 24),
+                            const Icon(
+                              Icons.inventory_2_outlined,
+                              color: AppColors.primaryGold,
+                              size: 24,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
@@ -362,12 +435,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 children: [
                                   Text(
                                     'Free Luxury Sizing Kit Included',
-                                    style: AppTypography.labelMD(color: AppColors.onGoldContainer),
+                                    style: AppTypography.labelMD(
+                                      color: AppColors.onGoldContainer,
+                                    ),
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     'Dispatched within 24 hours with return courier bag.',
-                                    style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                                    style: AppTypography.bodyXS(
+                                      color: AppColors.textSecondary,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -375,7 +452,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             Switch(
                               value: _includeImpressionKit,
                               activeThumbColor: AppColors.primaryGold,
-                              onChanged: (val) => setState(() => _includeImpressionKit = val),
+                              onChanged: (val) =>
+                                  setState(() => _includeImpressionKit = val),
                             ),
                           ],
                         ),
@@ -386,12 +464,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       if (product.description.isNotEmpty) ...[
                         Text(
                           'Atelier Craftsmanship Notes',
-                          style: AppTypography.headlineMD(color: AppColors.textPrimary),
+                          style: AppTypography.headlineMD(
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           product.description,
-                          style: AppTypography.bodyMD(color: AppColors.textSecondary).copyWith(height: 1.6),
+                          style: AppTypography.bodyMD(
+                            color: AppColors.textSecondary,
+                          ).copyWith(height: 1.6),
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -406,11 +488,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                         child: Column(
                           children: [
-                            _buildFeatureRow(Icons.verified, 'French Assay Office Hallmarked 18K/24K'),
+                            _buildFeatureRow(
+                              Icons.verified,
+                              'French Assay Office Hallmarked 18K/24K',
+                            ),
                             const Divider(height: 16),
-                            _buildFeatureRow(Icons.lock, 'Vault Escrow & Diplomatic Armored Courier'),
+                            _buildFeatureRow(
+                              Icons.lock,
+                              'Vault Escrow & Diplomatic Armored Courier',
+                            ),
                             const Divider(height: 16),
-                            _buildFeatureRow(Icons.architecture, 'Lifetime Precision Fit Guarantee'),
+                            _buildFeatureRow(
+                              Icons.architecture,
+                              'Lifetime Precision Fit Guarantee',
+                            ),
                           ],
                         ),
                       ),
@@ -430,9 +521,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
               decoration: const BoxDecoration(
                 color: AppColors.surface,
-                border: Border(top: BorderSide(color: AppColors.outlineLight, width: 1)),
+                border: Border(
+                  top: BorderSide(color: AppColors.outlineLight, width: 1),
+                ),
                 boxShadow: [
-                  BoxShadow(color: Color(0x14000000), blurRadius: 20, offset: Offset(0, -4)),
+                  BoxShadow(
+                    color: Color(0x14000000),
+                    blurRadius: 20,
+                    offset: Offset(0, -4),
+                  ),
                 ],
               ),
               child: SafeArea(
@@ -440,21 +537,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 child: Row(
                   children: [
                     // AR Try-On Button
-                    InkWell(
-                      onTap: () => context.push('/ar-fitting'),
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        height: 52,
-                        width: 52,
-                        decoration: BoxDecoration(
-                          color: AppColors.darkBase,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.darkBorder),
-                        ),
-                        child: const Icon(Icons.camera_alt_outlined, color: AppColors.primaryGold, size: 22),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
+                    // InkWell(
+                    //   onTap: () => context.push('/ar-fitting'),
+                    //   borderRadius: BorderRadius.circular(12),
+                    //   child: Container(
+                    //     height: 52,
+                    //     width: 52,
+                    //     decoration: BoxDecoration(
+                    //       color: AppColors.darkBase,
+                    //       borderRadius: BorderRadius.circular(12),
+                    //       border: Border.all(color: AppColors.darkBorder),
+                    //     ),
+                    //     child: const Icon(Icons.camera_alt_outlined, color: AppColors.primaryGold, size: 22),
+                    //   ),
+                    // ),
+                    // const SizedBox(width: 12),
                     // Add to Cart Button
                     Expanded(
                       child: AppButton.primary(
@@ -469,7 +566,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 );
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Added ${product.name} to Cart'),
+                                    content: Text(
+                                      'Added ${product.name} to Cart',
+                                    ),
                                     action: SnackBarAction(
                                       label: 'VIEW CART',
                                       textColor: AppColors.primaryGold,
@@ -480,7 +579,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 );
                               }
                             : null,
-                        suffixIcon: const Icon(Icons.shopping_cart_outlined, color: AppColors.textOnGold, size: 18),
+                        suffixIcon: const Icon(
+                          Icons.shopping_cart_outlined,
+                          color: AppColors.textOnGold,
+                          size: 18,
+                        ),
                       ),
                     ),
                   ],
@@ -503,7 +606,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
         Text(
           value,
-          style: AppTypography.labelMD(color: valueColor ?? AppColors.textPrimary),
+          style: AppTypography.labelMD(
+            color: valueColor ?? AppColors.textPrimary,
+          ),
         ),
       ],
     );

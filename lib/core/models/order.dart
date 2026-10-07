@@ -46,10 +46,10 @@ class CommissionOrder {
   final double total;
   final String currency;
   final List<TrackingStep> trackingSteps;
-  final String jewelerName;
-  final String trackingNumber;
-  final String estimatedDelivery;
-  final String deliveryAddress;
+  final String? jewelerName;
+  final String? trackingNumber;
+  final String? estimatedDelivery;
+  final String? deliveryAddress;
   final Map<String, dynamic>? client;
   final Map<String, dynamic>? specimen;
   final String? paymentUrl;
@@ -70,11 +70,11 @@ class CommissionOrder {
     double? totalUsd,
     double? totalNgn,
     this.currency = 'USD',
-    required this.trackingSteps,
-    this.jewelerName = 'Jean-Luc Atelier (Place Vendôme)',
-    this.trackingNumber = 'HK-SEC-9920194-VAULT',
-    this.estimatedDelivery = 'October 12, 2026',
-    this.deliveryAddress = 'Victoria Island Penthouse 4B, Lagos, Nigeria',
+    this.trackingSteps = const [],
+    this.jewelerName,
+    this.trackingNumber,
+    this.estimatedDelivery,
+    this.deliveryAddress,
     this.client,
     this.specimen,
     this.paymentUrl,
@@ -118,39 +118,6 @@ class CommissionOrder {
           .map((s) => TrackingStep.fromJson(s as Map<String, dynamic>))
           .toList();
     }
-    if (steps.isEmpty) {
-      final statusLower = (json['orderStatus']?.toString() ?? json['status']?.toString() ?? '').toLowerCase();
-      steps = [
-        const TrackingStep(
-          title: 'Escrow Secured & CAD Verified',
-          description: 'Payment confirmed via Flutterwave escrow. 3D intraoral CAD model verified by master jeweler.',
-          timestamp: 'Confirmed',
-          isCompleted: true,
-          isCurrent: false,
-        ),
-        TrackingStep(
-          title: 'Precision Lost-Wax Investment Casting',
-          description: 'Hand-poured 18K solid royal gold ingot casting in progress.',
-          timestamp: 'In Progress',
-          isCompleted: statusLower.contains('production') || statusLower.contains('shipped') || statusLower.contains('delivered') || statusLower.contains('completed'),
-          isCurrent: statusLower.contains('production') || statusLower.contains('processing'),
-        ),
-        TrackingStep(
-          title: 'Microscopic Pavé Diamond Setting',
-          description: 'Hand-setting VVS1 colorless melee diamonds under 40x Leica microscope.',
-          timestamp: 'Next',
-          isCompleted: statusLower.contains('shipped') || statusLower.contains('delivered') || statusLower.contains('completed'),
-          isCurrent: false,
-        ),
-        TrackingStep(
-          title: 'Armored Vault Courier Transit',
-          description: 'Dispatched via Brink\'s Armored Courier with GPS telemetry.',
-          timestamp: 'Estimated Delivery',
-          isCompleted: statusLower.contains('delivered') || statusLower.contains('completed'),
-          isCurrent: statusLower.contains('shipped'),
-        ),
-      ];
-    }
 
     final rawItems = json['items'];
     List<Product> parsedItems = [];
@@ -189,11 +156,11 @@ class CommissionOrder {
     final statusStr = json['orderStatus']?.toString() ?? json['status']?.toString() ?? 'PROCESSING';
     final cadUrl = json['cadRenderUrl']?.toString();
 
-    // Client delivery address fallback
+    // Client delivery address
     final clientMap = json['client'] as Map<String, dynamic>?;
     final shipping = json['shippingAddress']?.toString() ??
         json['deliveryAddress']?.toString() ??
-        (clientMap?['address'] != null ? clientMap!['address'].toString() : 'Victoria Island Penthouse 4B, Lagos, Nigeria');
+        (clientMap?['address'] != null ? clientMap!['address'].toString() : null);
 
     return CommissionOrder(
       id: json['id']?.toString() ?? '',
@@ -205,9 +172,9 @@ class CommissionOrder {
       total: parsedTotal,
       currency: json['currency']?.toString() ?? 'USD',
       trackingSteps: steps,
-      jewelerName: json['jewelerName']?.toString() ?? 'Jean-Luc Atelier (Place Vendôme)',
-      trackingNumber: json['trackingNumber']?.toString() ?? json['flwRef']?.toString() ?? 'HK-SEC-9920194-VAULT',
-      estimatedDelivery: json['estimatedDelivery']?.toString() ?? 'October 12, 2026',
+      jewelerName: json['jewelerName']?.toString(),
+      trackingNumber: json['trackingNumber']?.toString() ?? json['flwRef']?.toString(),
+      estimatedDelivery: json['estimatedDelivery']?.toString(),
       deliveryAddress: shipping,
       client: clientMap,
       specimen: json['specimen'] as Map<String, dynamic>?,

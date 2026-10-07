@@ -12,7 +12,8 @@ class OrderService {
   /// Place New Bespoke Commission Order (Flutterwave escrow checkout)
   Future<CommissionOrder> placeOrder({
     required Map<String, dynamic> client,
-    required Map<String, dynamic> specimen,
+    required List<Map<String, dynamic>> items,
+    Map<String, dynamic>? specimen,
     required double total,
     String currency = 'USD',
     required String shippingAddress,
@@ -21,7 +22,8 @@ class OrderService {
       ApiConstants.orders,
       data: {
         'client': client,
-        'specimen': specimen,
+        'items': items,
+        'specimen': ?specimen,
         'total': total,
         'currency': currency,
         'shippingAddress': shippingAddress,

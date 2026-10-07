@@ -1,9 +1,14 @@
+import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
+import '../../core/models/promo_banner.dart';
+import '../../core/models/product.dart';
 import '../../core/services/auth_provider.dart';
+import '../../core/services/banner_provider.dart';
 import '../../core/services/order_provider.dart';
 import '../../core/services/product_provider.dart';
 import '../../core/widgets/app_bar_luxury.dart';
@@ -26,6 +31,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
+  final PageController _bannerController = PageController();
+  int _currentBannerPage = 0;
+  Timer? _bannerTimer;
 
   @override
   void initState() {
@@ -37,8 +45,10 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+      final bannerProvider = Provider.of<BannerProvider>(context, listen: false);
 
       productProvider.fetchCatalog();
+      bannerProvider.fetchBanners();
       if (authProvider.isAuthenticated) {
         authProvider.refreshProfile();
         orderProvider.fetchOrders();
@@ -46,8 +56,24 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _startBannerTimer(int bannerCount) {
+    _bannerTimer?.cancel();
+    if (bannerCount <= 1) return;
+    _bannerTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted || !_bannerController.hasClients) return;
+      final nextPage = (_currentBannerPage + 1) % bannerCount;
+      _bannerController.animateToPage(
+        nextPage,
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOutCubic,
+      );
+    });
+  }
+
   @override
   void dispose() {
+    _bannerTimer?.cancel();
+    _bannerController.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -239,6 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final productProvider = Provider.of<ProductProvider>(context);
     final auth = Provider.of<AuthProvider>(context);
+    final bannerProvider = Provider.of<BannerProvider>(context);
     final displayedProducts = productProvider.products;
     final categoryFilters = productProvider.categoryFilters;
     final selectedCategory = productProvider.selectedCategory;
@@ -258,8 +285,13 @@ class _HomeScreenState extends State<HomeScreen> {
             context,
             listen: false,
           );
+          final bannerProv = Provider.of<BannerProvider>(
+            context,
+            listen: false,
+          );
           await Future.wait([
             productProvider.fetchCatalog(),
+            bannerProv.fetchBanners(silent: true),
             if (authProvider.isAuthenticated) ...[
               authProvider.refreshProfile(),
               orderProvider.fetchOrders(),
@@ -412,91 +444,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-            // Editorial Hero Carousel Banner
+            // Editorial Hero Sliding Banner (API & Cache Driven with CachedNetworkImage)
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: const [AppColors.softCardShadow],
-                    image: const DecorationImage(
-                      image: NetworkImage(
-                        'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1000&auto=format&fit=crop',
-                      ),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withValues(alpha: 0.4),
-                          Colors.black.withValues(alpha: 0.92),
-                        ],
-                      ),
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(height: 24),
-                        const AppBadgeChip(
-                          label: 'AUTUMN ATELIER DROP',
-                          variant: BadgeChipVariant.goldPurity,
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          '18K VVS1 Diamond Pavé Arch',
-                          style: AppTypography.headlineMD(
-                            color: AppColors.textOnDark,
-                          ).copyWith(fontSize: 18),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Handcrafted fine jewelry in gold, diamonds, and sterling silver.',
-                          style: AppTypography.bodyXS(
-                            color: AppColors.surfaceContainerHigh,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: [
-                            AppButton.primary(
-                              text: 'EXPLORE PIECE',
-                              height: 36,
-                              width: 136,
-                              borderRadius: 18,
-                              onPressed: () {
-                                if (displayedProducts.isNotEmpty) {
-                                  context.push(
-                                    '/product/${displayedProducts.first.id}',
-                                  );
-                                } else {
-                                  context.push('/categories');
-                                }
-                              },
-                            ),
-                            AppButton.outline(
-                              text: 'TRY ON',
-                              height: 36,
-                              width: 114,
-                              borderRadius: 18,
-                              onPressed: () => context.push('/ar-fitting'),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              child: _buildSlidingBanner(
+                bannerProvider,
+                productProvider,
+                displayedProducts,
               ),
             ),
 
@@ -746,6 +699,305 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSlidingBanner(
+    BannerProvider bannerProvider,
+    ProductProvider productProvider,
+    List displayedProducts,
+  ) {
+    final banners = bannerProvider.banners;
+
+    if (bannerProvider.isLoading && banners.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Container(
+          height: 220,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.outlineLight),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (banners.isEmpty) {
+      return _buildFallbackBanner(displayedProducts);
+    }
+
+    // Auto-slide timer management
+    if (_bannerTimer == null && banners.length > 1) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _startBannerTimer(banners.length);
+      });
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 220,
+            child: PageView.builder(
+              controller: _bannerController,
+              itemCount: banners.length,
+              onPageChanged: (index) {
+                setState(() => _currentBannerPage = index);
+              },
+              itemBuilder: (context, index) {
+                final banner = banners[index];
+                return _buildBannerCard(banner, displayedProducts);
+              },
+            ),
+          ),
+          if (banners.length > 1) ...[
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(banners.length, (i) {
+                final isSelected = i == _currentBannerPage;
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  width: isSelected ? 22 : 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(3),
+                    color: isSelected
+                        ? AppColors.primaryGold
+                        : AppColors.primaryGold.withValues(alpha: 0.25),
+                  ),
+                );
+              }),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBannerCard(PromoBanner banner, List displayedProducts) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [AppColors.softCardShadow],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          children: [
+            // CachedNetworkImage background
+            Positioned.fill(
+              child: CachedNetworkImage(
+                imageUrl: banner.fullImageUrl,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: AppColors.darkBase,
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Image.network(
+                  'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1000&auto=format&fit=crop',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            // Luxury gradient overlay
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.45),
+                      Colors.black.withValues(alpha: 0.94),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            // Content
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  AppBadgeChip(
+                    label: banner.placement.toUpperCase() == 'HERO'
+                        ? 'HAUTE ATELIER DROP'
+                        : banner.placement.toUpperCase(),
+                    variant: BadgeChipVariant.goldPurity,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    banner.title,
+                    style: AppTypography.headlineMD(color: AppColors.textOnDark).copyWith(
+                      fontSize: 17,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    banner.subtitle,
+                    style: AppTypography.bodyXS(color: AppColors.surfaceContainerHigh),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      AppButton.primary(
+                        text: banner.ctaText?.isNotEmpty == true
+                            ? banner.ctaText!.toUpperCase()
+                            : 'EXPLORE COLLECTION',
+                        height: 36,
+                        width: 170,
+                        borderRadius: 18,
+                        onPressed: () => _handleBannerNavigation(banner, displayedProducts),
+                      ),
+                      const SizedBox(width: 8),
+                      AppButton.outline(
+                        text: 'TRY ON',
+                        height: 36,
+                        width: 90,
+                        borderRadius: 18,
+                        onPressed: () => context.push('/ar-fitting'),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _handleBannerNavigation(PromoBanner banner, List displayedProducts) {
+    final link = banner.link?.trim() ?? '';
+    if (link == '/products' || link == '/catalog' || link == 'catalog') {
+      context.push('/catalog');
+    } else if (link.startsWith('/product/')) {
+      context.push(link);
+    } else if (link == '/categories' || link == 'categories') {
+      context.push('/categories');
+    } else if (link == '/configurator') {
+      context.push('/configurator');
+    } else if (link.isNotEmpty && link.startsWith('/')) {
+      try {
+        context.push(link);
+      } catch (_) {
+        context.push('/catalog');
+      }
+    } else if (displayedProducts.isNotEmpty) {
+      final firstProd = displayedProducts.first;
+      final id = firstProd is Product ? firstProd.id : firstProd.toString();
+      context.push('/product/$id');
+    } else {
+      context.push('/catalog');
+    }
+  }
+
+  Widget _buildFallbackBanner(List displayedProducts) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [AppColors.softCardShadow],
+          image: const DecorationImage(
+            image: NetworkImage(
+              'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1000&auto=format&fit=crop',
+            ),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.transparent,
+                Colors.black.withValues(alpha: 0.4),
+                Colors.black.withValues(alpha: 0.92),
+              ],
+            ),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 24),
+              const AppBadgeChip(
+                label: 'AUTUMN ATELIER DROP',
+                variant: BadgeChipVariant.goldPurity,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '18K VVS1 Diamond Pavé Arch',
+                style: AppTypography.headlineMD(
+                  color: AppColors.textOnDark,
+                ).copyWith(fontSize: 18),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Handcrafted fine jewelry in gold, diamonds, and sterling silver.',
+                style: AppTypography.bodyXS(
+                  color: AppColors.surfaceContainerHigh,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  AppButton.primary(
+                    text: 'EXPLORE PIECE',
+                    height: 36,
+                    width: 136,
+                    borderRadius: 18,
+                    onPressed: () {
+                      if (displayedProducts.isNotEmpty) {
+                        final firstProd = displayedProducts.first;
+                        final id = firstProd is Product ? firstProd.id : firstProd.toString();
+                        context.push('/product/$id');
+                      } else {
+                        context.push('/categories');
+                      }
+                    },
+                  ),
+                  AppButton.outline(
+                    text: 'TRY ON',
+                    height: 36,
+                    width: 114,
+                    borderRadius: 18,
+                    onPressed: () => context.push('/ar-fitting'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

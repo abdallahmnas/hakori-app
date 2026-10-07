@@ -132,8 +132,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                           color: Colors.transparent,
                           child: InkWell(
                             onTap: () {
-                              productProvider.setSelectedCategory(cat.name);
-                              context.push('/home');
+                              context.push('/category-info', extra: cat);
                             },
                             borderRadius: BorderRadius.circular(16),
                             child: Container(
@@ -144,9 +143,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                   colors: [
-                                    Colors.black.withOpacity(0.2),
-                                    Colors.black.withOpacity(0.65),
-                                    AppColors.darkBase.withOpacity(0.92),
+                                    Colors.black.withValues(alpha: 0.2),
+                                    Colors.black.withValues(alpha: 0.65),
+                                    AppColors.darkBase.withValues(alpha: 0.92),
                                   ],
                                 ),
                               ),

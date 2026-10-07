@@ -349,6 +349,14 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
               // Customer Support & Tickets Section (API Driven, replaces reference/digital assets)
               _buildMenuSection('CUSTOMER SUPPORT & TICKETS', [
                 _buildMenuItem(
+                  icon: Icons.forum_outlined,
+                  title: 'My Support Tickets',
+                  subtitle:
+                      'Track inquiries, concierge thread replies, and ticket status',
+                  onTap: () => context.push('/tickets'),
+                ),
+                const Divider(height: 1, indent: 56),
+                _buildMenuItem(
                   icon: Icons.confirmation_number_outlined,
                   title: 'Create Support Ticket',
                   subtitle:

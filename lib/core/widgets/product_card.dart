@@ -81,7 +81,7 @@ class ProductCard extends StatelessWidget {
                     child: InkWell(
                       customBorder: const CircleBorder(),
                       onTap: () {
-                        wishlistProvider.toggleFavorite(product.id);
+                        wishlistProvider.toggleFavorite(product.id, product: product);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(

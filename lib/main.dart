@@ -8,6 +8,8 @@ import 'core/services/order_service.dart';
 import 'core/services/consultation_service.dart';
 import 'core/services/ticket_service.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/banner_service.dart';
+import 'core/services/banner_provider.dart';
 import 'core/services/auth_provider.dart';
 import 'core/services/cart_provider.dart';
 import 'core/services/product_provider.dart';
@@ -34,6 +36,7 @@ void main() async {
   final consultationService = ConsultationService(apiClient);
   final ticketService = TicketService(apiClient);
   final notificationService = NotificationService(apiClient);
+  final bannerService = BannerService(apiClient);
 
   // Initialize Auth Provider
   final authProvider = AuthProvider(authService, storageService);
@@ -58,10 +61,14 @@ void main() async {
         Provider<ConsultationService>.value(value: consultationService),
         Provider<TicketService>.value(value: ticketService),
         Provider<NotificationService>.value(value: notificationService),
+        Provider<BannerService>.value(value: bannerService),
         Provider<ImagePickerService>(create: (_) => ImagePickerService()),
 
         // Providers
         ChangeNotifierProvider<AuthProvider>.value(value: authProvider),
+        ChangeNotifierProvider<BannerProvider>(
+          create: (_) => BannerProvider(bannerService, storageService),
+        ),
         ChangeNotifierProvider<CartProvider>(
           create: (_) => CartProvider(storageService),
         ),
@@ -75,7 +82,7 @@ void main() async {
           create: (_) => CurrencyProvider(),
         ),
         ChangeNotifierProvider<WishlistProvider>(
-          create: (_) => WishlistProvider(),
+          create: (_) => WishlistProvider(storageService),
         ),
       ],
       child: const HakoriAlmadinahApp(),

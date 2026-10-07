@@ -110,7 +110,10 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
     setState(() => _isSubmitting = false);
 
     if (success) {
-      final productProvider = Provider.of<ProductProvider>(context, listen: false);
+      final productProvider = Provider.of<ProductProvider>(
+        context,
+        listen: false,
+      );
       final orderProvider = Provider.of<OrderProvider>(context, listen: false);
       productProvider.fetchCatalog();
       orderProvider.fetchOrders();

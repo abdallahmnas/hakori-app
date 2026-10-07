@@ -45,7 +45,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const LuxuryAppBar(title: 'COMMISSIONS', showBack: false),
+      appBar: const LuxuryAppBar(title: 'ORDERS', showBack: false),
       body: Column(
         children: [
           // Tab Bar
@@ -76,12 +76,12 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
                   // Active Orders Tab
                   _buildOrderList(
                     activeOrders,
-                    'No active commissions currently in atelier production.',
+                    'No active orders currently in production.',
                   ),
                   // Completed Orders Tab
                   _buildOrderList(
                     completedOrders,
-                    'No completed or delivered commissions yet.',
+                    'No completed or delivered orders yet.',
                   ),
                 ],
               ),
@@ -117,7 +117,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
               ),
               const SizedBox(height: 12),
               Text(
-                'No Commissions Found',
+                'No Orders Found',
                 style: AppTypography.headlineSM(color: AppColors.textPrimary),
               ),
               const SizedBox(height: 6),
@@ -141,150 +141,158 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
         return Container(
           margin: const EdgeInsets.only(bottom: 14),
-          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: AppColors.outlineLight),
             boxShadow: const [AppColors.softCardShadow],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top Bar: Commission # and Status Pill
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    flex: 5,
-                    child: Text(
-                      order.commissionNumber,
-                      style: AppTypography.labelMD(
-                        color: AppColors.textPrimary,
-                      ).copyWith(fontWeight: FontWeight.bold, fontSize: 12),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    flex: 6,
-                    child: AppBadgeChip(
-                      label: order.status.toUpperCase(),
-                      variant:
-                          order.status.toLowerCase().contains('delivered') ||
-                              order.status.toLowerCase().contains('settled')
-                          ? BadgeChipVariant.statusSage
-                          : BadgeChipVariant.statusGold,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'Placed on ${order.date} • ${order.jewelerName}',
-                style: AppTypography.bodyXS(color: AppColors.textSecondary),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const Divider(height: 18),
-              // Item Row
-              Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      order.specimenImage,
-                      width: 58,
-                      height: 58,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        width: 58,
-                        height: 58,
-                        color: AppColors.surfaceContainerLow,
-                        child: const Icon(
-                          Icons.diamond,
-                          color: AppColors.primaryGold,
-                          size: 22,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(14),
+            child: InkWell(
+              onTap: () => context.push('/order-info/${order.id}', extra: order),
+              borderRadius: BorderRadius.circular(14),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top Bar: Order # and Status Pill
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          order.specimenTitle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTypography.headlineSM(
-                            color: AppColors.textPrimary,
-                          ).copyWith(fontSize: 13),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          firstItem?.purity ?? (order.specimen?['caratOrPurity']?.toString() ?? '18K Solid Gold'),
-                          style: AppTypography.bodyXS(
-                            color: AppColors.textSecondary,
-                          ).copyWith(fontSize: 11),
-                        ),
-                        const SizedBox(height: 4),
-                        DualPriceText(
-                          priceUsd: order.totalUsd,
-                          priceNgn: order.totalNgn,
-                          primaryStyle: AppTypography.priceDisplay().copyWith(
-                            fontSize: 14,
+                        Expanded(
+                          flex: 5,
+                          child: Text(
+                            order.commissionNumber,
+                            style: AppTypography.labelMD(
+                              color: AppColors.textPrimary,
+                            ).copyWith(fontWeight: FontWeight.bold, fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          secondaryStyle: AppTypography.priceSecondary()
-                              .copyWith(fontSize: 10),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          flex: 6,
+                          child: AppBadgeChip(
+                            label: order.status.toUpperCase(),
+                            variant:
+                                order.status.toLowerCase().contains('delivered') ||
+                                    order.status.toLowerCase().contains('settled')
+                                ? BadgeChipVariant.statusSage
+                                : BadgeChipVariant.statusGold,
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              // Track Button
-              InkWell(
-                onTap: () => context.push('/commission-tracker/${order.id}'),
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.outline),
-                  ),
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.radar,
-                            size: 15,
-                            color: AppColors.primaryGold,
-                          ),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              'VIEW LIVE TRANSIT & PRODUCTION TRACKER',
-                              style: AppTypography.labelSM(
-                                color: AppColors.textPrimary,
-                              ).copyWith(fontSize: 9),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: 6),
+                    Text(
+                      'Placed on ${order.date}${order.jewelerName != null && order.jewelerName!.isNotEmpty ? ' • ${order.jewelerName}' : ''}',
+                      style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Divider(height: 18),
+                    // Item Row
+                    Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            order.specimenImage,
+                            width: 58,
+                            height: 58,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => Container(
+                              width: 58,
+                              height: 58,
+                              color: AppColors.surfaceContainerLow,
+                              child: const Icon(
+                                Icons.diamond,
+                                color: AppColors.primaryGold,
+                                size: 22,
+                              ),
                             ),
                           ),
-                        ],
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                order.specimenTitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.headlineSM(
+                                  color: AppColors.textPrimary,
+                                ).copyWith(fontSize: 13),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                firstItem?.purity ?? (order.specimen?['caratOrPurity']?.toString() ?? '18K Solid Gold'),
+                                style: AppTypography.bodyXS(
+                                  color: AppColors.textSecondary,
+                                ).copyWith(fontSize: 11),
+                              ),
+                              const SizedBox(height: 4),
+                              DualPriceText(
+                                priceUsd: order.totalUsd,
+                                priceNgn: order.totalNgn,
+                                primaryStyle: AppTypography.priceDisplay().copyWith(
+                                  fontSize: 14,
+                                ),
+                                secondaryStyle: AppTypography.priceSecondary()
+                                    .copyWith(fontSize: 10),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    // Details Action Button
+                    Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: AppColors.outline),
+                      ),
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.receipt_long_outlined,
+                                size: 16,
+                                color: AppColors.primaryGold,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'VIEW ORDER DETAILS',
+                                style: AppTypography.labelSM(
+                                  color: AppColors.textPrimary,
+                                ).copyWith(fontSize: 11, fontWeight: FontWeight.bold),
+                              ),
+                              const Spacer(),
+                              const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 12,
+                                color: AppColors.textMuted,
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         );
       },

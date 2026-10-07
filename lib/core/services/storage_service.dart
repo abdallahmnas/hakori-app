@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../models/cart_item.dart';
+import '../models/product.dart';
+import '../models/promo_banner.dart';
 
 /// Central Persistent Local Storage Service using SharedPreferences
 class StorageService {
@@ -106,6 +108,70 @@ class StorageService {
   static const String _keySignupEmail = 'signup_flow_email';
   static const String _keySignupSessionToken = 'signup_session_token';
   static const String _keySignupVerificationToken = 'signup_verification_token';
+
+  // --- Wishlist / Favorites Persistence ---
+  static const String _keyWishlistIds = 'saved_wishlist_ids';
+  static const String _keyWishlistProducts = 'saved_wishlist_products';
+
+  Set<String> getWishlistIds() {
+    final list = _prefs.getStringList(_keyWishlistIds);
+    return list?.toSet() ?? {};
+  }
+
+  Future<bool> saveWishlistIds(Set<String> ids) {
+    return _prefs.setStringList(_keyWishlistIds, ids.toList());
+  }
+
+  List<Product> getWishlistProducts() {
+    final raw = _prefs.getString(_keyWishlistProducts);
+    if (raw == null || raw.isEmpty) return [];
+    try {
+      final list = jsonDecode(raw);
+      if (list is List) {
+        return list
+            .map((item) => Product.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<bool> saveWishlistProducts(List<Product> products) {
+    final list = products.map((p) => p.toJson()).toList();
+    return _prefs.setString(_keyWishlistProducts, jsonEncode(list));
+  }
+
+  Future<bool> clearWishlist() async {
+    await _prefs.remove(_keyWishlistIds);
+    await _prefs.remove(_keyWishlistProducts);
+    return true;
+  }
+
+  // --- Hero Banners Persistence ---
+  static const String _keyHeroBanners = 'cached_hero_banners';
+
+  List<PromoBanner> getCachedBanners() {
+    final raw = _prefs.getString(_keyHeroBanners);
+    if (raw == null || raw.isEmpty) return [];
+    try {
+      final list = jsonDecode(raw);
+      if (list is List) {
+        return list
+            .map((item) => PromoBanner.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  Future<bool> saveCachedBanners(List<PromoBanner> banners) {
+    final list = banners.map((b) => b.toJson()).toList();
+    return _prefs.setString(_keyHeroBanners, jsonEncode(list));
+  }
 
   Future<void> saveSignupSession({required String email, required String sessionToken}) async {
     await _prefs.setString(_keySignupEmail, email);

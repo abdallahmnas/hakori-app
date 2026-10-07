@@ -63,7 +63,8 @@ class OrderProvider extends ChangeNotifier {
 
   Future<CommissionOrder?> placeOrder({
     required Map<String, dynamic> client,
-    required Map<String, dynamic> specimen,
+    required List<Map<String, dynamic>> items,
+    Map<String, dynamic>? specimen,
     required double total,
     String currency = 'USD',
     required String shippingAddress,
@@ -75,6 +76,7 @@ class OrderProvider extends ChangeNotifier {
     try {
       final order = await _orderService.placeOrder(
         client: client,
+        items: items,
         specimen: specimen,
         total: total,
         currency: currency,

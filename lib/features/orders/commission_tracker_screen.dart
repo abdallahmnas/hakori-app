@@ -14,13 +14,11 @@ import '../../core/widgets/dual_price_text.dart';
 class CommissionTrackerScreen extends StatefulWidget {
   final String orderId;
 
-  const CommissionTrackerScreen({
-    super.key,
-    required this.orderId,
-  });
+  const CommissionTrackerScreen({super.key, required this.orderId});
 
   @override
-  State<CommissionTrackerScreen> createState() => _CommissionTrackerScreenState();
+  State<CommissionTrackerScreen> createState() =>
+      _CommissionTrackerScreenState();
 }
 
 class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
@@ -56,7 +54,9 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
           ),
           title: Text(
             'COMMISSION TRACKER',
-            style: AppTypography.labelLG(color: AppColors.textPrimary).copyWith(letterSpacing: 2),
+            style: AppTypography.labelLG(
+              color: AppColors.textPrimary,
+            ).copyWith(letterSpacing: 2),
           ),
         ),
         body: const Center(
@@ -77,7 +77,9 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
           ),
           title: Text(
             'NOT FOUND',
-            style: AppTypography.labelLG(color: AppColors.textPrimary).copyWith(letterSpacing: 2),
+            style: AppTypography.labelLG(
+              color: AppColors.textPrimary,
+            ).copyWith(letterSpacing: 2),
           ),
         ),
         body: Center(
@@ -86,7 +88,11 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.search_off_outlined, size: 48, color: AppColors.textMuted),
+                const Icon(
+                  Icons.search_off_outlined,
+                  size: 48,
+                  color: AppColors.textMuted,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Commission Record Not Found',
@@ -121,7 +127,9 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
         ),
         title: Text(
           order.commissionNumber,
-          style: AppTypography.labelLG(color: AppColors.textPrimary).copyWith(letterSpacing: 2),
+          style: AppTypography.labelLG(
+            color: AppColors.textPrimary,
+          ).copyWith(letterSpacing: 2),
         ),
       ),
       body: SingleChildScrollView(
@@ -167,8 +175,10 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
                             const SizedBox(width: 8),
                             Flexible(
                               child: Text(
-                                order.trackingNumber,
-                                style: AppTypography.labelSM(color: AppColors.textMuted),
+                                order.trackingNumber ?? "",
+                                style: AppTypography.labelSM(
+                                  color: AppColors.textMuted,
+                                ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -179,28 +189,53 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('ORIGIN', style: AppTypography.labelSM(color: AppColors.textMuted)),
-                                Text('Paris Vendôme', style: AppTypography.headlineSM(color: AppColors.textOnDark)),
+                                Text(
+                                  'ORIGIN',
+                                  style: AppTypography.labelSM(
+                                    color: AppColors.textMuted,
+                                  ),
+                                ),
+                                Text(
+                                  'Paris Vendôme',
+                                  style: AppTypography.headlineSM(
+                                    color: AppColors.textOnDark,
+                                  ),
+                                ),
                               ],
                             ),
                             const Expanded(
                               child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 12),
-                                child: Divider(color: AppColors.primaryGold, thickness: 1.5),
+                                child: Divider(
+                                  color: AppColors.primaryGold,
+                                  thickness: 1.5,
+                                ),
                               ),
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Text('DESTINATION', style: AppTypography.labelSM(color: AppColors.textMuted)),
-                                Text('Lagos Salon', style: AppTypography.headlineSM(color: AppColors.textOnDark)),
+                                Text(
+                                  'DESTINATION',
+                                  style: AppTypography.labelSM(
+                                    color: AppColors.textMuted,
+                                  ),
+                                ),
+                                Text(
+                                  'Lagos Salon',
+                                  style: AppTypography.headlineSM(
+                                    color: AppColors.textOnDark,
+                                  ),
+                                ),
                               ],
                             ),
                           ],
                         ),
                         Text(
                           'Estimated Delivery: ${order.estimatedDelivery}',
-                          style: AppTypography.bodyXS(color: AppColors.goldAccent),
+                          style: AppTypography.bodyXS(
+                            color: AppColors.goldAccent,
+                          ),
                         ),
                       ],
                     ),
@@ -228,15 +263,29 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
                       color: AppColors.darkCard,
                       border: Border.all(color: AppColors.primaryGold),
                     ),
-                    child: const Icon(Icons.person_pin, color: AppColors.primaryGold, size: 28),
+                    child: const Icon(
+                      Icons.person_pin,
+                      color: AppColors.primaryGold,
+                      size: 28,
+                    ),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Assigned Master Jeweler', style: AppTypography.bodyXS(color: AppColors.textSecondary)),
-                        Text(order.jewelerName, style: AppTypography.headlineSM(color: AppColors.textPrimary)),
+                        Text(
+                          'Assigned Master Jeweler',
+                          style: AppTypography.bodyXS(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        Text(
+                          order.jewelerName ?? "",
+                          style: AppTypography.headlineSM(
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -269,13 +318,17 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
                     children: [
                       Text(
                         'COMMISSION SPECIMEN',
-                        style: AppTypography.labelSM(color: AppColors.primaryGold).copyWith(letterSpacing: 1.5),
+                        style: AppTypography.labelSM(
+                          color: AppColors.primaryGold,
+                        ).copyWith(letterSpacing: 1.5),
                       ),
                       if (order.paymentStatus != null)
                         AppBadgeChip(
                           label: order.paymentStatus!.toUpperCase(),
-                          variant: order.paymentStatus!.toUpperCase() == 'PAID' ||
-                                  order.paymentStatus!.toUpperCase() == 'SETTLED'
+                          variant:
+                              order.paymentStatus!.toUpperCase() == 'PAID' ||
+                                  order.paymentStatus!.toUpperCase() ==
+                                      'SETTLED'
                               ? BadgeChipVariant.statusSage
                               : BadgeChipVariant.statusGold,
                         ),
@@ -292,12 +345,17 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
                           width: 72,
                           height: 72,
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(
-                            width: 72,
-                            height: 72,
-                            color: AppColors.surfaceContainerLow,
-                            child: const Icon(Icons.diamond, color: AppColors.primaryGold, size: 28),
-                          ),
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                width: 72,
+                                height: 72,
+                                color: AppColors.surfaceContainerLow,
+                                child: const Icon(
+                                  Icons.diamond,
+                                  color: AppColors.primaryGold,
+                                  size: 28,
+                                ),
+                              ),
                         ),
                       ),
                       const SizedBox(width: 14),
@@ -307,30 +365,41 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
                           children: [
                             Text(
                               order.specimenTitle,
-                              style: AppTypography.headlineSM(color: AppColors.textPrimary),
+                              style: AppTypography.headlineSM(
+                                color: AppColors.textPrimary,
+                              ),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(height: 4),
                             Text(
                               order.specimen?['specDetails']?.toString() ??
-                                  order.specimen?['caratOrPurity']?.toString() ??
-                                  (order.items.isNotEmpty ? order.items.first.material : '18K Solid Gold'),
-                              style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                                  order.specimen?['caratOrPurity']
+                                      ?.toString() ??
+                                  (order.items.isNotEmpty
+                                      ? order.items.first.material
+                                      : '18K Solid Gold'),
+                              style: AppTypography.bodyXS(
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                             if (order.specimen?['subType'] != null) ...[
                               const SizedBox(height: 2),
                               Text(
                                 'Discipline: ${order.specimen!['subType']}',
-                                style: AppTypography.bodyXS(color: AppColors.textMuted).copyWith(fontSize: 10),
+                                style: AppTypography.bodyXS(
+                                  color: AppColors.textMuted,
+                                ).copyWith(fontSize: 10),
                               ),
                             ],
                             const SizedBox(height: 6),
                             DualPriceText(
                               priceUsd: order.totalUsd,
                               priceNgn: order.totalNgn,
-                              primaryStyle: AppTypography.priceDisplay().copyWith(fontSize: 16),
-                              secondaryStyle: AppTypography.priceSecondary().copyWith(fontSize: 11),
+                              primaryStyle: AppTypography.priceDisplay()
+                                  .copyWith(fontSize: 16),
+                              secondaryStyle: AppTypography.priceSecondary()
+                                  .copyWith(fontSize: 11),
                             ),
                           ],
                         ),
@@ -374,7 +443,9 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
                                 shape: BoxShape.circle,
                                 color: step.isCompleted
                                     ? AppColors.primaryGold
-                                    : (step.isCurrent ? AppColors.darkBase : AppColors.surfaceContainerHigh),
+                                    : (step.isCurrent
+                                          ? AppColors.darkBase
+                                          : AppColors.surfaceContainerHigh),
                                 border: Border.all(
                                   color: step.isCurrent || step.isCompleted
                                       ? AppColors.primaryGold
@@ -382,17 +453,28 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
                                 ),
                               ),
                               child: step.isCompleted
-                                  ? const Icon(Icons.check, size: 12, color: Colors.black)
+                                  ? const Icon(
+                                      Icons.check,
+                                      size: 12,
+                                      color: Colors.black,
+                                    )
                                   : (step.isCurrent
-                                      ? const Center(
-                                          child: Icon(Icons.circle, size: 6, color: AppColors.primaryGold))
-                                      : null),
+                                        ? const Center(
+                                            child: Icon(
+                                              Icons.circle,
+                                              size: 6,
+                                              color: AppColors.primaryGold,
+                                            ),
+                                          )
+                                        : null),
                             ),
                             if (!isLast)
                               Container(
                                 width: 2,
                                 height: 48,
-                                color: step.isCompleted ? AppColors.primaryGold : AppColors.outlineLight,
+                                color: step.isCompleted
+                                    ? AppColors.primaryGold
+                                    : AppColors.outlineLight,
                               ),
                           ],
                         ),
@@ -406,18 +488,24 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
                                 style: AppTypography.labelMD(
                                   color: step.isCurrent
                                       ? AppColors.primaryGold
-                                      : (step.isCompleted ? AppColors.textPrimary : AppColors.textMuted),
+                                      : (step.isCompleted
+                                            ? AppColors.textPrimary
+                                            : AppColors.textMuted),
                                 ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 step.description,
-                                style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                                style: AppTypography.bodyXS(
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 step.timestamp,
-                                style: AppTypography.bodyXS(color: AppColors.textMuted).copyWith(fontSize: 10),
+                                style: AppTypography.bodyXS(
+                                  color: AppColors.textMuted,
+                                ).copyWith(fontSize: 10),
                               ),
                               const SizedBox(height: 12),
                             ],
@@ -441,15 +529,29 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.home_work_outlined, color: AppColors.primaryGold, size: 24),
+                  const Icon(
+                    Icons.home_work_outlined,
+                    color: AppColors.primaryGold,
+                    size: 24,
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Armored Delivery Address', style: AppTypography.bodyXS(color: AppColors.textSecondary)),
+                        Text(
+                          'Delivery Address',
+                          style: AppTypography.bodyXS(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
                         const SizedBox(height: 2),
-                        Text(order.deliveryAddress, style: AppTypography.labelMD(color: AppColors.textPrimary)),
+                        Text(
+                          order.deliveryAddress ?? "",
+                          style: AppTypography.labelMD(
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
                       ],
                     ),
                   ),

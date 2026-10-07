@@ -11,17 +11,23 @@ import '../../features/auth/password_reset_success_screen.dart';
 import '../../features/auth/complete_profile_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/catalog/categories_screen.dart';
+import '../../features/catalog/category_info_screen.dart';
 import '../../features/catalog/product_detail_screen.dart';
 import '../../features/customizer/bespoke_configurator_screen.dart';
 import '../../features/customizer/ar_live_fitting_screen.dart';
 import '../../features/cart/cart_screen.dart';
 import '../../features/cart/empty_bag_screen.dart';
+import '../../features/checkout/payment_webview_screen.dart';
 import '../../features/orders/order_confirmation_screen.dart';
+import '../../features/orders/order_info_screen.dart';
 import '../../features/orders/my_orders_screen.dart';
-import '../../features/orders/commission_tracker_screen.dart';
 import '../../features/wishlist/wishlist_screen.dart';
 import '../models/order.dart';
+import '../models/category.dart';
 import '../../features/profile/vip_profile_screen.dart';
+import '../../features/profile/tickets_list_screen.dart';
+import '../../features/profile/ticket_detail_screen.dart';
+import '../models/support_ticket.dart';
 import '../../features/profile/fx_ledger_screen.dart';
 import '../../features/profile/dental_vault_scans_screen.dart';
 import '../../features/concierge/concierge_booking_screen.dart';
@@ -178,6 +184,21 @@ class AppRouter {
         builder: (context, state) => const CategoriesScreen(),
       ),
       GoRoute(
+        path: '/category-info',
+        name: 'category-info',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final extra = state.extra;
+          if (extra is Category) {
+            return CategoryInfoScreen(categoryName: extra.name, category: extra);
+          } else if (extra is String) {
+            return CategoryInfoScreen(categoryName: extra);
+          }
+          final name = state.uri.queryParameters['name'] ?? 'ALL';
+          return CategoryInfoScreen(categoryName: name);
+        },
+      ),
+      GoRoute(
         path: '/configurator',
         name: 'configurator',
         parentNavigatorKey: _rootNavigatorKey,
@@ -205,12 +226,34 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: '/payment-webview',
+        name: 'payment-webview',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final map = state.extra as Map<String, dynamic>? ?? {};
+          final url = map['url']?.toString() ?? '';
+          final order = map['order'] as CommissionOrder;
+          return PaymentWebViewScreen(paymentUrl: url, order: order);
+        },
+      ),
+      GoRoute(
+        path: '/order-info/:id',
+        name: 'order-info',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final orderId = state.pathParameters['id'] ?? '';
+          final order = state.extra as CommissionOrder?;
+          return OrderInfoScreen(orderId: orderId, initialOrder: order);
+        },
+      ),
+      GoRoute(
         path: '/commission-tracker/:id',
         name: 'commission-tracker',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) {
           final orderId = state.pathParameters['id'] ?? 'ord_1';
-          return CommissionTrackerScreen(orderId: orderId);
+          final order = state.extra as CommissionOrder?;
+          return OrderInfoScreen(orderId: orderId, initialOrder: order);
         },
       ),
       GoRoute(
@@ -242,6 +285,22 @@ class AppRouter {
         name: 'live-call',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const LiveVideoCallScreen(),
+      ),
+      GoRoute(
+        path: '/tickets',
+        name: 'tickets',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const TicketsListScreen(),
+      ),
+      GoRoute(
+        path: '/ticket-detail/:id',
+        name: 'ticket-detail',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final ticketId = state.pathParameters['id'] ?? '';
+          final ticket = state.extra as SupportTicket?;
+          return TicketDetailScreen(ticketId: ticketId, initialTicket: ticket);
+        },
       ),
     ],
   );
