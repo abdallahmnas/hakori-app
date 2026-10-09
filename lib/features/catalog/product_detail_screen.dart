@@ -30,7 +30,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   String? _selectedMetal;
   String? _selectedStone;
   String? _selectedArch;
-  bool _includeImpressionKit = true;
 
   Product? _product;
   bool _isLoading = true;
@@ -414,51 +413,51 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ],
 
                       // Sizing Kit Option
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.goldContainer.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.outlineGold),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.inventory_2_outlined,
-                              color: AppColors.primaryGold,
-                              size: 24,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Free Luxury Sizing Kit Included',
-                                    style: AppTypography.labelMD(
-                                      color: AppColors.onGoldContainer,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    'Dispatched within 24 hours with return courier bag.',
-                                    style: AppTypography.bodyXS(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Switch(
-                              value: _includeImpressionKit,
-                              activeThumbColor: AppColors.primaryGold,
-                              onChanged: (val) =>
-                                  setState(() => _includeImpressionKit = val),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
+                      // Container(
+                      //   padding: const EdgeInsets.all(16),
+                      //   decoration: BoxDecoration(
+                      //     color: AppColors.goldContainer.withValues(alpha: 0.4),
+                      //     borderRadius: BorderRadius.circular(12),
+                      //     border: Border.all(color: AppColors.outlineGold),
+                      //   ),
+                      //   child: Row(
+                      //     children: [
+                      //       const Icon(
+                      //         Icons.inventory_2_outlined,
+                      //         color: AppColors.primaryGold,
+                      //         size: 24,
+                      //       ),
+                      //       const SizedBox(width: 12),
+                      //       Expanded(
+                      //         child: Column(
+                      //           crossAxisAlignment: CrossAxisAlignment.start,
+                      //           children: [
+                      //             Text(
+                      //               'Free Luxury Sizing Kit Included',
+                      //               style: AppTypography.labelMD(
+                      //                 color: AppColors.onGoldContainer,
+                      //               ),
+                      //             ),
+                      //             const SizedBox(height: 2),
+                      //             Text(
+                      //               'Dispatched within 24 hours with return courier bag.',
+                      //               style: AppTypography.bodyXS(
+                      //                 color: AppColors.textSecondary,
+                      //               ),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //       ),
+                      //       Switch(
+                      //         value: _includeImpressionKit,
+                      //         activeThumbColor: AppColors.primaryGold,
+                      //         onChanged: (val) =>
+                      //             setState(() => _includeImpressionKit = val),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                      // const SizedBox(height: 24),
 
                       // Description
                       if (product.description.isNotEmpty) ...[

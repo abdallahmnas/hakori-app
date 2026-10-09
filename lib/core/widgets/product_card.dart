@@ -65,11 +65,7 @@ class ProductCard extends StatelessWidget {
                 Positioned(
                   top: 6,
                   left: 6,
-                  child: AppBadgeChip.purity(
-                    label: product.purity.contains('24K')
-                        ? '24K Gold'
-                        : '18K Gold',
-                  ),
+                  child: AppBadgeChip.purity(label: product.purity),
                 ),
                 // Wishlist Heart Button
                 Positioned(
@@ -81,7 +77,10 @@ class ProductCard extends StatelessWidget {
                     child: InkWell(
                       customBorder: const CircleBorder(),
                       onTap: () {
-                        wishlistProvider.toggleFavorite(product.id, product: product);
+                        wishlistProvider.toggleFavorite(
+                          product.id,
+                          product: product,
+                        );
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(

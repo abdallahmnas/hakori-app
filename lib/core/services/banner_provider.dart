@@ -25,12 +25,12 @@ class BannerProvider extends ChangeNotifier {
     if (storage != null) {
       final cached = storage.getCachedBanners();
       if (cached.isNotEmpty) {
-        _banners = cached;
+        _banners = cached.take(5).toList();
       }
     }
   }
 
-  /// Fetch hero banners from API and update local storage cache
+  /// Fetch hero banners from API and update local storage cache (max 5 banners)
   Future<void> fetchBanners({bool silent = false}) async {
     if (_banners.isEmpty && !silent) {
       _isLoading = true;
@@ -44,10 +44,10 @@ class BannerProvider extends ChangeNotifier {
         all: true,
       );
 
-      if (fetched.isNotEmpty) {
-        _banners = fetched;
-        _storageService?.saveCachedBanners(fetched);
-      }
+      // Enforce max 5 banners as specified
+      final capped = fetched.take(5).toList();
+      _banners = capped;
+      await _storageService?.saveCachedBanners(capped);
       _errorMessage = null;
     } catch (e) {
       if (_banners.isEmpty) {

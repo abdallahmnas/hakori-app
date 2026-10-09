@@ -55,7 +55,7 @@ class Product {
     required this.id,
     String? title,
     String? name,
-    this.subtitle = 'Haute Joaillerie Atelier Piece',
+    this.subtitle = 'Haute Joaillerie piece',
     required this.category,
     double? price,
     double? priceUsd,
@@ -87,23 +87,31 @@ class Product {
     this.stoneOptions = const [],
     this.isFeatured = false,
     this.isBestSeller = false,
-  })  : title = (name != null && name.isNotEmpty) ? name : (title ?? 'Bespoke Atelier Piece'),
-        price = price ?? priceUsd ?? 0.0,
-        costPrice = costPrice ?? 0.0,
-        castingPrice = castingPrice ?? 0.0,
-        material = (material != null && material.isNotEmpty)
-            ? material
-            : (purity != null && purity.isNotEmpty ? purity : '18K Solid Yellow Gold'),
-        placement = (placement != null && placement.isNotEmpty)
-            ? placement
-            : (archType != null && archType.isNotEmpty ? archType : 'Fine Product'),
-        stock = stock ?? inventory ?? stockQuantity ?? 1,
-        inventory = inventory ?? stock ?? stockQuantity ?? 1,
-        images = (images != null && images.isNotEmpty)
-            ? images
-            : (galleryImages != null && galleryImages.isNotEmpty
-                ? galleryImages
-                : (imageUrl != null && imageUrl.isNotEmpty ? [imageUrl] : const []));
+  }) : title = (name != null && name.isNotEmpty)
+           ? name
+           : (title ?? 'Bespoke piece'),
+       price = price ?? priceUsd ?? 0.0,
+       costPrice = costPrice ?? 0.0,
+       castingPrice = castingPrice ?? 0.0,
+       material = (material != null && material.isNotEmpty)
+           ? material
+           : (purity != null && purity.isNotEmpty
+                 ? purity
+                 : '18K Solid Yellow Gold'),
+       placement = (placement != null && placement.isNotEmpty)
+           ? placement
+           : (archType != null && archType.isNotEmpty
+                 ? archType
+                 : 'Fine Product'),
+       stock = stock ?? inventory ?? stockQuantity ?? 1,
+       inventory = inventory ?? stock ?? stockQuantity ?? 1,
+       images = (images != null && images.isNotEmpty)
+           ? images
+           : (galleryImages != null && galleryImages.isNotEmpty
+                 ? galleryImages
+                 : (imageUrl != null && imageUrl.isNotEmpty
+                       ? [imageUrl]
+                       : const []));
 
   // UI Backward Compatibility Getters
   String get name => title;
@@ -122,45 +130,66 @@ class Product {
     List<String> parsedImages = [];
     if (rawImages is List && rawImages.isNotEmpty) {
       parsedImages = rawImages.map((e) => e.toString()).toList();
-    } else if (json['imageUrl'] != null && json['imageUrl'].toString().isNotEmpty) {
+    } else if (json['imageUrl'] != null &&
+        json['imageUrl'].toString().isNotEmpty) {
       parsedImages = [json['imageUrl'].toString()];
     } else if (json['image'] != null && json['image'].toString().isNotEmpty) {
       parsedImages = [json['image'].toString()];
     }
 
     final rawPrice = json['price'] ?? json['priceUsd'] ?? 0;
-    final double parsedPrice = (rawPrice is num) ? rawPrice.toDouble() : double.tryParse(rawPrice.toString()) ?? 0.0;
+    final double parsedPrice = (rawPrice is num)
+        ? rawPrice.toDouble()
+        : double.tryParse(rawPrice.toString()) ?? 0.0;
 
     final rawCostPrice = json['costPrice'] ?? 0;
-    final double parsedCostPrice = (rawCostPrice is num) ? rawCostPrice.toDouble() : double.tryParse(rawCostPrice.toString()) ?? 0.0;
+    final double parsedCostPrice = (rawCostPrice is num)
+        ? rawCostPrice.toDouble()
+        : double.tryParse(rawCostPrice.toString()) ?? 0.0;
 
     final rawCastingPrice = json['castingPrice'] ?? 0;
-    final double parsedCastingPrice = (rawCastingPrice is num) ? rawCastingPrice.toDouble() : double.tryParse(rawCastingPrice.toString()) ?? 0.0;
+    final double parsedCastingPrice = (rawCastingPrice is num)
+        ? rawCastingPrice.toDouble()
+        : double.tryParse(rawCastingPrice.toString()) ?? 0.0;
 
-    final rawStock = json['stock'] ?? json['inventory'] ?? json['stockQuantity'];
-    final int parsedStock = (rawStock is num) ? rawStock.toInt() : (int.tryParse(rawStock?.toString() ?? '') ?? 0);
+    final rawStock =
+        json['stock'] ?? json['inventory'] ?? json['stockQuantity'];
+    final int parsedStock = (rawStock is num)
+        ? rawStock.toInt()
+        : (int.tryParse(rawStock?.toString() ?? '') ?? 0);
 
     final rawInStock = json['inStock'];
-    final bool parsedInStock = (rawInStock is bool) ? rawInStock : (parsedStock > 0);
+    final bool parsedInStock = (rawInStock is bool)
+        ? rawInStock
+        : (parsedStock > 0);
 
     final rawLowStock = json['lowStock'];
     final bool parsedLowStock = (rawLowStock is bool) ? rawLowStock : false;
 
     // Parse options only if explicitly provided in backend
     List<String> parsedMetalOptions = [];
-    if (json['metalOptions'] is List && (json['metalOptions'] as List).isNotEmpty) {
-      parsedMetalOptions = (json['metalOptions'] as List).map((e) => e.toString()).toList();
+    if (json['metalOptions'] is List &&
+        (json['metalOptions'] as List).isNotEmpty) {
+      parsedMetalOptions = (json['metalOptions'] as List)
+          .map((e) => e.toString())
+          .toList();
     }
 
     List<String> parsedStoneOptions = [];
-    if (json['stoneOptions'] is List && (json['stoneOptions'] as List).isNotEmpty) {
-      parsedStoneOptions = (json['stoneOptions'] as List).map((e) => e.toString()).toList();
+    if (json['stoneOptions'] is List &&
+        (json['stoneOptions'] as List).isNotEmpty) {
+      parsedStoneOptions = (json['stoneOptions'] as List)
+          .map((e) => e.toString())
+          .toList();
     }
 
     return Product(
       id: json['id']?.toString() ?? '',
-      name: json['name']?.toString() ?? json['title']?.toString() ?? 'Bespoke Atelier Piece',
-      subtitle: json['subtitle']?.toString() ?? 'Haute Joaillerie Atelier Piece',
+      name:
+          json['name']?.toString() ??
+          json['title']?.toString() ??
+          'Bespoke piece',
+      subtitle: json['subtitle']?.toString() ?? 'Haute Joaillerie piece',
       category: json['category']?.toString() ?? 'Jewelry',
       price: parsedPrice,
       costPrice: parsedCostPrice,
@@ -168,8 +197,14 @@ class Product {
       currency: json['currency']?.toString() ?? 'USD',
       rating: (json['rating'] as num?)?.toDouble() ?? 5.0,
       reviewCount: (json['reviewCount'] as num?)?.toInt() ?? 1,
-      material: json['material']?.toString() ?? json['purity']?.toString() ?? '18K Solid Yellow Gold',
-      placement: json['placement']?.toString() ?? json['archType']?.toString() ?? 'Fine Product',
+      material:
+          json['material']?.toString() ??
+          json['purity']?.toString() ??
+          '18K Solid Yellow Gold',
+      placement:
+          json['placement']?.toString() ??
+          json['archType']?.toString() ??
+          'Fine Product',
       diamondClarity: json['diamondClarity']?.toString() ?? 'VVS1 Natural',
       images: parsedImages,
       description: json['description']?.toString() ?? '',

@@ -13,7 +13,7 @@ import '../../core/widgets/product_card.dart';
 import '../../core/widgets/product_skeleton.dart';
 
 /// Screen: category_info_screen
-/// Lists atelier products by category with hero header and grid
+/// Lists products by category with hero header and grid
 class CategoryInfoScreen extends StatefulWidget {
   final String categoryName;
   final Category? category;
@@ -46,11 +46,16 @@ class _CategoryInfoScreenState extends State<CategoryInfoScreen> {
     });
 
     try {
-      final productService = Provider.of<ProductService>(context, listen: false);
+      final productService = Provider.of<ProductService>(
+        context,
+        listen: false,
+      );
       final fetched = await productService.getProducts(
         page: 0,
         pageSize: 50,
-        category: widget.categoryName.toUpperCase() == 'ALL' ? null : widget.categoryName,
+        category: widget.categoryName.toUpperCase() == 'ALL'
+            ? null
+            : widget.categoryName,
       );
 
       if (mounted) {
@@ -79,14 +84,13 @@ class _CategoryInfoScreenState extends State<CategoryInfoScreen> {
         : 'Explore our curated ${widget.categoryName} collection handcrafted in pure 18K/24K solid gold and fine gemstones.';
     final heroImage = widget.category?.imageUrl.isNotEmpty == true
         ? widget.category!.imageUrl
-        : (_products.isNotEmpty ? _products.first.imageUrl : 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1000&auto=format&fit=crop');
+        : (_products.isNotEmpty
+              ? _products.first.imageUrl
+              : 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1000&auto=format&fit=crop');
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: LuxuryAppBar(
-        title: title,
-        showBack: true,
-      ),
+      appBar: LuxuryAppBar(title: title, showBack: true),
       body: RefreshIndicator(
         color: AppColors.primaryGold,
         backgroundColor: AppColors.darkBase,
@@ -127,27 +131,29 @@ class _CategoryInfoScreenState extends State<CategoryInfoScreen> {
                       Row(
                         children: [
                           AppBadgeChip(
-                            label: '${_products.length} ATELIER PIECES',
+                            label: '${_products.length} PIECES',
                             variant: BadgeChipVariant.goldPurity,
                           ),
                           const Spacer(),
-                          const AppBadgeChip(
-                            label: 'SOLID GOLD & VVS',
-                            variant: BadgeChipVariant.darkTag,
-                          ),
+                          // const AppBadgeChip(
+                          //   label: '${widget.category!.title}',
+                          //   variant: BadgeChipVariant.darkTag,
+                          // ),
                         ],
                       ),
                       const SizedBox(height: 10),
                       Text(
                         title,
-                        style: AppTypography.headlineLG(color: AppColors.textOnDark),
+                        style: AppTypography.headlineLG(
+                          color: AppColors.textOnDark,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         description,
-                        style: AppTypography.bodyXS(color: AppColors.surfaceContainerHigh).copyWith(
-                          height: 1.4,
-                        ),
+                        style: AppTypography.bodyXS(
+                          color: AppColors.surfaceContainerHigh,
+                        ).copyWith(height: 1.4),
                       ),
                     ],
                   ),
@@ -164,11 +170,15 @@ class _CategoryInfoScreenState extends State<CategoryInfoScreen> {
                   children: [
                     Text(
                       'Collection Pieces',
-                      style: AppTypography.headlineMD(color: AppColors.textPrimary).copyWith(fontSize: 16),
+                      style: AppTypography.headlineMD(
+                        color: AppColors.textPrimary,
+                      ).copyWith(fontSize: 16),
                     ),
                     Text(
                       '${_products.length} Results',
-                      style: AppTypography.labelSM(color: AppColors.primaryGold),
+                      style: AppTypography.labelSM(
+                        color: AppColors.primaryGold,
+                      ),
                     ),
                   ],
                 ),
@@ -181,16 +191,25 @@ class _CategoryInfoScreenState extends State<CategoryInfoScreen> {
             else if (_errorMessage != null)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 48,
+                    horizontal: 24,
+                  ),
                   child: Center(
                     child: Column(
                       children: [
-                        const Icon(Icons.error_outline, size: 44, color: AppColors.error),
+                        const Icon(
+                          Icons.error_outline,
+                          size: 44,
+                          color: AppColors.error,
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           _errorMessage!,
                           textAlign: TextAlign.center,
-                          style: AppTypography.bodyMD(color: AppColors.textSecondary),
+                          style: AppTypography.bodyMD(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         AppButton.outline(
@@ -206,21 +225,32 @@ class _CategoryInfoScreenState extends State<CategoryInfoScreen> {
             else if (_products.isEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 48,
+                    horizontal: 24,
+                  ),
                   child: Center(
                     child: Column(
                       children: [
-                        const Icon(Icons.diamond_outlined, size: 48, color: AppColors.textMuted),
+                        const Icon(
+                          Icons.diamond_outlined,
+                          size: 48,
+                          color: AppColors.textMuted,
+                        ),
                         const SizedBox(height: 12),
                         Text(
                           'No Pieces in this Category',
-                          style: AppTypography.headlineSM(color: AppColors.textPrimary),
+                          style: AppTypography.headlineSM(
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           'We are currently preparing new bespoke pieces for this collection.',
                           textAlign: TextAlign.center,
-                          style: AppTypography.bodyXS(color: AppColors.textSecondary),
+                          style: AppTypography.bodyXS(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         AppButton.outline(
@@ -243,16 +273,13 @@ class _CategoryInfoScreenState extends State<CategoryInfoScreen> {
                     crossAxisSpacing: 12,
                     childAspectRatio: 0.72,
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final product = _products[index];
-                      return ProductCard(
-                        product: product,
-                        onTap: () => context.push('/product/${product.id}'),
-                      );
-                    },
-                    childCount: _products.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final product = _products[index];
+                    return ProductCard(
+                      product: product,
+                      onTap: () => context.push('/product/${product.id}'),
+                    );
+                  }, childCount: _products.length),
                 ),
               ),
           ],

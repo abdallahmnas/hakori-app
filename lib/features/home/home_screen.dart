@@ -33,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   final PageController _bannerController = PageController();
   int _currentBannerPage = 0;
+  int _lastBannerCount = 0;
   Timer? _bannerTimer;
 
   @override
@@ -45,7 +46,10 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-      final bannerProvider = Provider.of<BannerProvider>(context, listen: false);
+      final bannerProvider = Provider.of<BannerProvider>(
+        context,
+        listen: false,
+      );
 
       productProvider.fetchCatalog();
       bannerProvider.fetchBanners();
@@ -58,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _startBannerTimer(int bannerCount) {
     _bannerTimer?.cancel();
+    _bannerTimer = null;
     if (bannerCount <= 1) return;
     _bannerTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       if (!mounted || !_bannerController.hasClients) return;
@@ -649,7 +654,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'No Atelier Pieces Found',
+                          'No pieces Found',
                           style: AppTypography.headlineSM(
                             color: AppColors.textPrimary,
                           ),
@@ -709,7 +714,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ProductProvider productProvider,
     List displayedProducts,
   ) {
-    final banners = bannerProvider.banners;
+    final banners = bannerProvider.banners.take(5).toList();
 
     if (bannerProvider.isLoading && banners.isEmpty) {
       return Padding(
@@ -734,10 +739,16 @@ class _HomeScreenState extends State<HomeScreen> {
       return _buildFallbackBanner(displayedProducts);
     }
 
-    // Auto-slide timer management
-    if (_bannerTimer == null && banners.length > 1) {
+    // Auto-slide timer management when banner count changes or upon refresh
+    if (_lastBannerCount != banners.length) {
+      _lastBannerCount = banners.length;
+      if (_currentBannerPage >= banners.length) {
+        _currentBannerPage = 0;
+      }
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _startBannerTimer(banners.length);
+        if (mounted) {
+          _startBannerTimer(banners.length);
+        }
       });
     }
 
@@ -750,6 +761,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: PageView.builder(
               controller: _bannerController,
               itemCount: banners.length,
+              physics: const BouncingScrollPhysics(),
               onPageChanged: (index) {
                 setState(() => _currentBannerPage = index);
               },
@@ -805,7 +817,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: const Center(
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.primaryGold,
+                      ),
                     ),
                   ),
                 ),
@@ -847,16 +861,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 6),
                   Text(
                     banner.title,
-                    style: AppTypography.headlineMD(color: AppColors.textOnDark).copyWith(
-                      fontSize: 17,
-                    ),
+                    style: AppTypography.headlineMD(
+                      color: AppColors.textOnDark,
+                    ).copyWith(fontSize: 17),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     banner.subtitle,
-                    style: AppTypography.bodyXS(color: AppColors.surfaceContainerHigh),
+                    style: AppTypography.bodyXS(
+                      color: AppColors.surfaceContainerHigh,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -870,7 +886,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 36,
                         width: 170,
                         borderRadius: 18,
-                        onPressed: () => _handleBannerNavigation(banner, displayedProducts),
+                        onPressed: () =>
+                            _handleBannerNavigation(banner, displayedProducts),
                       ),
                       const SizedBox(width: 8),
                       AppButton.outline(
@@ -980,7 +997,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () {
                       if (displayedProducts.isNotEmpty) {
                         final firstProd = displayedProducts.first;
-                        final id = firstProd is Product ? firstProd.id : firstProd.toString();
+                        final id = firstProd is Product
+                            ? firstProd.id
+                            : firstProd.toString();
                         context.push('/product/$id');
                       } else {
                         context.push('/categories');

@@ -116,9 +116,15 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
 
     final displayName = user.fullName.isNotEmpty
         ? user.fullName
-        : ([user.firstName, user.lastName].where((s) => s != null && s.isNotEmpty).join(' ').isNotEmpty
-            ? [user.firstName, user.lastName].where((s) => s != null && s.isNotEmpty).join(' ')
-            : 'Valued Patron');
+        : ([
+                user.firstName,
+                user.lastName,
+              ].where((s) => s != null && s.isNotEmpty).join(' ').isNotEmpty
+              ? [
+                  user.firstName,
+                  user.lastName,
+                ].where((s) => s != null && s.isNotEmpty).join(' ')
+              : 'Valued Patron');
     final displayEmail = user.email;
     final displayPhone = user.phone?.isNotEmpty == true
         ? user.phone!
@@ -172,20 +178,27 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                                 boxShadow: const [AppColors.goldGlow],
                               ),
                               child: ClipOval(
-                                child: (user.avatarUrl != null && user.avatarUrl!.isNotEmpty)
+                                child:
+                                    (user.avatarUrl != null &&
+                                        user.avatarUrl!.isNotEmpty)
                                     ? Image.network(
                                         user.avatarUrl!,
                                         width: 68,
                                         height: 68,
                                         fit: BoxFit.cover,
-                                        errorBuilder: (context, error, stackTrace) => Center(
-                                          child: Text(
-                                            _getInitials(displayName),
-                                            style: AppTypography.headlineMD(
-                                              color: AppColors.primaryGold,
+                                        errorBuilder:
+                                            (
+                                              context,
+                                              error,
+                                              stackTrace,
+                                            ) => Center(
+                                              child: Text(
+                                                _getInitials(displayName),
+                                                style: AppTypography.headlineMD(
+                                                  color: AppColors.primaryGold,
+                                                ),
+                                              ),
                                             ),
-                                          ),
-                                        ),
                                       )
                                     : Center(
                                         child: Text(
@@ -506,13 +519,17 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
   // Edit Profile Bottom Sheet (Connected directly to AuthProvider.updateProfile)
   void _showEditProfileSheet(User user, AuthProvider auth) {
     final names = user.fullName.split(' ');
-    final initialFirst = user.firstName ?? (names.isNotEmpty ? names.first : '');
-    final initialLast = user.lastName ?? (names.length > 1 ? names.sublist(1).join(' ') : '');
+    final initialFirst =
+        user.firstName ?? (names.isNotEmpty ? names.first : '');
+    final initialLast =
+        user.lastName ?? (names.length > 1 ? names.sublist(1).join(' ') : '');
 
     final firstCtrl = TextEditingController(text: initialFirst);
     final lastCtrl = TextEditingController(text: initialLast);
     final phoneCtrl = TextEditingController(text: user.phone ?? '');
-    final addressCtrl = TextEditingController(text: user.address ?? user.location ?? '');
+    final addressCtrl = TextEditingController(
+      text: user.address ?? user.location ?? '',
+    );
     bool isSaving = false;
 
     showModalBottomSheet(
@@ -598,6 +615,7 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                 AppTextField(
                   label: 'PHONE NUMBER',
                   controller: phoneCtrl,
+                  enabled: false,
                   keyboardType: TextInputType.phone,
                   prefixIcon: const Icon(
                     Icons.phone_outlined,
@@ -748,8 +766,7 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                 const SizedBox(height: 14),
                 AppTextField(
                   label: 'SUBJECT',
-                  hintText:
-                      'e.g. Impression kit delivery tracking',
+                  hintText: 'e.g. Impression kit delivery tracking',
                   controller: subjectCtrl,
                   prefixIcon: const Icon(
                     Icons.title,
@@ -851,7 +868,8 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                 const SizedBox(height: 14),
                 AppTextField(
                   label: 'MESSAGE / DETAILS',
-                  hintText: 'When will the 3D impression kit arrive in Mayfair?',
+                  hintText:
+                      'When will the 3D impression kit arrive in Mayfair?',
                   controller: messageCtrl,
                   maxLines: 4,
                   prefixIcon: const Icon(
@@ -871,7 +889,10 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                           final custPhone = phoneCtrl.text.trim();
                           final subject = subjectCtrl.text.trim();
                           final message = messageCtrl.text.trim();
-                          if (custName.isEmpty || custEmail.isEmpty || subject.isEmpty || message.isEmpty) {
+                          if (custName.isEmpty ||
+                              custEmail.isEmpty ||
+                              subject.isEmpty ||
+                              message.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
@@ -888,7 +909,9 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                             final ticket = await ticketService.createTicket(
                               customerName: custName,
                               customerEmail: custEmail,
-                              customerPhone: custPhone.isNotEmpty ? custPhone : null,
+                              customerPhone: custPhone.isNotEmpty
+                                  ? custPhone
+                                  : null,
                               subject: subject,
                               category: selectedCategory,
                               priority: selectedPriority,

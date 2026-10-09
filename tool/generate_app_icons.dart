@@ -17,6 +17,7 @@ void main() {
     file.parent.createSync(recursive: true);
     final pngBytes = generateHakoriPng(entry.value);
     file.writeAsBytesSync(pngBytes);
+    // ignore: avoid_print
     print('Generated ${entry.key} (${entry.value}x${entry.value})');
   }
 }

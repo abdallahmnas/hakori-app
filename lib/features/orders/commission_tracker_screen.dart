@@ -414,7 +414,7 @@ class _CommissionTrackerScreenState extends State<CommissionTrackerScreen> {
             // Step-by-Step Production Log
             if (order.trackingSteps.isNotEmpty) ...[
               Text(
-                'Live Atelier Production Log',
+                'Live production Log',
                 style: AppTypography.headlineMD(color: AppColors.textPrimary),
               ),
               const SizedBox(height: 14),

@@ -112,7 +112,7 @@ class _SplashScreenState extends State<SplashScreen>
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.primaryGold.withOpacity(0.18),
+                    AppColors.primaryGold.withValues(alpha: 0.18),
                     Colors.transparent,
                   ],
                 ),
@@ -136,9 +136,9 @@ class _SplashScreenState extends State<SplashScreen>
                 children: [
                   // Logo container with gold ring
                   Container(
-                    width: 90,
-                    height: 90,
-                    padding: const EdgeInsets.all(18),
+                    width: 96,
+                    height: 96,
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: AppColors.darkCard,
@@ -148,19 +148,16 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                       boxShadow: const [AppColors.goldGlow],
                     ),
-                    child: Image.network(
-                      AppConstants.logoUrl,
+                    child: Image.asset(
+                      AppConstants.logoLocalPath,
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => Image.asset(
-                        AppConstants.logoLocalPath,
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(
-                              Icons.diamond,
-                              size: 40,
-                              color: AppColors.primaryGold,
-                            ),
-                      ),
+                      filterQuality: FilterQuality.high,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Icon(
+                            Icons.diamond,
+                            size: 44,
+                            color: AppColors.primaryGold,
+                          ),
                     ),
                   ),
                   const SizedBox(height: 28),

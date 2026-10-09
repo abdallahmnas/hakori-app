@@ -43,7 +43,7 @@ class PromoBanner {
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       subtitle: json['subtitle']?.toString() ?? '',
-      imageUrl: json['imageUrl']?.toString() ?? '',
+      imageUrl: (json['imageUrl'] ?? json['image'])?.toString() ?? '',
       link: json['link']?.toString(),
       ctaText: json['ctaText']?.toString() ?? 'Explore Collection',
       placement: json['placement']?.toString() ?? 'hero',

@@ -3,12 +3,7 @@ import '../models/product.dart';
 import '../models/category.dart';
 import 'product_service.dart';
 
-enum ProductStateStatus {
-  initial,
-  loading,
-  loaded,
-  error,
-}
+enum ProductStateStatus { initial, loading, loaded, error }
 
 /// Catalog & Categories State Provider
 class ProductProvider extends ChangeNotifier {
@@ -42,11 +37,14 @@ class ProductProvider extends ChangeNotifier {
     // so we only apply local search filtering here.
     if (_searchQuery.trim().isNotEmpty) {
       final q = _searchQuery.trim().toLowerCase();
-      list = list.where((p) =>
-        p.title.toLowerCase().contains(q) ||
-        p.description.toLowerCase().contains(q) ||
-        p.category.toLowerCase().contains(q)
-      ).toList();
+      list = list
+          .where(
+            (p) =>
+                p.title.toLowerCase().contains(q) ||
+                p.description.toLowerCase().contains(q) ||
+                p.category.toLowerCase().contains(q),
+          )
+          .toList();
     }
     return list;
   }
@@ -60,14 +58,19 @@ class ProductProvider extends ChangeNotifier {
     }
 
     try {
-      final categoryParam = (_selectedCategory == 'ALL') ? null : _selectedCategory;
+      final categoryParam = (_selectedCategory == 'ALL')
+          ? null
+          : _selectedCategory;
       final fetchedProducts = await _productService.getProducts(
         page: 0,
         pageSize: 50,
         category: categoryParam,
         inStock: _inStockOnly ? true : null,
       );
-      final fetchedCategories = await _productService.getCategories(page: 0, pageSize: 50);
+      final fetchedCategories = await _productService.getCategories(
+        page: 0,
+        pageSize: 50,
+      );
       final fetchedPills = await _productService.getProductCategories();
 
       _products = fetchedProducts;
@@ -75,13 +78,17 @@ class ProductProvider extends ChangeNotifier {
       _selectedCategory = 'ALL';
       final Set<String> pillsSet = {'ALL'};
       for (final p in fetchedPills) {
-        if (p.trim().isNotEmpty && p.toUpperCase() != 'ALL') pillsSet.add(p.trim());
+        if (p.trim().isNotEmpty && p.toUpperCase() != 'ALL')
+          pillsSet.add(p.trim());
       }
       for (final c in fetchedCategories) {
-        if (c.name.trim().isNotEmpty && c.name.toUpperCase() != 'ALL') pillsSet.add(c.name.trim());
+        if (c.name.trim().isNotEmpty && c.name.toUpperCase() != 'ALL')
+          pillsSet.add(c.name.trim());
       }
       for (final prod in fetchedProducts) {
-        if (prod.category.trim().isNotEmpty && prod.category.toUpperCase() != 'ALL') pillsSet.add(prod.category.trim());
+        if (prod.category.trim().isNotEmpty &&
+            prod.category.toUpperCase() != 'ALL')
+          pillsSet.add(prod.category.trim());
       }
       _categoryFilters = pillsSet.toList();
 
@@ -89,7 +96,7 @@ class ProductProvider extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Could not load atelier pieces.';
+      _errorMessage = 'Could not load pieces.';
       _status = ProductStateStatus.error;
       notifyListeners();
     }
