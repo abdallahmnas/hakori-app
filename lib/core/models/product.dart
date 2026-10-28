@@ -203,8 +203,8 @@ class Product {
           '18K Solid Yellow Gold',
       placement:
           json['placement']?.toString() ??
-          json['archType']?.toString() ??
-          'Fine Product',
+          json['category']?.toString() ??
+          'General',
       diamondClarity: json['diamondClarity']?.toString() ?? 'VVS1 Natural',
       images: parsedImages,
       description: json['description']?.toString() ?? '',

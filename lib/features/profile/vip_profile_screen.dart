@@ -6,11 +6,14 @@ import '../../core/constants/app_typography.dart';
 import '../../core/models/support_ticket.dart';
 import '../../core/models/user.dart';
 import '../../core/services/auth_provider.dart';
+import '../../core/services/auth_service.dart';
+import '../../core/services/storage_service.dart';
+import '../../core/services/biometric_service.dart';
+import '../../core/services/api_client.dart';
 import '../../core/services/ticket_service.dart';
 import '../../core/widgets/app_bar_luxury.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
-import '../../core/widgets/badge_chip.dart';
 
 /// Patron Profile Screen
 /// Connected directly to AuthProvider with Login required enforcement
@@ -29,9 +32,15 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
   bool _priceAlerts = false;
   bool _conciergeReminders = true;
 
+  // Biometric Preferences State
+  bool _isBiometricEnabled = false;
+  bool _isTogglingBiometrics = false;
+
   @override
   void initState() {
     super.initState();
+    final storage = Provider.of<StorageService>(context, listen: false);
+    _isBiometricEnabled = storage.isBiometricEnabled();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final auth = Provider.of<AuthProvider>(context, listen: false);
       if (auth.isAuthenticated) {
@@ -339,22 +348,19 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                 _buildMenuItem(
                   icon: Icons.fingerprint,
                   title: 'Biometric Access',
-                  subtitle: 'Coming Soon',
-                  trailing: const AppBadgeChip(
-                    label: 'COMING SOON',
-                    variant: BadgeChipVariant.darkTag,
+                  subtitle: _isBiometricEnabled
+                      ? 'Biometric fingerprint & Face ID login enabled'
+                      : 'Enable fingerprint or Face ID for instant sign in',
+                  trailing: Switch.adaptive(
+                    value: _isBiometricEnabled,
+                    activeTrackColor: AppColors.primaryGold,
+                    onChanged: _isTogglingBiometrics
+                        ? null
+                        : _handleBiometricToggle,
                   ),
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Fingerprint biometric login is coming soon.',
-                        ),
-                        backgroundColor: AppColors.darkBase,
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  },
+                  onTap: _isTogglingBiometrics
+                      ? () {}
+                      : () => _handleBiometricToggle(!_isBiometricEnabled),
                 ),
               ]),
               const SizedBox(height: 20),
@@ -1598,6 +1604,283 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // --- Biometric Access Logic ---
+
+  Future<void> _handleBiometricToggle(bool enable) async {
+    if (_isTogglingBiometrics) return;
+
+    final biometricService =
+        Provider.of<BiometricService>(context, listen: false);
+    final storage = Provider.of<StorageService>(context, listen: false);
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+
+    if (!enable) {
+      // Disabling Biometric Access: immediately clear credentials & preferences
+      setState(() => _isTogglingBiometrics = true);
+      await biometricService.clearBiometricCredentials();
+      if (mounted) {
+        setState(() {
+          _isBiometricEnabled = false;
+          _isTogglingBiometrics = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Biometric access disabled.'),
+            backgroundColor: AppColors.darkBase,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+      return;
+    }
+
+    // Enabling Biometric Access
+    // Step 1: Verify device biometric hardware & enrollment availability
+    final isSupported = await biometricService.isBiometricsAvailable();
+    if (!isSupported) {
+      if (mounted) {
+        setState(() {
+          _isBiometricEnabled = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Biometric authentication is not supported or no credentials are enrolled on this device.',
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Step 2: Retrieve user's email address from existing locally stored account data
+    final user = auth.currentUser ?? storage.getUser();
+    final email = user?.email ?? storage.getSavedEmail();
+
+    if (email == null || email.trim().isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account email not found. Please log in again.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Step 3: Prompt password confirmation dialog
+    _showPasswordConfirmationDialog(
+      email: email.trim(),
+      biometricService: biometricService,
+    );
+  }
+
+  void _showPasswordConfirmationDialog({
+    required String email,
+    required BiometricService biometricService,
+  }) {
+    final passwordCtrl = TextEditingController();
+    String? dialogError;
+    bool isSubmitting = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: !isSubmitting,
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (ctx, setDialogState) {
+          return AlertDialog(
+            backgroundColor: AppColors.surface,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+            title: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.darkBase,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.primaryGold, width: 1),
+                  ),
+                  child: const Icon(
+                    Icons.fingerprint,
+                    color: AppColors.primaryGold,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Enable Biometrics',
+                    style: AppTypography.headlineMD(color: AppColors.textPrimary)
+                        .copyWith(fontSize: 18),
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Confirm your account password to activate biometric authentication.',
+                  style: AppTypography.bodySM(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 16),
+                AppTextField(
+                  label: 'ACCOUNT PASSWORD',
+                  hintText: 'Enter your account password',
+                  controller: passwordCtrl,
+                  isPassword: true,
+                  enabled: !isSubmitting,
+                  autofocus: true,
+                  prefixIcon: const Icon(
+                    Icons.lock_outline,
+                    size: 20,
+                    color: AppColors.primaryGold,
+                  ),
+                ),
+                if (dialogError != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    dialogError!,
+                    style: AppTypography.bodyXS(color: AppColors.rubyRed),
+                  ),
+                ],
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: isSubmitting ? null : () => Navigator.pop(dialogCtx),
+                child: Text(
+                  'CANCEL',
+                  style: AppTypography.labelMD(color: AppColors.textSecondary),
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryGold,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: isSubmitting
+                    ? null
+                    : () async {
+                        final password = passwordCtrl.text;
+                        if (password.isEmpty) {
+                          setDialogState(() {
+                            dialogError = 'Please enter your password.';
+                          });
+                          return;
+                        }
+
+                        setDialogState(() {
+                          isSubmitting = true;
+                          dialogError = null;
+                        });
+
+                        final authService =
+                            Provider.of<AuthService>(context, listen: false);
+
+                        try {
+                          // Call existing login API to verify credentials
+                          await authService.login(
+                            email: email,
+                            password: password,
+                          );
+
+                          // API authentication succeeded, close password dialog
+                          if (dialogCtx.mounted) {
+                            Navigator.pop(dialogCtx);
+                          }
+
+                          // Request native biometric verification
+                          final authResult =
+                              await biometricService.authenticate(
+                            localizedReason:
+                                'Scan your fingerprint or Face ID to enable biometric access',
+                          );
+
+                          if (!mounted) return;
+
+                          if (authResult.success) {
+                            // Persist credentials securely and update preference
+                            await biometricService.saveBiometricCredentials(
+                              email: email,
+                              password: password,
+                            );
+
+                            setState(() {
+                              _isBiometricEnabled = true;
+                            });
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Biometric access enabled successfully.',
+                                ),
+                                backgroundColor: AppColors.darkBase,
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          } else {
+                            // Biometric verification failed or was cancelled
+                            setState(() {
+                              _isBiometricEnabled = false;
+                            });
+
+                            if (!authResult.isCancelled) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    authResult.errorMessage ??
+                                        'Biometric verification failed.',
+                                  ),
+                                  backgroundColor: AppColors.error,
+                                ),
+                              );
+                            }
+                          }
+                        } on ApiException catch (e) {
+                          setDialogState(() {
+                            isSubmitting = false;
+                            dialogError = e.message;
+                          });
+                        } catch (_) {
+                          setDialogState(() {
+                            isSubmitting = false;
+                            dialogError =
+                                'Authentication failed. Please verify your password.';
+                          });
+                        }
+                      },
+                child: isSubmitting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.darkBase,
+                          ),
+                        ),
+                      )
+                    : Text(
+                        'ENABLE',
+                        style: AppTypography.labelMD(color: AppColors.darkBase)
+                            .copyWith(fontWeight: FontWeight.bold),
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

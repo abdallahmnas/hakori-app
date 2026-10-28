@@ -193,6 +193,29 @@ class StorageService {
     await _prefs.remove(_keySignupVerificationToken);
   }
 
+  // --- Biometric Authentication Preferences ---
+  static const String _keyBiometricEnabled = 'biometric_enabled';
+  static const String _keyBiometricEmail = 'biometric_email';
+
+  bool isBiometricEnabled() {
+    return _prefs.getBool(_keyBiometricEnabled) ?? false;
+  }
+
+  Future<bool> setBiometricEnabled(bool enabled) {
+    return _prefs.setBool(_keyBiometricEnabled, enabled);
+  }
+
+  String? getBiometricEmail() {
+    return _prefs.getString(_keyBiometricEmail);
+  }
+
+  Future<bool> setBiometricEmail(String? email) {
+    if (email == null) {
+      return _prefs.remove(_keyBiometricEmail);
+    }
+    return _prefs.setString(_keyBiometricEmail, email);
+  }
+
   // Clear Entire Session
   Future<void> clearAuthSession() async {
     await clearToken();

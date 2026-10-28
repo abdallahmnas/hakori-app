@@ -7,6 +7,7 @@ import '../../core/services/auth_provider.dart';
 import '../../core/services/order_provider.dart';
 import '../../core/services/product_provider.dart';
 import '../../core/services/storage_service.dart';
+import '../../core/services/biometric_service.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 
@@ -24,15 +25,32 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController(text: '');
   bool _rememberMe = true;
   bool _isSubmitting = false;
+  bool _canUseBiometrics = false;
+  bool _isBiometricAuthenticating = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final storage = Provider.of<StorageService>(context, listen: false);
+      final biometric = Provider.of<BiometricService>(context, listen: false);
+
       final savedEmail = storage.getSavedEmail();
       if (savedEmail != null && savedEmail.isNotEmpty) {
         _emailController.text = savedEmail;
+      }
+
+      final canBio = await biometric.canShowBiometricLogin();
+      if (mounted) {
+        setState(() {
+          _canUseBiometrics = canBio;
+          if (_emailController.text.isEmpty) {
+            final bioEmail = storage.getBiometricEmail();
+            if (bioEmail != null && bioEmail.isNotEmpty) {
+              _emailController.text = bioEmail;
+            }
+          }
+        });
       }
     });
   }
@@ -110,14 +128,117 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _showBiometricComingSoon() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Fingerprint login is coming soon.'),
-        backgroundColor: AppColors.darkBase,
-        duration: Duration(seconds: 2),
-      ),
-    );
+  Future<void> _handleBiometricLogin() async {
+    if (_isSubmitting || _isBiometricAuthenticating) return;
+
+    final biometric = Provider.of<BiometricService>(context, listen: false);
+    final storage = Provider.of<StorageService>(context, listen: false);
+
+    if (!storage.isBiometricEnabled()) {
+      setState(() => _canUseBiometrics = false);
+      return;
+    }
+
+    final creds = await biometric.getBiometricCredentials();
+    final bioEmail = creds?['email'] ?? storage.getBiometricEmail();
+    final bioPassword = creds?['password'];
+
+    if (creds == null || bioEmail == null || bioPassword == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'No stored biometric credentials found. Please sign in with your password and re-enable biometrics in Settings.',
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      await biometric.clearBiometricCredentials();
+      if (mounted) {
+        setState(() => _canUseBiometrics = false);
+      }
+      return;
+    }
+
+    final isAvailable = await biometric.isBiometricsAvailable();
+    if (!isAvailable) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Biometric sensor is unavailable or no credentials are enrolled.',
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
+
+    setState(() => _isBiometricAuthenticating = true);
+
+    try {
+      final authResult = await biometric.authenticate(
+        localizedReason:
+            'Authenticate to sign in to your Hakori Atelier account',
+      );
+
+      if (!authResult.success) {
+        if (!authResult.isCancelled && authResult.errorMessage != null) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(authResult.errorMessage!),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        }
+        return;
+      }
+
+      if (!mounted) return;
+      setState(() => _isSubmitting = true);
+
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      final success = await auth.login(
+        email: bioEmail,
+        password: bioPassword,
+        rememberMe: _rememberMe,
+      );
+
+      if (!mounted) return;
+
+      if (success) {
+        final productProvider =
+            Provider.of<ProductProvider>(context, listen: false);
+        final orderProvider =
+            Provider.of<OrderProvider>(context, listen: false);
+        productProvider.fetchCatalog();
+        orderProvider.fetchOrders();
+        auth.refreshProfile();
+
+        context.go('/home');
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              auth.errorMessage ??
+                  'Authentication failed. Please sign in with your password.',
+            ),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isBiometricAuthenticating = false;
+          _isSubmitting = false;
+        });
+      }
+    }
   }
 
   @override
@@ -254,35 +375,55 @@ class _LoginScreenState extends State<LoginScreen> {
                   Expanded(
                     child: AppButton.primary(
                       text: _isSubmitting ? 'LOGGING IN...' : 'LOG IN',
-                      onPressed: _isSubmitting ? null : _handleLogin,
+                      onPressed: (_isSubmitting || _isBiometricAuthenticating)
+                          ? null
+                          : _handleLogin,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: _showBiometricComingSoon,
-                      borderRadius: BorderRadius.circular(30),
-                      child: Container(
-                        width: 54,
-                        height: 54,
-                        decoration: BoxDecoration(
-                          color: AppColors.darkCard,
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: AppColors.primaryGold,
-                            width: 1.2,
+                  if (_canUseBiometrics) ...[
+                    const SizedBox(width: 12),
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: (_isSubmitting || _isBiometricAuthenticating)
+                            ? null
+                            : _handleBiometricLogin,
+                        borderRadius: BorderRadius.circular(30),
+                        child: Container(
+                          width: 54,
+                          height: 54,
+                          decoration: BoxDecoration(
+                            color: AppColors.darkCard,
+                            borderRadius: BorderRadius.circular(30),
+                            border: Border.all(
+                              color: AppColors.primaryGold,
+                              width: 1.2,
+                            ),
+                            boxShadow: const [AppColors.goldGlow],
                           ),
-                          boxShadow: const [AppColors.goldGlow],
-                        ),
-                        child: const Icon(
-                          Icons.fingerprint,
-                          color: AppColors.primaryGold,
-                          size: 28,
+                          child: _isBiometricAuthenticating
+                              ? const Center(
+                                  child: SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor:
+                                          AlwaysStoppedAnimation<Color>(
+                                        AppColors.primaryGold,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.fingerprint,
+                                  color: AppColors.primaryGold,
+                                  size: 28,
+                                ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
               const SizedBox(height: 40),

@@ -20,6 +20,8 @@
 		<string>This app needs camera access to take profile photos.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>This app needs photo library access to select profile images.</string>
+		<key>NSFaceIDUsageDescription</key>
+		<string>Hakori Almadinah uses biometric authentication to securely access your atelier account.</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>

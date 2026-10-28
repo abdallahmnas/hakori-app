@@ -8,6 +8,7 @@ import 'core/services/order_service.dart';
 import 'core/services/consultation_service.dart';
 import 'core/services/ticket_service.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/biometric_service.dart';
 import 'core/services/banner_service.dart';
 import 'core/services/banner_provider.dart';
 import 'core/services/auth_provider.dart';
@@ -26,6 +27,9 @@ void main() async {
   // Initialize Storage Service (SharedPreferences)
   final storageService = await StorageService.getInstance();
 
+  // Initialize Biometric Service (LocalAuthentication & SecureStorage)
+  final biometricService = BiometricService(storageService: storageService);
+
   // Initialize Api Client
   final apiClient = ApiClient.getInstance(storageService);
 
@@ -39,7 +43,11 @@ void main() async {
   final bannerService = BannerService(apiClient);
 
   // Initialize Auth Provider
-  final authProvider = AuthProvider(authService, storageService);
+  final authProvider = AuthProvider(
+    authService,
+    storageService,
+    biometricService: biometricService,
+  );
 
   // Wire 401 Unauthorized Central Redirection
   apiClient.onUnauthorized = () {
@@ -54,6 +62,7 @@ void main() async {
       providers: [
         // Services
         Provider<StorageService>.value(value: storageService),
+        Provider<BiometricService>.value(value: biometricService),
         Provider<ApiClient>.value(value: apiClient),
         Provider<AuthService>.value(value: authService),
         Provider<ProductService>.value(value: productService),

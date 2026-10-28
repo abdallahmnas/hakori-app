@@ -77,21 +77,27 @@ class _CartScreenState extends State<CartScreen> {
 
       return {
         'productId': item.product.id,
-        'title': item.product.title.isNotEmpty ? item.product.title : item.product.name,
-        'unitPrice': item.product.priceUsd > 0 ? item.product.priceUsd : item.product.price,
+        'title': item.product.title.isNotEmpty
+            ? item.product.title
+            : item.product.name,
+        'unitPrice': item.product.priceUsd > 0
+            ? item.product.priceUsd
+            : item.product.price,
         'quantity': item.quantity,
         'specDetails': details.isNotEmpty
             ? details
             : (item.product.description.isNotEmpty
-                ? item.product.description
-                : '18K Solid Yellow • VVS1 Pavé Inlay'),
+                  ? item.product.description
+                  : '18K Solid Yellow • VVS1 Pavé Inlay'),
       };
     }).toList();
 
     final firstItem = cart.items.first;
     final specimen = {
       'productId': firstItem.product.id,
-      'title': firstItem.product.title.isNotEmpty ? firstItem.product.title : firstItem.product.name,
+      'title': firstItem.product.title.isNotEmpty
+          ? firstItem.product.title
+          : firstItem.product.name,
       'specDetails': '${firstItem.selectedMetal} • ${firstItem.selectedStone}',
       'caratOrPurity': firstItem.selectedMetal,
       'subType': firstItem.selectedArch,
@@ -100,11 +106,12 @@ class _CartScreenState extends State<CartScreen> {
 
     setState(() => _isCheckingOut = true);
 
-    final shipping = (clientUser?.address != null && clientUser!.address!.isNotEmpty)
+    final shipping =
+        (clientUser?.address != null && clientUser!.address!.isNotEmpty)
         ? clientUser.address!
         : ((clientUser?.location != null && clientUser!.location!.isNotEmpty)
-            ? clientUser.location!
-            : 'Victoria Island Penthouse, Lagos');
+              ? clientUser.location!
+              : 'Victoria Island Penthouse, Lagos');
 
     final order = await orderProvider.placeOrder(
       client: client,
@@ -121,10 +128,10 @@ class _CartScreenState extends State<CartScreen> {
     if (order != null) {
       cart.clearCart();
       if (order.paymentUrl != null && order.paymentUrl!.isNotEmpty) {
-        context.push('/payment-webview', extra: {
-          'url': order.paymentUrl!,
-          'order': order,
-        });
+        context.push(
+          '/payment-webview',
+          extra: {'url': order.paymentUrl!, 'order': order},
+        );
       } else {
         context.push('/order-confirmation', extra: order);
       }
@@ -303,21 +310,21 @@ class _CartScreenState extends State<CartScreen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: Checkbox(
-                                      value: item.impressionKitIncluded,
-                                      activeColor: AppColors.primaryGold,
-                                      checkColor: AppColors.textOnGold,
-                                      onChanged: (val) =>
-                                          cart.toggleImpressionKit(item.id),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
+                                  // SizedBox(
+                                  //   width: 18,
+                                  //   height: 18,
+                                  //   child: Checkbox(
+                                  //     value: item.impressionKitIncluded,
+                                  //     activeColor: AppColors.primaryGold,
+                                  //     checkColor: AppColors.textOnGold,
+                                  //     onChanged: (val) =>
+                                  //         cart.toggleImpressionKit(item.id),
+                                  //   ),
+                                  // ),
+                                  // const SizedBox(width: 6),
                                   Flexible(
                                     child: Text(
-                                      'Impression Kit (FREE)',
+                                      'Quantity: ',
                                       style: AppTypography.bodyXS(
                                         color: AppColors.textPrimary,
                                       ).copyWith(fontSize: 11),

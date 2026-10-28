@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../models/user.dart';
 import 'auth_service.dart';
 import 'storage_service.dart';
+import 'biometric_service.dart';
 import 'api_client.dart';
 
 enum AuthStatus {
@@ -16,6 +17,7 @@ enum AuthStatus {
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService;
   final StorageService _storageService;
+  final BiometricService? _biometricService;
 
   AuthStatus _status = AuthStatus.initial;
   User? _currentUser;
@@ -35,7 +37,11 @@ class AuthProvider extends ChangeNotifier {
   String? _pendingPhone;
   String? _pendingPassword;
 
-  AuthProvider(this._authService, this._storageService);
+  AuthProvider(
+    this._authService,
+    this._storageService, {
+    BiometricService? biometricService,
+  }) : _biometricService = biometricService;
 
   AuthStatus get status => _status;
   bool get isAuthenticated => _status == AuthStatus.authenticated && _currentUser != null;
@@ -152,6 +158,14 @@ class AuthProvider extends ChangeNotifier {
       await _storageService.saveUser(user);
       if (rememberMe) {
         await _storageService.saveSavedEmail(email);
+      }
+
+      // If user switches accounts, invalidate previously stored biometric credentials
+      final bioEmail = _storageService.getBiometricEmail();
+      if (bioEmail != null &&
+          bioEmail.isNotEmpty &&
+          bioEmail.trim().toLowerCase() != email.trim().toLowerCase()) {
+        await _biometricService?.clearBiometricCredentials();
       }
 
       _currentUser = user;
