@@ -50,6 +50,9 @@ class Product {
   final List<String> stoneOptions;
   final bool isFeatured;
   final bool isBestSeller;
+  final List<ProductAttribute> categoryAttributes;
+  final CategoryDetails? categoryDetails;
+  final List<ProductAttribute> attributes;
 
   Product({
     required this.id,
@@ -87,6 +90,9 @@ class Product {
     this.stoneOptions = const [],
     this.isFeatured = false,
     this.isBestSeller = false,
+    this.categoryAttributes = const [],
+    this.categoryDetails,
+    this.attributes = const [],
   }) : title = (name != null && name.isNotEmpty)
            ? name
            : (title ?? 'Bespoke piece'),
@@ -116,7 +122,19 @@ class Product {
   // UI Backward Compatibility Getters
   String get name => title;
   String get purity => material;
-  String get archType => placement;
+  String get archType => categoryName;
+  String get categoryName {
+    if (category.trim().isNotEmpty) {
+      final c = category.trim();
+      return c.length > 1
+          ? '${c[0].toUpperCase()}${c.substring(1)}'
+          : c.toUpperCase();
+    }
+    if (placement.trim().isNotEmpty && placement != 'Fine Product') {
+      return placement;
+    }
+    return 'Jewelry';
+  }
   int get stockQuantity => stock;
   double get priceUsd => price;
   double get priceNgn => price * 1550.0;
@@ -124,6 +142,21 @@ class Product {
       ? images.first
       : 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=1000&auto=format&fit=crop';
   List<String> get galleryImages => images;
+
+  /// Effective attributes resolved from categoryAttributes, categoryDetails, or attributes
+  List<ProductAttribute> get effectiveAttributes {
+    if (categoryAttributes.isNotEmpty) return categoryAttributes;
+    if (categoryDetails != null && categoryDetails!.attributes.isNotEmpty) {
+      return categoryDetails!.attributes;
+    }
+    if (attributes.isNotEmpty) return attributes;
+    return const [];
+  }
+
+  /// True if the product has one or more attributes to select
+  bool get hasAttributes => effectiveAttributes.any(
+        (attr) => attr.label.isNotEmpty && attr.values.isNotEmpty,
+      );
 
   factory Product.fromJson(Map<String, dynamic> json) {
     final rawImages = json['images'];
@@ -183,6 +216,29 @@ class Product {
           .toList();
     }
 
+    // Helper to parse lists of attributes safely
+    List<ProductAttribute> parseAttributes(dynamic raw) {
+      if (raw is List) {
+        return raw
+            .whereType<Map>()
+            .map((item) =>
+                ProductAttribute.fromJson(Map<String, dynamic>.from(item)))
+            .toList();
+      }
+      return const [];
+    }
+
+    final parsedCategoryAttributes =
+        parseAttributes(json['categoryAttributes']);
+    final parsedAttributes = parseAttributes(json['attributes']);
+
+    CategoryDetails? parsedCategoryDetails;
+    if (json['categoryDetails'] is Map) {
+      parsedCategoryDetails = CategoryDetails.fromJson(
+        Map<String, dynamic>.from(json['categoryDetails'] as Map),
+      );
+    }
+
     return Product(
       id: json['id']?.toString() ?? '',
       name:
@@ -220,6 +276,9 @@ class Product {
       stoneOptions: parsedStoneOptions,
       isFeatured: json['isFeatured'] as bool? ?? false,
       isBestSeller: json['isBestSeller'] as bool? ?? false,
+      categoryAttributes: parsedCategoryAttributes,
+      categoryDetails: parsedCategoryDetails,
+      attributes: parsedAttributes,
     );
   }
 
@@ -253,6 +312,93 @@ class Product {
       'stoneOptions': stoneOptions,
       'isFeatured': isFeatured,
       'isBestSeller': isBestSeller,
+      'categoryAttributes':
+          categoryAttributes.map((a) => a.toJson()).toList(),
+      'attributes': attributes.map((a) => a.toJson()).toList(),
+      if (categoryDetails != null) 'categoryDetails': categoryDetails!.toJson(),
+    };
+  }
+}
+
+/// Represents a single product attribute group such as 'upper', 'lower', 'size', etc.
+class ProductAttribute {
+  final String label;
+  final List<String> values;
+
+  const ProductAttribute({
+    required this.label,
+    required this.values,
+  });
+
+  factory ProductAttribute.fromJson(Map<String, dynamic> json) {
+    final label = json['label']?.toString() ?? json['name']?.toString() ?? '';
+    final rawValue = json['value'] ?? json['values'] ?? json['options'];
+    List<String> parsedValues = [];
+    if (rawValue is List) {
+      parsedValues = rawValue
+          .map((e) => e?.toString().trim() ?? '')
+          .where((e) => e.isNotEmpty)
+          .toList();
+    } else if (rawValue != null && rawValue.toString().trim().isNotEmpty) {
+      parsedValues = [rawValue.toString().trim()];
+    }
+    return ProductAttribute(
+      label: label,
+      values: parsedValues,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'label': label,
+      'value': values,
+    };
+  }
+}
+
+/// Represents the nested categoryDetails payload returned by the backend
+class CategoryDetails {
+  final String id;
+  final String name;
+  final String slug;
+  final List<ProductAttribute> attributes;
+
+  const CategoryDetails({
+    required this.id,
+    required this.name,
+    this.slug = '',
+    this.attributes = const [],
+  });
+
+  factory CategoryDetails.fromJson(Map<String, dynamic> json) {
+    List<ProductAttribute> parsedAttributes = [];
+    final rawAttributes = json['attributes'] ?? json['categoryAttributes'];
+    if (rawAttributes is List) {
+      for (final item in rawAttributes) {
+        if (item is Map<String, dynamic>) {
+          parsedAttributes.add(ProductAttribute.fromJson(item));
+        } else if (item is Map) {
+          parsedAttributes.add(
+            ProductAttribute.fromJson(Map<String, dynamic>.from(item)),
+          );
+        }
+      }
+    }
+
+    return CategoryDetails(
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      slug: json['slug']?.toString() ?? '',
+      attributes: parsedAttributes,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'slug': slug,
+      'attributes': attributes.map((a) => a.toJson()).toList(),
     };
   }
 }

@@ -14,6 +14,7 @@ import '../../core/services/ticket_service.dart';
 import '../../core/widgets/app_bar_luxury.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
+import '../../core/widgets/badge_chip.dart';
 
 /// Patron Profile Screen
 /// Connected directly to AuthProvider with Login required enforcement
@@ -1821,15 +1822,17 @@ class _VipProfileScreenState extends State<VipProfileScreen> {
                               _isBiometricEnabled = true;
                             });
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Biometric access enabled successfully.',
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Biometric access enabled successfully.',
+                                  ),
+                                  backgroundColor: AppColors.darkBase,
+                                  duration: Duration(seconds: 2),
                                 ),
-                                backgroundColor: AppColors.darkBase,
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
+                              );
+                            }
                           } else {
                             // Biometric verification failed or was cancelled
                             setState(() {

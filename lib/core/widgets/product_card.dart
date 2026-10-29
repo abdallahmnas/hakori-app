@@ -7,6 +7,7 @@ import '../services/wishlist_provider.dart';
 import '../services/cart_provider.dart';
 import 'badge_chip.dart';
 import 'dual_price_text.dart';
+import 'attribute_selection_bottom_sheet.dart';
 
 /// Haute Joaillerie 2-Column Product Card
 class ProductCard extends StatelessWidget {
@@ -163,7 +164,7 @@ class ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 1),
                   Text(
-                    product.archType,
+                    product.categoryName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.bodyXS(
@@ -195,19 +196,26 @@ class ProductCard extends StatelessWidget {
                         child: InkWell(
                           borderRadius: BorderRadius.circular(8),
                           onTap: () {
-                            cartProvider.addToCart(product);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Added "${product.name}" to Cart',
-                                  style: AppTypography.bodySM(
-                                    color: Colors.white,
+                            if (product.hasAttributes) {
+                              AttributeSelectionBottomSheet.show(
+                                context,
+                                product,
+                              );
+                            } else {
+                              cartProvider.addToCart(product);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Added "${product.name}" to Cart',
+                                    style: AppTypography.bodySM(
+                                      color: Colors.white,
+                                    ),
                                   ),
+                                  duration: const Duration(seconds: 1),
+                                  backgroundColor: AppColors.darkBase,
                                 ),
-                                duration: const Duration(seconds: 1),
-                                backgroundColor: AppColors.darkBase,
-                              ),
-                            );
+                              );
+                            }
                           },
                           child: const Padding(
                             padding: EdgeInsets.all(6),

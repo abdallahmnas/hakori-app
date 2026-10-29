@@ -5,6 +5,7 @@ import 'package:hakori_almadinah/app.dart';
 import 'package:hakori_almadinah/core/services/storage_service.dart';
 import 'package:hakori_almadinah/core/services/api_client.dart';
 import 'package:hakori_almadinah/core/services/auth_service.dart';
+import 'package:hakori_almadinah/core/services/biometric_service.dart';
 import 'package:hakori_almadinah/core/services/product_service.dart';
 import 'package:hakori_almadinah/core/services/order_service.dart';
 import 'package:hakori_almadinah/core/services/consultation_service.dart';
@@ -25,6 +26,7 @@ void main() {
       (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
     final storageService = await StorageService.getInstance();
+    final biometricService = BiometricService(storageService: storageService);
     final apiClient = ApiClient.getInstance(storageService);
     final authService = AuthService(apiClient);
     final productService = ProductService(apiClient);
@@ -37,6 +39,7 @@ void main() {
       MultiProvider(
         providers: [
           Provider<StorageService>.value(value: storageService),
+          Provider<BiometricService>.value(value: biometricService),
           Provider<ApiClient>.value(value: apiClient),
           Provider<AuthService>.value(value: authService),
           Provider<ProductService>.value(value: productService),
@@ -70,7 +73,7 @@ void main() {
       ),
     );
 
-    expect(find.text('HAKORI AL MADINAH'), findsWidgets);
+    expect(find.text('HAKORI AL-MADINAH'), findsWidgets);
 
     // Pump past the splash timer
     await tester.pump(const Duration(milliseconds: 3000));

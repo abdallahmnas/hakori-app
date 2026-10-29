@@ -64,11 +64,14 @@ class _SplashScreenState extends State<SplashScreen>
         listen: false,
       );
 
-      final results = await Future.wait([
-        authProvider.restoreSession(),
-        productProvider.fetchCatalog(silent: true),
-      ]);
-      isAuthenticated = results[0] as bool;
+      // Run catalog fetch asynchronously in the background so it never blocks splash navigation
+      unawaited(productProvider.fetchCatalog(silent: true));
+
+      // Restore session with timeout guard so splash navigation is never held up
+      isAuthenticated = await authProvider.restoreSession().timeout(
+        const Duration(milliseconds: 1800),
+        onTimeout: () => authProvider.isAuthenticated,
+      );
     } catch (_) {}
 
     final elapsed = DateTime.now().difference(startTime);

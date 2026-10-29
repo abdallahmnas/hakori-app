@@ -73,6 +73,7 @@ class _CartScreenState extends State<CartScreen> {
         if (item.selectedMetal.isNotEmpty) item.selectedMetal,
         if (item.selectedStone.isNotEmpty) item.selectedStone,
         if (item.selectedArch.isNotEmpty) item.selectedArch,
+        if (item.attributesSummary.isNotEmpty) item.attributesSummary,
       ].join(' • ');
 
       return {
@@ -84,6 +85,9 @@ class _CartScreenState extends State<CartScreen> {
             ? item.product.priceUsd
             : item.product.price,
         'quantity': item.quantity,
+        'attributes': item.selectedAttributesPayload,
+        'categoryAttributes': item.selectedAttributesPayload,
+        'selectedAttributes': item.selectedAttributes,
         'specDetails': details.isNotEmpty
             ? details
             : (item.product.description.isNotEmpty
@@ -98,10 +102,17 @@ class _CartScreenState extends State<CartScreen> {
       'title': firstItem.product.title.isNotEmpty
           ? firstItem.product.title
           : firstItem.product.name,
-      'specDetails': '${firstItem.selectedMetal} • ${firstItem.selectedStone}',
+      'specDetails': [
+        '${firstItem.selectedMetal} • ${firstItem.selectedStone}',
+        if (firstItem.attributesSummary.isNotEmpty) firstItem.attributesSummary,
+      ].join(' • '),
       'caratOrPurity': firstItem.selectedMetal,
       'subType': firstItem.selectedArch,
       'qty': cart.itemCount,
+      if (firstItem.selectedAttributesPayload.isNotEmpty)
+        'attributes': firstItem.selectedAttributesPayload,
+      if (firstItem.selectedAttributes.isNotEmpty)
+        'selectedAttributes': firstItem.selectedAttributes,
     };
 
     setState(() => _isCheckingOut = true);
@@ -433,48 +444,48 @@ class _CartScreenState extends State<CartScreen> {
           // ),
 
           // Promo Code Row
-          SliverToBoxAdapter(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.outlineLight),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: SizedBox(
-                      height: 40,
-                      child: TextField(
-                        controller: _promoController,
-                        style: AppTypography.bodySM(),
-                        decoration: InputDecoration(
-                          hintText: 'Promo Code (HAKORI2026)',
-                          hintStyle: AppTypography.bodyXS(
-                            color: AppColors.textMuted,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  AppButton.dark(
-                    text: 'APPLY',
-                    width: 75,
-                    height: 40,
-                    borderRadius: 10,
-                    onPressed: () => _applyPromo(cart),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          // SliverToBoxAdapter(
+          //   child: Container(
+          //     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          //     padding: const EdgeInsets.all(12),
+          //     decoration: BoxDecoration(
+          //       color: AppColors.surface,
+          //       borderRadius: BorderRadius.circular(12),
+          //       border: Border.all(color: AppColors.outlineLight),
+          //     ),
+          //     child: Row(
+          //       children: [
+          //         Expanded(
+          //           child: SizedBox(
+          //             height: 40,
+          //             child: TextField(
+          //               controller: _promoController,
+          //               style: AppTypography.bodySM(),
+          //               decoration: InputDecoration(
+          //                 hintText: 'Promo Code (HAKORI2026)',
+          //                 hintStyle: AppTypography.bodyXS(
+          //                   color: AppColors.textMuted,
+          //                 ),
+          //                 contentPadding: const EdgeInsets.symmetric(
+          //                   horizontal: 12,
+          //                   vertical: 8,
+          //                 ),
+          //               ),
+          //             ),
+          //           ),
+          //         ),
+          //         const SizedBox(width: 8),
+          //         AppButton.dark(
+          //           text: 'APPLY',
+          //           width: 75,
+          //           height: 40,
+          //           borderRadius: 10,
+          //           onPressed: () => _applyPromo(cart),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
+          // ),
 
           // Order Summary
           SliverToBoxAdapter(

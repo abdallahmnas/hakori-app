@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:local_auth/local_auth.dart';
 import 'storage_service.dart';
 
@@ -58,7 +57,7 @@ class BiometricService {
         _secureStorage =
             secureStorage ??
             const FlutterSecureStorage(
-              aOptions: AndroidOptions(encryptedSharedPreferences: true),
+              aOptions: AndroidOptions(resetOnError: true),
               iOptions: IOSOptions(
                 accessibility: KeychainAccessibility.first_unlock,
               ),
@@ -112,11 +111,8 @@ class BiometricService {
     try {
       final didAuthenticate = await _localAuth.authenticate(
         localizedReason: localizedReason,
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: true,
-          useErrorDialogs: true,
-        ),
+        biometricOnly: true,
+        persistAcrossBackgrounding: true,
       );
 
       if (didAuthenticate) {
@@ -127,30 +123,47 @@ class BiometricService {
           isCancelled: true,
         );
       }
+    } on LocalAuthException catch (e) {
+      switch (e.code) {
+        case LocalAuthExceptionCode.userCanceled:
+        case LocalAuthExceptionCode.systemCanceled:
+          return BiometricAuthResult.failure(
+            'Biometric authentication was cancelled.',
+            isCancelled: true,
+          );
+        case LocalAuthExceptionCode.noBiometricsEnrolled:
+          return BiometricAuthResult.failure(
+            'No biometric credentials are enrolled. Please set up fingerprint or Face ID in device settings.',
+          );
+        case LocalAuthExceptionCode.noBiometricHardware:
+          return BiometricAuthResult.failure(
+            'Biometric authentication hardware is not available on this device.',
+          );
+        case LocalAuthExceptionCode.noCredentialsSet:
+          return BiometricAuthResult.failure(
+            'Device lock passcode is not configured. Please enable screen lock in settings.',
+          );
+        case LocalAuthExceptionCode.authInProgress:
+          return BiometricAuthResult.failure(
+            'Authentication is already in progress.',
+            isCancelled: true,
+          );
+        case LocalAuthExceptionCode.timeout:
+          return BiometricAuthResult.failure(
+            'Biometric authentication timed out. Please try again.',
+          );
+        default:
+          final desc = e.description;
+          return BiometricAuthResult.failure(
+            (desc != null && desc.isNotEmpty)
+                ? desc
+                : 'Biometric authentication failed.',
+          );
+      }
     } on PlatformException catch (e) {
-      if (e.code == auth_error.notAvailable) {
-        return BiometricAuthResult.failure(
-          'Biometric authentication is not available on this device.',
-        );
-      } else if (e.code == auth_error.notEnrolled) {
-        return BiometricAuthResult.failure(
-          'No biometric credentials are enrolled. Please set up fingerprint or Face ID in device settings.',
-        );
-      } else if (e.code == auth_error.passcodeNotSet) {
-        return BiometricAuthResult.failure(
-          'Device lock passcode is not configured. Please enable screen lock in settings.',
-        );
-      } else if (e.code == auth_error.lockedOut) {
-        return BiometricAuthResult.failure(
-          'Biometrics temporarily locked due to too many failed attempts.',
-        );
-      } else if (e.code == auth_error.permanentlyLockedOut) {
-        return BiometricAuthResult.failure(
-          'Biometrics permanently locked. Device passcode required to reset.',
-        );
-      } else if (e.code == 'UserCancel' ||
+      if (e.code == 'UserCancel' ||
           e.code == 'Canceled' ||
-          e.code == auth_error.otherOperatingSystem) {
+          e.code == 'systemCanceled') {
         return BiometricAuthResult.failure(
           'Biometric authentication was cancelled.',
           isCancelled: true,

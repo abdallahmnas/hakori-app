@@ -61,12 +61,14 @@ class CartProvider extends ChangeNotifier {
     String metal = '18K Yellow Gold',
     String stone = 'VVS1 Natural Diamonds',
     String arch = 'Top 6 Arch',
+    Map<String, dynamic> selectedAttributes = const {},
   }) {
     final existingIndex = _items.indexWhere(
       (item) =>
           item.product.id == product.id &&
           item.selectedMetal == metal &&
-          item.selectedArch == arch,
+          item.selectedArch == arch &&
+          mapEquals(item.selectedAttributes, selectedAttributes),
     );
 
     if (existingIndex >= 0) {
@@ -79,6 +81,7 @@ class CartProvider extends ChangeNotifier {
           selectedMetal: metal,
           selectedStone: stone,
           selectedArch: arch,
+          selectedAttributes: selectedAttributes,
           quantity: 1,
         ),
       );

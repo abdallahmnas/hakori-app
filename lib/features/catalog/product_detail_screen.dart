@@ -11,6 +11,7 @@ import '../../core/services/product_service.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/badge_chip.dart';
 import '../../core/widgets/dual_price_text.dart';
+import '../../core/widgets/attribute_selection_bottom_sheet.dart';
 
 /// Screen 10: ProductDetailScreen
 /// Luxury Product Detail Screen reflecting exact API attributes:
@@ -30,6 +31,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   String? _selectedMetal;
   String? _selectedStone;
   String? _selectedArch;
+  final Map<String, dynamic> _selectedAttributes = {};
 
   Product? _product;
   bool _isLoading = true;
@@ -57,6 +59,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ? existing.stoneOptions.first
               : 'Bespoke Finishing';
           _selectedArch = existing.placement;
+          for (final attr in existing.effectiveAttributes) {
+            if (attr.values.isNotEmpty) {
+              _selectedAttributes[attr.label] = attr.values.first;
+            }
+          }
           _isLoading = false;
         });
       }
@@ -79,6 +86,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ? fetched.stoneOptions.first
               : 'Bespoke Finishing';
           _selectedArch = fetched.placement;
+          for (final attr in fetched.effectiveAttributes) {
+            if (attr.values.isNotEmpty) {
+              _selectedAttributes[attr.label] = attr.values.first;
+            }
+          }
           _isLoading = false;
         });
       }
@@ -412,6 +424,48 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         const SizedBox(height: 24),
                       ],
 
+                      // Dynamic Product Attributes (categoryAttributes / categoryDetails / attributes)
+                      if (product.effectiveAttributes.isNotEmpty) ...[
+                        for (final attr in product.effectiveAttributes) ...[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                attr.label.toUpperCase(),
+                                style: AppTypography.labelLG(
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              if (_selectedAttributes[attr.label] != null)
+                                Text(
+                                  _selectedAttributes[attr.label].toString(),
+                                  style: AppTypography.labelSM(
+                                    color: AppColors.primaryGold,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: attr.values.map((val) {
+                              final isSelected =
+                                  _selectedAttributes[attr.label] == val;
+                              return AppBadgeChip(
+                                label: val,
+                                variant: BadgeChipVariant.outline,
+                                isSelected: isSelected,
+                                onTap: () => setState(
+                                  () => _selectedAttributes[attr.label] = val,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                      ],
+
                       // Sizing Kit Option
                       // Container(
                       //   padding: const EdgeInsets.all(16),
@@ -557,11 +611,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         text: product.inStock ? 'ADD TO CART' : 'OUT OF STOCK',
                         onPressed: product.inStock
                             ? () {
+                                if (product.hasAttributes &&
+                                    _selectedAttributes.isEmpty) {
+                                  AttributeSelectionBottomSheet.show(
+                                    context,
+                                    product,
+                                    initialAttributes: _selectedAttributes,
+                                  );
+                                  return;
+                                }
                                 cartProvider.addToCart(
                                   product,
                                   metal: _selectedMetal ?? product.material,
                                   stone: _selectedStone ?? 'Standard Setting',
                                   arch: _selectedArch ?? product.placement,
+                                  selectedAttributes: Map<String, dynamic>.from(
+                                    _selectedAttributes,
+                                  ),
                                 );
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
