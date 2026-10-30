@@ -88,7 +88,7 @@ void main() async {
           create: (_) => OrderProvider(orderService),
         ),
         ChangeNotifierProvider<CurrencyProvider>(
-          create: (_) => CurrencyProvider(),
+          create: (_) => CurrencyProvider(apiClient, storageService),
         ),
         ChangeNotifierProvider<WishlistProvider>(
           create: (_) => WishlistProvider(storageService),

@@ -8,6 +8,7 @@ import '../../core/constants/app_typography.dart';
 import '../../core/services/auth_provider.dart';
 import '../../core/services/product_provider.dart';
 import '../../core/services/storage_service.dart';
+import '../../core/services/currency_provider.dart';
 
 /// Animated Luxury Splash Screen with Hakori Al Madinah Logo and Gold Shimmer
 class SplashScreen extends StatefulWidget {
@@ -63,9 +64,14 @@ class _SplashScreenState extends State<SplashScreen>
         context,
         listen: false,
       );
+      final currencyProvider = Provider.of<CurrencyProvider>(
+        context,
+        listen: false,
+      );
 
-      // Run catalog fetch asynchronously in the background so it never blocks splash navigation
+      // Run catalog and exchange rates fetch asynchronously in the background so it never blocks splash navigation
       unawaited(productProvider.fetchCatalog(silent: true));
+      unawaited(currencyProvider.fetchExchangeRates(silent: true));
 
       // Restore session with timeout guard so splash navigation is never held up
       isAuthenticated = await authProvider.restoreSession().timeout(

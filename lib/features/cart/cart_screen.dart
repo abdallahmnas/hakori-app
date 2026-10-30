@@ -32,21 +32,21 @@ class _CartScreenState extends State<CartScreen> {
     super.dispose();
   }
 
-  void _applyPromo(CartProvider cart) {
-    if (_promoController.text.trim().isNotEmpty) {
-      final success = cart.applyPromoCode(_promoController.text.trim());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            success
-                ? 'VIP Code Applied: 10% Privilege'
-                : 'Invalid Code. Try "HAKORI2026"',
-          ),
-          backgroundColor: success ? AppColors.darkBase : AppColors.error,
-        ),
-      );
-    }
-  }
+  // void _applyPromo(CartProvider cart) {
+  //   if (_promoController.text.trim().isNotEmpty) {
+  //     final success = cart.applyPromoCode(_promoController.text.trim());
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text(
+  //           success
+  //               ? 'VIP Code Applied: 10% Privilege'
+  //               : 'Invalid Code. Try "HAKORI2026"',
+  //         ),
+  //         backgroundColor: success ? AppColors.darkBase : AppColors.error,
+  //       ),
+  //     );
+  //   }
+  // }
 
   Future<void> _handleCheckout() async {
     final cart = Provider.of<CartProvider>(context, listen: false);

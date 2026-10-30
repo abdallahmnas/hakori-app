@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../models/cart_item.dart';
@@ -25,6 +26,9 @@ class StorageService {
     }
     return _instance!;
   }
+
+  @visibleForTesting
+  static void resetInstanceForTesting() => _instance = null;
 
   // --- Auth Token ---
   String? getToken() {
@@ -214,6 +218,35 @@ class StorageService {
       return _prefs.remove(_keyBiometricEmail);
     }
     return _prefs.setString(_keyBiometricEmail, email);
+  }
+
+  // --- Exchange Rates & Currency Persistence ---
+  static const String _keyExchangeRates = 'cached_exchange_rates';
+  static const String _keySelectedCurrencyCode = 'selected_currency_code';
+
+  Map<String, dynamic>? getExchangeData() {
+    final raw = _prefs.getString(_keyExchangeRates);
+    if (raw == null || raw.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<bool> saveExchangeData(Map<String, dynamic> data) {
+    return _prefs.setString(_keyExchangeRates, jsonEncode(data));
+  }
+
+  String? getSelectedCurrencyCode() {
+    return _prefs.getString(_keySelectedCurrencyCode);
+  }
+
+  Future<bool> saveSelectedCurrencyCode(String code) {
+    return _prefs.setString(_keySelectedCurrencyCode, code);
   }
 
   // Clear Entire Session

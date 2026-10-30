@@ -11,6 +11,7 @@ import '../../core/services/auth_provider.dart';
 import '../../core/services/banner_provider.dart';
 import '../../core/services/order_provider.dart';
 import '../../core/services/product_provider.dart';
+import '../../core/services/currency_provider.dart';
 import '../../core/widgets/app_bar_luxury.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
@@ -50,9 +51,14 @@ class _HomeScreenState extends State<HomeScreen> {
         context,
         listen: false,
       );
+      final currencyProvider = Provider.of<CurrencyProvider>(
+        context,
+        listen: false,
+      );
 
       productProvider.fetchCatalog();
       bannerProvider.fetchBanners();
+      currencyProvider.fetchExchangeRates(silent: true);
       if (authProvider.isAuthenticated) {
         authProvider.refreshProfile();
         orderProvider.fetchOrders();

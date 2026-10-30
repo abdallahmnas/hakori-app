@@ -611,8 +611,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         text: product.inStock ? 'ADD TO CART' : 'OUT OF STOCK',
                         onPressed: product.inStock
                             ? () {
-                                if (product.hasAttributes &&
-                                    _selectedAttributes.isEmpty) {
+                                if (product.hasAttributes) {
                                   AttributeSelectionBottomSheet.show(
                                     context,
                                     product,

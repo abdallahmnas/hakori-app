@@ -55,6 +55,9 @@ class ApiConstants {
   // Promotional Banners
   static const String banners = '/banners';
 
+  // Currency Exchange
+  static const String exchange = '/exchange';
+
   // System
   static const String health = '/health';
 }

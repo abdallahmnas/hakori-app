@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_typography.dart';
 import '../../core/services/currency_provider.dart';
-import '../../core/services/mock_data_service.dart';
 import '../../core/widgets/badge_chip.dart';
 
 /// Screen 20: multi_currency_fx_ledger_settings
@@ -26,6 +25,33 @@ class FxLedgerScreen extends StatelessWidget {
           'FX LEDGER SETTINGS',
           style: AppTypography.labelLG(color: AppColors.textPrimary).copyWith(letterSpacing: 2),
         ),
+        actions: [
+          IconButton(
+            icon: currencyProvider.isLoading
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primaryGold,
+                    ),
+                  )
+                : const Icon(Icons.refresh, size: 20),
+            onPressed: currencyProvider.isLoading
+                ? null
+                : () async {
+                    await currencyProvider.fetchExchangeRates();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Exchange rates updated'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    }
+                  },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -84,7 +110,7 @@ class FxLedgerScreen extends StatelessWidget {
                 boxShadow: const [AppColors.softCardShadow],
               ),
               child: Column(
-                children: MockDataService.supportedCurrencies.map((curr) {
+                children: currencyProvider.currencies.map((curr) {
                   final isSelected = curr.code == currencyProvider.selectedCurrency.code;
 
                   return InkWell(
@@ -112,7 +138,9 @@ class FxLedgerScreen extends StatelessWidget {
                                   style: AppTypography.labelLG(color: AppColors.textPrimary),
                                 ),
                                 Text(
-                                  curr.code == 'USD' ? 'Global Atelier Base (1.00)' : '1 USD = ${curr.symbol}${curr.rateToUsd}',
+                                  curr.code == 'USD'
+                                      ? 'Global Atelier Base (1.00)'
+                                      : '1 USD = ${curr.symbol} ${curr.rateToUsd}'.replaceAll('  ', ' '),
                                   style: AppTypography.bodyXS(color: AppColors.textSecondary),
                                 ),
                               ],
@@ -161,7 +189,7 @@ class FxLedgerScreen extends StatelessWidget {
                   ),
                   Switch(
                     value: currencyProvider.autoLockRates,
-                    activeColor: AppColors.primaryGold,
+                    activeThumbColor: AppColors.primaryGold,
                     onChanged: (val) => currencyProvider.toggleAutoLock(val),
                   ),
                 ],

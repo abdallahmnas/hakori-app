@@ -111,15 +111,14 @@ class _AttributeSelectionBottomSheetState
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.85,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(
-          top: BorderSide(color: AppColors.outlineGold, width: 1.2),
-          left: BorderSide(color: AppColors.outlineLight, width: 0.8),
-          right: BorderSide(color: AppColors.outlineLight, width: 0.8),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border.all(
+          color: AppColors.outlineGold.withValues(alpha: 0.6),
+          width: 1.0,
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Colors.black54,
             blurRadius: 20,

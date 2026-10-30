@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../constants/app_typography.dart';
+import '../models/currency.dart';
 import '../services/currency_provider.dart';
 
 /// Reusable Dual Currency / Dynamic FX Price Display
@@ -27,20 +28,29 @@ class DualPriceText extends StatelessWidget {
     final currencyProvider = Provider.of<CurrencyProvider>(context);
     final activeFormatted = currencyProvider.formatPrice(priceUsd);
 
-    // Calculate secondary conversion (e.g. if USD is active, show NGN secondary)
+    // Calculate secondary conversion (e.g. if USD is active, show NGN secondary from exchange rates)
     String secondaryText = '';
     if (showSecondary) {
       if (currencyProvider.selectedCurrency.code == 'USD') {
-        final ngnAmount = (priceNgn ?? (priceUsd * 1550))
-            .toStringAsFixed(0)
-            .replaceAllMapped(
+        final ngnRate = currencyProvider.currencies
+            .firstWhere(
+              (c) => c.code == 'NGN',
+              orElse: () => CurrencyInfo(
+                code: 'NGN',
+                symbol: '₦',
+                name: 'Nigerian Naira',
+                rateToUsd: 1600.0,
+              ),
+            )
+            .price;
+        final ngnAmount = (priceUsd * ngnRate).toStringAsFixed(0).replaceAllMapped(
               RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
               (Match m) => '${m[1]},',
             );
         secondaryText = '₦$ngnAmount';
       } else {
         final usdAmount =
-            '\$${priceUsd.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}';
+            '\$${priceUsd.toStringAsFixed(2).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}';
         secondaryText = '$usdAmount USD';
       }
     }

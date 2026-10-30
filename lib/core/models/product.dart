@@ -135,6 +135,7 @@ class Product {
     }
     return 'Jewelry';
   }
+
   int get stockQuantity => stock;
   double get priceUsd => price;
   double get priceNgn => price * 1550.0;
@@ -155,8 +156,8 @@ class Product {
 
   /// True if the product has one or more attributes to select
   bool get hasAttributes => effectiveAttributes.any(
-        (attr) => attr.label.isNotEmpty && attr.values.isNotEmpty,
-      );
+    (attr) => attr.label.isNotEmpty && attr.values.isNotEmpty,
+  );
 
   factory Product.fromJson(Map<String, dynamic> json) {
     final rawImages = json['images'];
@@ -221,15 +222,18 @@ class Product {
       if (raw is List) {
         return raw
             .whereType<Map>()
-            .map((item) =>
-                ProductAttribute.fromJson(Map<String, dynamic>.from(item)))
+            .map(
+              (item) =>
+                  ProductAttribute.fromJson(Map<String, dynamic>.from(item)),
+            )
             .toList();
       }
       return const [];
     }
 
-    final parsedCategoryAttributes =
-        parseAttributes(json['categoryAttributes']);
+    final parsedCategoryAttributes = parseAttributes(
+      json['categoryAttributes'],
+    );
     final parsedAttributes = parseAttributes(json['attributes']);
 
     CategoryDetails? parsedCategoryDetails;
@@ -312,8 +316,7 @@ class Product {
       'stoneOptions': stoneOptions,
       'isFeatured': isFeatured,
       'isBestSeller': isBestSeller,
-      'categoryAttributes':
-          categoryAttributes.map((a) => a.toJson()).toList(),
+      'categoryAttributes': categoryAttributes.map((a) => a.toJson()).toList(),
       'attributes': attributes.map((a) => a.toJson()).toList(),
       if (categoryDetails != null) 'categoryDetails': categoryDetails!.toJson(),
     };
@@ -325,10 +328,7 @@ class ProductAttribute {
   final String label;
   final List<String> values;
 
-  const ProductAttribute({
-    required this.label,
-    required this.values,
-  });
+  const ProductAttribute({required this.label, required this.values});
 
   factory ProductAttribute.fromJson(Map<String, dynamic> json) {
     final label = json['label']?.toString() ?? json['name']?.toString() ?? '';
@@ -342,17 +342,11 @@ class ProductAttribute {
     } else if (rawValue != null && rawValue.toString().trim().isNotEmpty) {
       parsedValues = [rawValue.toString().trim()];
     }
-    return ProductAttribute(
-      label: label,
-      values: parsedValues,
-    );
+    return ProductAttribute(label: label, values: parsedValues);
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'label': label,
-      'value': values,
-    };
+    return {'label': label, 'value': values};
   }
 }
 
