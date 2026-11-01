@@ -1,27 +1,3 @@
-/// Product Model supporting API_DOCUMENTATION.md and active backend payload:
-/// {
-///   "id": "245eaddc-97d8-461b-95e9-6366056fc71d",
-///   "name": "leshi",
-///   "sku": "vvv",
-///   "category": "necklace",
-///   "price": 46,
-///   "costPrice": 22,
-///   "castingPrice": 46,
-///   "stock": 67,
-///   "description": "cccc",
-///   "imageUrl": "https://...",
-///   "images": ["https://..."],
-///   "material": "18K Solid Yellow Gold",
-///   "placement": "Fine Product",
-///   "rating": 5,
-///   "inStock": true,
-///   "status": "Active",
-///   "createdAt": "2026-10-03T12:56:50.445Z",
-///   "updatedAt": "2026-10-03T12:56:50.445Z",
-///   "inventory": 67,
-///   "image": "https://...",
-///   "lowStock": false
-/// }
 class Product {
   final String id;
   final String title;
